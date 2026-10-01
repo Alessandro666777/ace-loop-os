@@ -1,0 +1,17 @@
+{
+  "name": "PANTHERA Mobile",
+  "short_name": "PANTHERA",
+  "start_url": "./panthera.html",
+  "display": "standalone",
+  "background_color": "#07090d",
+  "theme_color": "#07090d",
+  "description": "Private multi-user PANTHERA mobile interface",
+  "icons": [
+    {
+      "src": "./panthera-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
