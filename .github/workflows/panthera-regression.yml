@@ -1,6 +1,15 @@
-name: PANTHERA Manual Regression
+name: PANTHERA Regression Suite
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "site/panthera.html"
+      - "site/panthera-manifest.webmanifest"
+      - "site/panthera-service-worker.js"
+      - "tests/panthera-mobile.test.mjs"
+      - "tests/panthera.test.mjs"
+      - "package.json"
 permissions:
   contents: read
 jobs:
@@ -16,5 +25,5 @@ jobs:
           node-version: 22
       - name: Install test runtime
         run: npm install --no-audit --no-fund
-      - name: Run 60 user-scenario regression suite
+      - name: Run PANTHERA regression suites
         run: npm test
