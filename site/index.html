@@ -349,6 +349,7 @@ function normalizeSkill(s){
 }
 function migrate(){
  try{
+  if(isJoinMode())return neutralBase();
   const raw=localStorage.getItem(KEY);if(raw)return normalize(JSON.parse(raw));
   const v3=localStorage.getItem(OLD3);
   if(v3){
