@@ -26,6 +26,9 @@ async function boot(opts={}){
       const custom=await opts.fetchHandler(u,init);
       if(custom)return custom;
     }
+    if(u.includes("/rest/v1/rpc/can_access_panthera"))return res(true);
+    if(u.includes("/rest/v1/rpc/bootstrap_personal_kernel"))return res({onboarding_status:"needs_baseline"});
+    if(u.includes("/rest/v1/rpc/claim_organization_invites"))return res([]);
     if(u.includes("/auth/v1/otp"))return res({});
     if(u.includes("/auth/v1/token"))return res({access_token:"refreshed_access",refresh_token:"refreshed_refresh",expires_in:3600,user:{id:"user-1",email:"aaamstadt@icloud.com"}});
     if(u.includes("/auth/v1/verify"))return res({access_token:"verified_access",refresh_token:"verified_refresh",expires_in:3600,user:{id:"user-1",email:"aaamstadt@icloud.com"}});
@@ -201,7 +204,7 @@ test("67 company members default to private daily execution",async t=>{
     return null;
   }});
   t.after(x.close);
-  assert.ok(x.d.getElementById("companyMembers").textContent.includes("daily")===false || true);
+  assert.ok(x.d.getElementById("companyMembers").textContent.includes("daily private"));
   assert.equal(members[0].share_daily_execution,false);
 });
 test("68 local mode exposes no private company data",async t=>{
@@ -209,4 +212,65 @@ test("68 local mode exposes no private company data",async t=>{
   x.w.show("company");
   assert.equal(x.d.getElementById("companyMembersChip").textContent,"MEMBERS · 0");
   assert.ok(x.d.getElementById("companyGoals").textContent.includes("Cloud-Login"));
+});
+
+test("69 invite-only login blocks unapproved new email",async t=>{
+  const x=await boot({fetchHandler:async u=>u.includes("/rest/v1/rpc/can_access_panthera")?res(false):null});
+  t.after(x.close);
+  setVal(x.w,"authEmail","newperson@example.com");
+  click(x.w,"magicBtn");
+  await new Promise(r=>setTimeout(r,15));
+  assert.equal(x.calls.some(c=>c.url.includes("/auth/v1/otp")),false);
+  assert.ok(x.d.getElementById("authStatus").textContent.includes("nicht für PANTHERA freigeschaltet"));
+});
+test("70 approved invited email can create account by magic link",async t=>{
+  const x=await boot();
+  t.after(x.close);
+  setVal(x.w,"authEmail","tokyo@example.com");
+  click(x.w,"magicBtn");
+  await new Promise(r=>setTimeout(r,15));
+  const otp=x.calls.find(c=>c.url.includes("/auth/v1/otp"));
+  assert.ok(otp);
+  assert.equal(JSON.parse(otp.init.body).create_user,true);
+});
+test("71 authenticated login bootstraps kernel and claims invites",async t=>{
+  const auth={access_token:"a",refresh_token:"r",expires_at:Date.now()+3600000,user:{id:"user-2",email:"tokyo@example.com"}};
+  const x=await boot({storage:{[AUTH_KEY]:auth}});
+  t.after(x.close);
+  assert.ok(x.calls.some(c=>c.url.includes("/rest/v1/rpc/bootstrap_personal_kernel")));
+  assert.ok(x.calls.some(c=>c.url.includes("/rest/v1/rpc/claim_organization_invites")));
+});
+test("72 non-primary user never inherits Alessandro goal portfolio",async t=>{
+  const auth={access_token:"a",refresh_token:"r",expires_at:Date.now()+3600000,user:{id:"user-2",email:"tokyo@example.com"}};
+  const neutralSkills=[
+   {id:"s1",name:"Self-Leadership",domain:"meta",level:0,target_level:1,evidence_count:0,knowledge_level:0,capability_level:0,pressure_level:0,skill_class:"meta",confidence:.5,baseline_verified:false,next_drill:"x",next_field_test:"y",active_training:true},
+   {id:"s2",name:"Communication",domain:"core",level:0,target_level:1,evidence_count:0,knowledge_level:0,capability_level:0,pressure_level:0,skill_class:"core",confidence:.5,baseline_verified:false,next_drill:"x",next_field_test:"y",active_training:true},
+   {id:"s3",name:"Learning",domain:"meta",level:0,target_level:1,evidence_count:0,knowledge_level:0,capability_level:0,pressure_level:0,skill_class:"meta",confidence:.5,baseline_verified:false,next_drill:"x",next_field_test:"y",active_training:true}
+  ];
+  const x=await boot({storage:{[AUTH_KEY]:auth},fetchHandler:async(u,init)=>u.includes("/rest/v1/skills?")&&(!init.method||init.method==="GET")?res(neutralSkills):null});
+  t.after(x.close);
+  assert.equal(state(x.w).goals.length,0);
+  assert.equal(state(x.w).skills.length,3);
+  assert.equal(state(x.w).skills[0].knowledge,0);
+});
+test("73 owner can prepare privacy-safe company invite",async t=>{
+  const auth={access_token:"a",refresh_token:"r",expires_at:Date.now()+3600000,user:{id:"user-1",email:"aaamstadt@icloud.com"}};
+  const org=[{id:"org-1",name:"PANTHERA Core Team",slug:"panthera-core-team",status:"active",metadata:{}}];
+  const members=[{user_id:"user-1",role:"owner",status:"active",share_capabilities:true,share_goals:true,share_daily_execution:false,metadata:{display_name:"Alessandro"}}];
+  const x=await boot({storage:{[AUTH_KEY]:auth},fetchHandler:async(u,init)=>{
+    if(u.includes("/rest/v1/organizations?"))return res(org);
+    if(u.includes("/rest/v1/organization_members?"))return res(members);
+    if(u.includes("/rest/v1/company_goals?")||u.includes("/rest/v1/company_kpis?")||u.includes("/rest/v1/company_dependencies?")||u.includes("/rest/v1/organization_invites?select="))return res([]);
+    return null;
+  }});
+  t.after(x.close);
+  setVal(x.w,"companyInviteEmail","tokyo@example.com");
+  click(x.w,"prepareCompanyInvite");
+  await new Promise(r=>setTimeout(r,30));
+  const c=x.calls.find(c=>c.url.includes("/rest/v1/organization_invites")&&c.init.method==="POST");
+  assert.ok(c);
+  const row=JSON.parse(c.init.body)[0];
+  assert.equal(row.share_capabilities,true);
+  assert.equal(row.share_goals,true);
+  assert.equal(row.share_daily_execution,false);
 });
