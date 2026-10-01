@@ -106,21 +106,13 @@
     <h2>Dein OS. Deine Daten.</h2>
     <p>Login synchronisiert Daily Execution, Skills, Projekte, Seasons und Events verschlüsselt über HTTPS mit deinem privaten Supabase-Datenkern. Die App bleibt weiterhin local-first.</p>
     <div class="stack">
-      <label>E-Mail<input id="authEmail" type="email" autocomplete="email" placeholder="deine@email.de"></label>
-      <label>Passwort<input id="authPassword" type="password" autocomplete="current-password" placeholder="mindestens 12 Zeichen"></label>
-      <label>Bootstrap-Code · nur beim ersten Setup<input id="bootstrapCode" type="password" autocomplete="off" placeholder="ACE-…"></label>
+      <label>E-Mail<input id="authEmail" type="email" autocomplete="email" value="aaamstadt@icloud.com" placeholder="deine@email.de"></label>
     </div>
     <div class="actions">
-      <button class="btn primary" id="loginBtn">ANMELDEN</button>
-      <button class="btn soft" id="bootstrapBtn">ERSTMALIG EINRICHTEN</button>
-      <button class="btn" id="resetBtn">PASSWORT VERGESSEN</button>
+      <button class="btn primary" id="magicBtn">LOGIN-LINK SENDEN</button>
       <button class="btn" id="localBtn">LOCAL WEITER</button>
     </div>
-    <div id="newPasswordBox" class="hidden">
-      <label>Neues Passwort<input id="newPassword" type="password" autocomplete="new-password" placeholder="mindestens 12 Zeichen"></label>
-      <button class="btn primary" id="saveNewPassword" style="margin-top:10px;width:100%">NEUES PASSWORT SPEICHERN</button>
-    </div>
-    <p class="cloudMeta" id="authStatus">Login oder Passwort-Reset direkt über ACE.</p>
+    <p class="cloudMeta" id="authStatus">E-Mail → Login-Link senden → Mail öffnen → angemeldet.</p>
   </div>
 </div>
 
@@ -314,14 +306,39 @@ function queueFullSync(){clearTimeout(cloudSyncTimer);cloudSyncTimer=setTimeout(
 async function cloudUpsertEvent(e){
  await api('events?on_conflict=id','',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify([{id:e.id,user_id:cloudSession.user.id,occurred_at:e.at,event_type:e.type,source:'ace-loop-os',payload:e.payload||{}}])});
 }
-async function loginCloud(email,password){
- const r=await fetch(SUPA_URL+'/auth/v1/token?grant_type=password',{method:'POST',headers:{'apikey':SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({email,password})});
- if(!r.ok)throw new Error((await r.json()).msg||'Login fehlgeschlagen');
- const x=await r.json();cloudSession={...x,expires_at:Date.now()+(x.expires_in||3600)*1000};writeAuth(cloudSession);return x;
+async function fetchCurrentUser(accessToken){
+ const r=await fetch(SUPA_URL+'/auth/v1/user',{headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+accessToken}});
+ if(!r.ok)throw new Error('Session konnte nicht geladen werden');
+ return await r.json();
 }
-async function bootstrapCloud(email,password,bootstrap_code){
- const r=await fetch(SUPA_URL+'/functions/v1/ace-bootstrap',{method:'POST',headers:{'apikey':SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({email,password,bootstrap_code})});
- const x=await r.json();if(!r.ok)throw new Error(x.error||x.detail||'Setup fehlgeschlagen');return x;
+async function acceptMagicLink(){
+ const params=new URLSearchParams(location.hash.replace(/^#/,''));
+ const access=params.get('access_token'),refresh=params.get('refresh_token'),expires=Number(params.get('expires_in')||3600);
+ if(!access)return false;
+ try{
+   const user=await fetchCurrentUser(access);
+   cloudSession={access_token:access,refresh_token:refresh||'',expires_at:Date.now()+expires*1000,user};
+   writeAuth(cloudSession);
+   history.replaceState(null,'',location.pathname);
+   await syncAll();
+   $('authOverlay').classList.add('hidden');
+   setCloudBadge('SYNCED','ok');
+   return true;
+ }catch(e){
+   $('authStatus').textContent=String(e.message||e);
+   return false;
+ }
+}
+async function sendMagicLink(email){
+ const redirect=location.origin+location.pathname;
+ const r=await fetch(SUPA_URL+'/auth/v1/otp?redirect_to='+encodeURIComponent(redirect),{
+   method:'POST',
+   headers:{'apikey':SUPA_KEY,'Content-Type':'application/json'},
+   body:JSON.stringify({email,create_user:false})
+ });
+ const x=await r.json().catch(()=>({}));
+ if(!r.ok)throw new Error(x.msg||x.error_description||x.message||'Login-Link konnte nicht gesendet werden');
+ return true;
 }
 async function syncAll(){
  if(!cloudSession)return;
@@ -346,7 +363,6 @@ async function syncAll(){
  if(remoteSeasons?.length)system.season={primary:remoteSeasons[0].primary_focus||'',secondary:remoteSeasons[0].secondary_focus||'',maintain:remoteSeasons[0].maintain_focus||''};
  if(remoteEvents?.length)system.events=remoteEvents.map(e=>({id:e.id,at:e.occurred_at,type:e.event_type,payload:e.payload||{}}));
  integrationStatuses=remoteIntegrations||[];
-
  await api('daily_entries?on_conflict=user_id,entry_date','',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(system.entries.map(dbEntry))});
  if(system.skills.length)await api('skills?on_conflict=user_id,name','',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(system.skills.map(s=>({user_id:userId,name:s.name,domain:s.domain||null,level:s.level,target_level:s.targetLevel??Math.min(7,s.level+1),evidence_count:s.evidenceCount||0})))});
  if(system.projects.length)await api('projects?on_conflict=user_id,name','',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(system.projects.map((name,i)=>({user_id:userId,name,priority:Math.min(5,i+1),status:'active'})))});
@@ -355,72 +371,32 @@ async function syncAll(){
  writeSystem(system);current=getEntry($('date').value);renderAll();setCloudBadge('SYNCED','ok');
 }
 function cloudFail(e){console.error(e);setCloudBadge('CLOUD ERROR');}
-
-function parseRecoveryFromUrl(){
- const hash=new URLSearchParams(location.hash.replace(/^#/,''));
- const access=hash.get('access_token'),refresh=hash.get('refresh_token'),type=hash.get('type');
- if(access&&type==='recovery'){
-   cloudSession={access_token:access,refresh_token:refresh||'',expires_at:Date.now()+3600*1000,user:null,recovery:true};
-   $('authOverlay').classList.remove('hidden');
-   $('newPasswordBox').classList.remove('hidden');
-   $('authStatus').textContent='Recovery-Link erkannt. Setze jetzt dein neues Passwort.';
-   return true;
+async function initCloud(){
+ const saved=readAuth();
+ if(saved){
+   cloudSession=saved;
+   if(await ensureSession()){
+     try{await syncAll();$('authOverlay').classList.add('hidden');return}catch(e){cloudFail(e)}
+   }
  }
- return false;
+ setCloudBadge('LOCAL');
+ $('authOverlay').classList.remove('hidden');
 }
-async function requestPasswordReset(email){
- const redirect=location.origin+location.pathname;
- const r=await fetch(SUPA_URL+'/auth/v1/recover',{
-   method:'POST',
-   headers:{'apikey':SUPA_KEY,'Content-Type':'application/json'},
-   body:JSON.stringify({email,redirect_to:redirect})
- });
- const x=await r.json().catch(()=>({}));
- if(!r.ok)throw new Error(x.msg||x.error_description||x.message||'Reset-Mail konnte nicht gesendet werden');
- return true;
-}
-async function saveRecoveredPassword(password){
- if(password.length<12)throw new Error('Passwort mindestens 12 Zeichen.');
- const r=await fetch(SUPA_URL+'/auth/v1/user',{
-   method:'PUT',
-   headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+cloudSession.access_token,'Content-Type':'application/json'},
-   body:JSON.stringify({password})
- });
- const x=await r.json().catch(()=>({}));
- if(!r.ok)throw new Error(x.msg||x.error_description||x.message||'Passwort konnte nicht geändert werden');
- return x;
-}
-$('resetBtn').onclick=async()=>{
+$('magicBtn').onclick=async()=>{
  try{
    const email=$('authEmail').value.trim();
-   if(!email.includes('@'))throw new Error('Trage zuerst deine E-Mail ein.');
-   $('authStatus').textContent='Reset-Mail wird gesendet…';
-   await requestPasswordReset(email);
-   $('authStatus').textContent='Reset-Mail gesendet. Öffne die E-Mail und tippe auf den Link. Danach kommst du zurück zu ACE.';
+   if(!email.includes('@'))throw new Error('Bitte gültige E-Mail eintragen.');
+   $('authStatus').textContent='Login-Link wird gesendet…';
+   await sendMagicLink(email);
+   $('authStatus').textContent='Login-Link gesendet. Öffne die neueste Mail und tippe einmal auf den Link.';
  }catch(e){$('authStatus').textContent=String(e.message||e)}
 };
-$('saveNewPassword').onclick=async()=>{
- try{
-   $('authStatus').textContent='Passwort wird gespeichert…';
-   await saveRecoveredPassword($('newPassword').value);
-   $('authStatus').textContent='Passwort geändert. Du kannst dich jetzt anmelden.';
-   $('newPasswordBox').classList.add('hidden');
-   history.replaceState(null,'',location.pathname);
-   cloudSession=null;writeAuth(null);
- }catch(e){$('authStatus').textContent=String(e.message||e)}
-};
-async function initCloud(){
- const saved=readAuth();if(saved){cloudSession=saved;if(await ensureSession()){try{await syncAll();$('authOverlay').classList.add('hidden');return}catch(e){cloudFail(e)}}}
- setCloudBadge('LOCAL');$('authOverlay').classList.remove('hidden');
-}
-$('loginBtn').onclick=async()=>{try{$('authStatus').textContent='Login…';await loginCloud($('authEmail').value.trim(),$('authPassword').value);await syncAll();$('authOverlay').classList.add('hidden');$('authStatus').textContent='Verbunden.'}catch(e){$('authStatus').textContent=String(e.message||e)}};
-$('bootstrapBtn').onclick=async()=>{try{$('authStatus').textContent='Ersteinrichtung…';const email=$('authEmail').value.trim(),pass=$('authPassword').value,code=$('bootstrapCode').value.trim();if(pass.length<12)throw new Error('Passwort mindestens 12 Zeichen.');await bootstrapCloud(email,pass,code);await loginCloud(email,pass);await syncAll();$('authOverlay').classList.add('hidden');$('authStatus').textContent='Private Cloud eingerichtet.'}catch(e){$('authStatus').textContent=String(e.message||e)}};
 $('localBtn').onclick=()=>{$('authOverlay').classList.add('hidden');setCloudBadge('LOCAL')};
 $('cloudBadge').onclick=()=>{$('authOverlay').classList.remove('hidden')};
 $('logoutBtn').onclick=()=>{cloudSession=null;writeAuth(null);setCloudBadge('LOCAL');$('authOverlay').classList.remove('hidden')};
 $('syncNow').onclick=()=>syncAll().catch(cloudFail);
 
-$('date').value=todayISO();load(todayISO());if(!parseRecoveryFromUrl())initCloud();
+$('date').value=todayISO();load(todayISO());acceptMagicLink().then(ok=>{if(!ok)initCloud()});
 </script>
 <script>if('serviceWorker'in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js').catch(()=>{}));}</script>
 </body>
