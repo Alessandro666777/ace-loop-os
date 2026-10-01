@@ -1,0 +1,29 @@
+name: PANTHERA Knowledge Sync
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+  id-token: write
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+      - name: Request GitHub OIDC token
+        id: oidc
+        shell: bash
+        run: |
+          RESPONSE="$(curl -fsSL -H "Authorization: bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=panthera-knowledge-sync")"
+          TOKEN="$(python -c 'import json,sys; print(json.load(sys.stdin)["value"])' <<< "$RESPONSE")"
+          echo "token=$TOKEN" >> "$GITHUB_OUTPUT"
+      - name: Sync repository knowledge
+        env:
+          PANTHERA_OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+          PANTHERA_KNOWLEDGE_ENDPOINT: https://gbzoxohtdlujrfljdwfz.supabase.co/functions/v1/panthera-knowledge-ingest
+          PANTHERA_KNOWLEDGE_SCOPE: global_core
+          PANTHERA_KNOWLEDGE_MODULE: PANTHERA RUNTIME / KNOWLEDGE PORT
+          PANTHERA_KNOWLEDGE_PRIORITY: "85"
+        run: python scripts/sync_panthera_knowledge.py
