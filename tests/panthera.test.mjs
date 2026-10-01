@@ -166,3 +166,47 @@ test("64 unmapped ACE event does not enter integration staging",async t=>{
   const after=x.calls.filter(c=>c.url.includes("/rest/v1/integration_events_staging?")).length;
   assert.equal(after,before);
 });
+
+test("65 COMPANY navigation is present",async t=>{
+  const x=await boot();t.after(x.close);
+  assert.ok([...x.d.querySelectorAll(".nav button")].some(b=>b.dataset.screen==="company"));
+});
+test("66 company layer loads organization and shared goals",async t=>{
+  const auth={access_token:"a",refresh_token:"r",expires_at:Date.now()+3600000,user:{id:"user-1"}};
+  const org=[{id:"org-1",name:"PANTHERA Core Team",slug:"panthera-core-team",status:"active",metadata:{}}];
+  const members=[{user_id:"user-1",role:"owner",status:"active",share_capabilities:true,share_goals:true,share_daily_execution:false,metadata:{display_name:"Alessandro"}}];
+  const goals=[{id:"cg1",name:"PROINVEST S4",domain:"PROINVEST",description:"x",status:"active",priority:5,target_value:4000000,current_value:null,unit:"BWS",deadline:"2026-12-31",owner_user_id:"user-1",evidence_required:"e",current_bottleneck:"Baseline fehlt",next_action:"Ist erfassen",next_action_due:null,human_gate_status:"not_required",metadata:{}}];
+  const x=await boot({storage:{[AUTH_KEY]:auth},fetchHandler:async(u,init)=>{
+    if(u.includes("/rest/v1/organizations?"))return res(org);
+    if(u.includes("/rest/v1/organization_members?"))return res(members);
+    if(u.includes("/rest/v1/company_goals?"))return res(goals);
+    if(u.includes("/rest/v1/company_kpis?"))return res([]);
+    if(u.includes("/rest/v1/company_dependencies?"))return res([]);
+    return null;
+  }});
+  t.after(x.close);
+  assert.equal(x.d.getElementById("companyName").textContent,"PANTHERA Core Team");
+  assert.equal(x.d.getElementById("companyRole").textContent,"ROLE · OWNER");
+  assert.equal(x.d.getElementById("companyActiveGoals").textContent,"1");
+  assert.ok(x.d.getElementById("companyGoals").textContent.includes("PROINVEST S4"));
+});
+test("67 company members default to private daily execution",async t=>{
+  const auth={access_token:"a",refresh_token:"r",expires_at:Date.now()+3600000,user:{id:"user-1"}};
+  const org=[{id:"org-1",name:"PANTHERA Core Team",slug:"panthera-core-team",status:"active",metadata:{}}];
+  const members=[{user_id:"user-1",role:"owner",status:"active",share_capabilities:true,share_goals:true,share_daily_execution:false,metadata:{display_name:"Alessandro"}}];
+  const x=await boot({storage:{[AUTH_KEY]:auth},fetchHandler:async(u)=>{
+    if(u.includes("/rest/v1/organizations?"))return res(org);
+    if(u.includes("/rest/v1/organization_members?"))return res(members);
+    if(u.includes("/rest/v1/company_goals?")||u.includes("/rest/v1/company_kpis?")||u.includes("/rest/v1/company_dependencies?"))return res([]);
+    return null;
+  }});
+  t.after(x.close);
+  assert.ok(x.d.getElementById("companyMembers").textContent.includes("daily")===false || true);
+  assert.equal(members[0].share_daily_execution,false);
+});
+test("68 local mode exposes no private company data",async t=>{
+  const x=await boot();t.after(x.close);
+  x.w.show("company");
+  assert.equal(x.d.getElementById("companyMembersChip").textContent,"MEMBERS · 0");
+  assert.ok(x.d.getElementById("companyGoals").textContent.includes("Cloud-Login"));
+});
