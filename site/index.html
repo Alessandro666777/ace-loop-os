@@ -466,7 +466,7 @@ async function acceptMagicUrl(raw){
    const tokenHash=u.searchParams.get("token_hash")||u.searchParams.get("token");
    const rawType=(u.searchParams.get("type")||"magiclink").toLowerCase();
    if(!tokenHash)throw new Error("Im Link wurde kein Login-Token gefunden.");
-   if(!u.hostname.endsWith(".supabase.co"))throw new Error("Der Link stammt nicht von Supabase.");
+   if(u.hostname!==new URL(SUPA_URL).hostname)throw new Error("Der Login-Link gehört nicht zu diesem PANTHERA-Projekt.");
    const verifyType=["magiclink","email","signup","invite","recovery","email_change"].includes(rawType)?rawType:"magiclink";
    const vr=await fetch(SUPA_URL+"/auth/v1/verify",{
      method:"POST",
