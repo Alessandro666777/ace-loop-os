@@ -1,14 +1,221 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#07080a"><title>ACE Loop OS v2</title><style>
-*{box-sizing:border-box}html{background:#07080a;color:#f4f4f1}body{margin:0;font-family:Arial,Helvetica,sans-serif;background:radial-gradient(circle at 85% 0%,#17243a 0,transparent 30%),#07080a;color:#f4f4f1}button,input,textarea,select{font:inherit}button{cursor:pointer}main{max-width:1120px;margin:auto;padding:38px 18px 70px}.top{display:flex;justify-content:space-between;gap:20px;align-items:end}.eyebrow,.n{font-size:11px;letter-spacing:.18em;color:#7fa1d5;font-weight:700}h1{font-size:33px;margin:7px 0 0;letter-spacing:-.04em}.sub{margin:7px 0 0;color:#667384;font-size:12px}.date{background:#0d1014;color:#fff;border:1px solid #272d35;padding:11px;border-radius:10px}.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:18px 0 12px}.metric,.card,.proof{background:#0e1115;border:1px solid #222832;border-radius:15px;padding:18px}.metric:first-child{background:linear-gradient(140deg,#142135,#0d1117);border-color:#345272}.metric b{display:block;font-size:25px}.metric span{font-size:9px;color:#828b96;letter-spacing:.12em}.signal{display:none;grid-template-columns:auto auto 1fr;gap:10px;align-items:center;padding:10px 14px;border:1px solid #273a51;background:#0b1119;border-radius:12px;margin-bottom:12px;font-size:11px}.signal span{color:#6f8db8;letter-spacing:.12em}.signal em{font-style:normal;color:#75808d}.grid3,.grid2{display:grid;gap:10px}.grid3{grid-template-columns:repeat(3,1fr)}.grid2{grid-template-columns:repeat(2,1fr)}.section{display:flex;gap:10px;align-items:center}.section h2{font-size:14px;letter-spacing:.08em}.autosave{margin-left:auto;font-size:9px;color:#657181;letter-spacing:.1em}.proofs{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:12px}.proof:last-child{grid-column:1/-1}.proof.done{border-color:#4c6b91;background:#101822}.proofHead{display:flex;justify-content:space-between;align-items:center}.proofHead div{display:flex;align-items:center;gap:9px}.proof h3{margin:0;font-size:19px}.proof p{font-size:13px;color:#969eaa;min-height:34px}label{display:flex;flex-direction:column;gap:7px;color:#929aa6;font-size:10px;letter-spacing:.07em;margin-top:10px}input,textarea,select{width:100%;background:#080a0d;border:1px solid #29313a;color:#fff;padding:10px;border-radius:9px;outline:none}textarea{min-height:68px;resize:vertical;line-height:1.4}input:focus,textarea:focus,select:focus{border-color:#4b6f9e}.check{width:34px;height:34px;border:1px solid #3b4552;background:#080a0d;color:#fff;border-radius:50%;font-size:18px}.done .check{background:#1e334b}.evidence{opacity:.78}.done .evidence{opacity:1}.review,.history,.analytics{margin-top:12px}.historyRows{display:grid;grid-template-columns:repeat(2,1fr);gap:7px}.historyRows button{display:flex;justify-content:space-between;background:#090b0e;color:#d5d9de;border:1px solid #262c34;padding:10px;border-radius:9px}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:14px}.actions button,.import,.ghost{border:1px solid #2d343e;background:#11151a;color:#edf0f2;padding:11px 14px;border-radius:9px;font-size:10px;letter-spacing:.08em;cursor:pointer}.primary{background:#eef1f4!important;color:#0b0c0e!important;font-weight:800}.ghost{margin-left:auto;padding:7px 10px}.analyticsBody{display:none}.pillar{display:grid;grid-template-columns:180px 1fr;align-items:center;gap:12px;margin:11px 0}.pillarMeta{display:flex;justify-content:space-between;gap:8px;font-size:10px}.pillarMeta span{color:#6f7984}.bar{height:7px;border:1px solid #222a34;background:#080a0d;border-radius:999px;overflow:hidden}.bar i{display:block;height:100%;background:linear-gradient(90deg,#2b4869,#7396c0)}.intel{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}.intel div{background:#090c10;border:1px solid #202730;border-radius:10px;padding:12px}.intel span{display:block;font-size:9px;color:#66717e;letter-spacing:.1em}.intel b{display:block;margin-top:5px;font-size:18px}.rule{text-align:center;color:#536173;font-size:8px;letter-spacing:.12em;margin-top:25px}@media(max-width:720px){.top{flex-direction:column;align-items:stretch}.metrics{grid-template-columns:1fr 1fr}.grid3,.grid2,.proofs,.historyRows,.intel{grid-template-columns:1fr}.proof:last-child{grid-column:auto}.pillar{grid-template-columns:1fr}.signal{grid-template-columns:auto auto}.signal em{grid-column:1/-1}}@media(max-width:520px){.metrics{grid-template-columns:1fr}h1{font-size:27px}}
-</style><link rel="manifest" href="manifest.webmanifest"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="ACE Loop"></head><body><main><div class="top"><div><div class="eyebrow">ACE LOOP OS · V2</div><h1>The Man Who Closes The Loop</h1><div class="sub">Execution → Evidence → Learning → Compounding</div></div><input class="date" id="date" type="date"></div><div class="metrics"><div class="metric"><b id="todayScore">0/5</b><span>HEUTE</span></div><div class="metric"><b id="avg7">—</b><span>Ø 7 TAGE</span></div><div class="metric"><b id="streak">0</b><span>4+/5 STREAK</span></div><div class="metric"><b id="evidenceRate">0%</b><span>EVIDENCE RATE · 7T</span></div></div><div class="signal" id="signal"><span>REALITY SIGNAL</span><b id="signalKey"></b><em id="signalText"></em></div><div class="card"><div class="section"><span class="n">01</span><h2>MORNING COMMAND</h2><span class="autosave" id="autosave">READY</span></div><div class="grid3"><label>Schlaf<input id="sleep" type="number" min="0" max="24" step="0.5" placeholder="h"></label><label>Energie<input id="energy" type="number" min="1" max="10" placeholder="1–10"></label><label>Zustand<select id="state"><option value="">—</option><option value="green">GRÜN</option><option value="yellow">GELB</option><option value="red">ROT</option></select></label></div><div class="grid2"><label>Heutiger Sieg<textarea id="win" placeholder="Wenn heute nur eine Sache wirklich zählt …"></textarea></label><label>Nächster physischer Move<textarea id="nextMove" placeholder="Was tue ich als Nächstes konkret mit Körper, Telefon, Tastatur oder Gespräch?"></textarea></label></div></div><div id="proofs" class="proofs"></div><div class="card review"><div class="section"><span class="n">07</span><h2>3-MINUTE REALITY CHECK</h2></div><div class="grid2"><label>Wichtigster Output<textarea id="biggest"></textarea></label><label>Größte Abweichung<textarea id="deviation"></textarea></label></div><div class="grid2"><label>Morgen korrigiere ich<textarea id="correction"></textarea></label><label>Notizen<textarea id="notes"></textarea></label></div></div><div class="card analytics"><div class="section"><span class="n">08</span><h2>EXECUTION INTELLIGENCE</h2><button class="ghost" id="toggleAnalytics">ÖFFNEN</button></div><div class="analyticsBody" id="analyticsBody"><div id="pillars"></div><div class="intel"><div><span>GETRACKTE TAGE</span><b id="tracked">0</b></div><div><span>4+/5 IN 7 TAGEN</span><b id="strong7">0/0</b></div><div><span>Ø SCHLAF · 7T</span><b id="sleep7">—</b></div></div></div></div><div class="card history"><div class="section"><span class="n">09</span><h2>HISTORY</h2></div><div id="history" class="historyRows"></div></div><div class="actions"><button id="save" class="primary">JETZT SPEICHERN</button><button id="export">PORTABLE JSON EXPORT</button><label class="import">JSON IMPORT<input id="import" type="file" accept="application/json" hidden></label></div><div class="rule">REVENUE BEFORE ARCHITECTURE · EVIDENCE BEFORE NARRATIVE · CLOSED LOOPS OVER OPEN INTENTIONS · REALITY IS THE LAST TEST</div></main><script>
-const KEY='ace-loop-os.entries.v2',LEGACY='ace-loop-os.entries.v1';const meta={body:['BODY','Was hält mich heute leistungsfähig?','Körper geführt, nicht nur belastet.'],revenue:['REVENUE','Welche Handlung berührt heute direkt Markt, Pipeline oder Geld?','Realer Außenkontakt statt interne Vorbereitung.'],people:['PEOPLE','Wer braucht heute Führung, Klarheit oder einen Next Step?','Jemand ist danach unabhängiger oder klarer.'],build:['BUILD','Was baue ich heute einmal und profitiere mehrfach davon?','Ein Asset existiert morgen noch.'],close:['CLOSE','Welchen offenen Loop beende ich heute endgültig?','Entschieden, versendet, delegiert, veröffentlicht oder beendet.']};const keys=Object.keys(meta);let current,saveTimer;
-const $=id=>document.getElementById(id);const iso=()=>{const d=new Date();return new Date(d-d.getTimezoneOffset()*60000).toISOString().slice(0,10)};const fresh=d=>({schemaVersion:2,id:crypto.randomUUID(),date:d,sleepHours:null,energy:null,state:null,win:'',nextMove:'',proofs:Object.fromEntries(keys.map(k=>[k,{target:'',done:false,evidence:''}])),biggestOutput:'',deviation:'',correction:'',notes:'',createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()});
-function normalize(x){if(!Array.isArray(x))return[];return x.filter(e=>e&&e.date&&e.proofs).map(e=>({schemaVersion:2,id:e.id||crypto.randomUUID(),date:e.date,sleepHours:e.sleepHours??null,energy:e.energy??null,state:e.state??null,win:e.win||'',nextMove:e.nextMove||'',proofs:Object.fromEntries(keys.map(k=>[k,{target:e.proofs[k]?.target||'',done:!!e.proofs[k]?.done,evidence:e.proofs[k]?.evidence||''}])),biggestOutput:e.biggestOutput||'',deviation:e.deviation||'',correction:e.correction||'',notes:e.notes||'',createdAt:e.createdAt||new Date().toISOString(),updatedAt:e.updatedAt||new Date().toISOString()})).sort((a,b)=>b.date.localeCompare(a.date))}
-function read(){try{const v=localStorage.getItem(KEY);if(v)return normalize(JSON.parse(v));const old=localStorage.getItem(LEGACY);if(!old)return[];const m=normalize(JSON.parse(old));write(m);return m}catch{return[]}}function write(x){localStorage.setItem(KEY,JSON.stringify(x))}function persist(){current.updatedAt=new Date().toISOString();let all=read();const i=all.findIndex(x=>x.date===current.date);if(i>=0)all[i]=current;else all.push(current);write(all);$('autosave').textContent='AUTO-SAVED';renderStats()}
-function scheduleSave(){clearTimeout(saveTimer);$('autosave').textContent='UNSAVED';saveTimer=setTimeout(()=>{const meaningful=current.win||current.nextMove||current.sleepHours!==null||current.energy!==null||Object.values(current.proofs).some(p=>p.target||p.done||p.evidence);if(meaningful)persist()},700)}
-function score(e){return Object.values(e.proofs).filter(x=>x.done).length}function renderProofs(){const wrap=$('proofs');wrap.innerHTML='';keys.forEach((k,i)=>{const p=current.proofs[k],m=meta[k];const el=document.createElement('div');el.className='proof'+(p.done?' done':'');el.innerHTML=`<div class="proofHead"><div><span class="n">0${i+2}</span><h3>${m[0]}</h3></div><button class="check">${p.done?'✓':''}</button></div><p>${m[1]}</p><label>Commitment<textarea placeholder="Eine konkrete Handlung mit erkennbarem Done.">${escapeHtml(p.target)}</textarea></label><label class="evidence">Evidence / Result<textarea placeholder="${m[2]}">${escapeHtml(p.evidence)}</textarea></label>`;const tas=el.querySelectorAll('textarea');el.querySelector('.check').onclick=()=>{p.done=!p.done;renderProofs();renderStats();scheduleSave()};tas[0].oninput=e=>{p.target=e.target.value;scheduleSave()};tas[1].oninput=e=>{p.evidence=e.target.value;scheduleSave()};wrap.appendChild(el)})}
-function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
-function load(d){const all=read();current=all.find(x=>x.date===d)||fresh(d);$('sleep').value=current.sleepHours??'';$('energy').value=current.energy??'';$('state').value=current.state??'';$('win').value=current.win;$('nextMove').value=current.nextMove;$('biggest').value=current.biggestOutput;$('deviation').value=current.deviation;$('correction').value=current.correction;$('notes').value=current.notes;$('autosave').textContent='READY';renderProofs();renderStats()}
-function renderStats(){const all=read().sort((a,b)=>b.date.localeCompare(a.date)),last7=all.slice(0,7),last30=all.slice(0,30);$('todayScore').textContent=score(current)+'/5';$('tracked').textContent=all.length;$('avg7').textContent=last7.length?(last7.reduce((s,e)=>s+score(e),0)/last7.length).toFixed(1):'—';let st=0;const map=new Map(all.map(e=>[e.date,e]));const d=new Date(iso()+'T12:00:00');for(let i=0;i<365;i++){const key=new Date(d-i*86400000).toISOString().slice(0,10),e=map.get(key);if(!e||score(e)<4)break;st++}$('streak').textContent=st;const comp=last7.flatMap(e=>keys.map(k=>e.proofs[k])).filter(p=>p.done),ev=comp.filter(p=>p.evidence.trim()).length;$('evidenceRate').textContent=(comp.length?Math.round(ev/comp.length*100):0)+'%';const stats=keys.map(k=>({k,p7:last7.length?Math.round(last7.filter(e=>e.proofs[k].done).length/last7.length*100):0,p30:last30.length?Math.round(last30.filter(e=>e.proofs[k].done).length/last30.length*100):0}));$('pillars').innerHTML=stats.map(s=>`<div class="pillar"><div class="pillarMeta"><b>${meta[s.k][0]}</b><span>7T ${s.p7}% · 30T ${s.p30}%</span></div><div class="bar"><i style="width:${s.p7}%"></i></div></div>`).join('');if(last7.length){const b=[...stats].sort((a,b)=>a.p7-b.p7)[0];$('signal').style.display='grid';$('signalKey').textContent=meta[b.k][0];$('signalText').textContent=`ist aktuell dein schwächster 7-Tage-Beweis (${b.p7}%). Nicht interpretieren – testen.`}else $('signal').style.display='none';$('strong7').textContent=`${last7.filter(e=>score(e)>=4).length}/${last7.length}`;const sl=last7.filter(e=>e.sleepHours!==null);$('sleep7').textContent=sl.length?(sl.reduce((s,e)=>s+e.sleepHours,0)/sl.length).toFixed(1)+'h':'—';$('history').innerHTML='';all.slice(0,14).forEach(e=>{const b=document.createElement('button');b.innerHTML=`<span>${e.date}</span><b>${score(e)}/5</b>`;b.onclick=()=>{$('date').value=e.date;load(e.date)};$('history').appendChild(b)})}
-const fieldMap={sleep:'sleepHours',energy:'energy',state:'state',win:'win',nextMove:'nextMove',biggest:'biggestOutput',deviation:'deviation',correction:'correction',notes:'notes'};Object.keys(fieldMap).forEach(id=>{$(id).addEventListener('input',e=>{let v=e.target.value;if(id==='sleep'||id==='energy')v=v===''?null:Number(v);current[fieldMap[id]]=v;scheduleSave()})});$('save').onclick=()=>{persist();$('save').textContent='GESPEICHERT ✓';setTimeout(()=>$('save').textContent='JETZT SPEICHERN',1200)};$('date').onchange=e=>load(e.target.value);$('toggleAnalytics').onclick=()=>{const b=$('analyticsBody'),open=b.style.display==='block';b.style.display=open?'none':'block';$('toggleAnalytics').textContent=open?'ÖFFNEN':'SCHLIESSEN'};$('export').onclick=()=>{const payload={product:'ACE Loop OS',exportVersion:2,exportedAt:new Date().toISOString(),entries:read()},blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`ace-loop-os-${iso()}.json`;a.click();URL.revokeObjectURL(a.href)};$('import').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const raw=JSON.parse(r.result),x=normalize(Array.isArray(raw)?raw:raw.entries);if(x.length){write(x);load($('date').value)}}catch{alert('Ungültige Datei')}};r.readAsText(f)};$('date').value=iso();load(iso());
-</script><script>if('serviceWorker'in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js').catch(()=>{}));}</script></body></html>
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#07080a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ACE Loop">
+<link rel="manifest" href="manifest.webmanifest">
+<title>ACE Loop OS V3</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;background:#07080a;color:#f5f7fa;font-family:Inter,Arial,sans-serif}body{min-height:100vh;background:radial-gradient(circle at 85% -5%,#17263c 0,transparent 32%),#07080a}button,input,textarea,select{font:inherit}button{cursor:pointer}.app{max-width:980px;margin:auto;padding:24px 16px calc(100px + env(safe-area-inset-bottom))}.top{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}.brand small,.eyebrow{font-size:10px;letter-spacing:.18em;color:#79a1d1;font-weight:800}.brand h1{font-size:28px;letter-spacing:-.04em;margin:5px 0 2px}.brand p{margin:0;color:#6f7b8a;font-size:12px}.date{background:#0d1116;border:1px solid #27303a;color:#fff;border-radius:10px;padding:9px 10px}.screen{display:none}.screen.active{display:block}.hero{margin:18px 0 12px;padding:20px;border:1px solid #26374c;background:linear-gradient(145deg,#111b28,#0b1016);border-radius:18px}.hero .label{font-size:9px;letter-spacing:.16em;color:#7897bc}.hero h2{font-size:26px;letter-spacing:-.03em;margin:7px 0 5px}.hero p{color:#8e9bab;font-size:13px;margin:0;line-height:1.45}.mode{display:inline-flex;margin-top:12px;padding:6px 9px;border:1px solid #34465b;border-radius:999px;font-size:9px;letter-spacing:.12em;color:#b8c8da}.card{background:#0e1217;border:1px solid #232b35;border-radius:16px;padding:16px;margin:10px 0}.sectionHead{display:flex;align-items:center;gap:9px;margin-bottom:11px}.sectionHead h3{font-size:13px;letter-spacing:.09em;margin:0}.n{color:#6d91bc;font-size:10px;letter-spacing:.14em}.auto{margin-left:auto;color:#5f6d7c;font-size:9px;letter-spacing:.1em}.grid2,.grid3{display:grid;gap:10px}.grid2{grid-template-columns:1fr 1fr}.grid3{grid-template-columns:repeat(3,1fr)}label{display:flex;flex-direction:column;gap:6px;color:#87919e;font-size:9px;letter-spacing:.07em}input,textarea,select{width:100%;background:#080a0d;border:1px solid #29323d;color:#fff;border-radius:9px;padding:10px;outline:none}textarea{min-height:64px;resize:vertical;line-height:1.4}input:focus,textarea:focus,select:focus{border-color:#55779d}.next{display:flex;align-items:center;gap:12px;padding:16px;background:#f0f3f6;color:#0a0b0d;border-radius:14px;border:0;width:100%;text-align:left}.next b{font-size:14px}.next span{display:block;color:#55616e;font-size:10px;margin-top:2px}.next .arrow{margin-left:auto;font-size:22px}.proofs{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:10px 0}.proof{background:#0d1116;border:1px solid #252d37;border-radius:13px;padding:12px;min-height:112px}.proof.done{border-color:#476786;background:#101925}.proof h4{font-size:12px;margin:0 0 8px}.proof p{font-size:10px;color:#818c99;line-height:1.35;min-height:28px}.proof button{width:32px;height:32px;border-radius:50%;border:1px solid #37414c;background:#080a0d;color:#fff}.proof.done button{background:#223952}.proof textarea{min-height:50px;font-size:11px;margin-top:7px}.proof .evidence{opacity:.8}.metricRow{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.metric{padding:14px;background:#0b0f13;border:1px solid #222a33;border-radius:12px}.metric span{font-size:8px;color:#687484;letter-spacing:.12em}.metric b{display:block;font-size:20px;margin-top:4px}.signal{margin:10px 0;padding:12px 14px;border:1px solid #30435b;background:#0c1219;border-radius:12px;font-size:11px;color:#9aa8b8}.signal b{color:#dfe9f4}.list{display:grid;gap:8px}.row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:12px;background:#090c10;border:1px solid #202832;border-radius:11px}.row strong{font-size:12px}.row small{display:block;color:#707d8c;margin-top:3px}.pill{font-size:9px;border:1px solid #364658;border-radius:999px;padding:5px 8px;color:#a8bbd0}.bar{height:7px;background:#080a0d;border:1px solid #242d37;border-radius:999px;overflow:hidden;margin-top:8px}.bar i{display:block;height:100%;background:linear-gradient(90deg,#2f4d70,#7c9fc7)}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.btn{border:1px solid #2d3640;background:#11161c;color:#edf1f5;padding:10px 13px;border-radius:9px;font-size:9px;letter-spacing:.08em}.btn.primary{background:#f1f4f6;color:#090b0e;font-weight:800}.btn.soft{background:#111925;border-color:#31445a}.timer{font-size:30px;font-variant-numeric:tabular-nums;font-weight:800;letter-spacing:.04em}.muted{color:#6f7a87;font-size:10px;line-height:1.45}.commandGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.bottom{position:fixed;left:0;right:0;bottom:0;background:rgba(8,10,13,.94);backdrop-filter:blur(16px);border-top:1px solid #202832;padding:8px 12px calc(8px + env(safe-area-inset-bottom));z-index:30}.nav{max-width:650px;margin:auto;display:grid;grid-template-columns:repeat(4,1fr);gap:5px}.nav button{background:transparent;border:0;color:#657181;padding:9px 4px;border-radius:10px;font-size:9px;letter-spacing:.08em}.nav button.active{background:#141b23;color:#f1f4f7}.history button{width:100%;display:flex;justify-content:space-between;background:#090c10;border:1px solid #222a33;color:#dce2e8;border-radius:9px;padding:10px;margin:5px 0}.warning{padding:12px;border:1px solid #594b2e;background:#17140d;border-radius:11px;color:#c8ba93;font-size:10px}.success{padding:12px;border:1px solid #2f5947;background:#0e1713;border-radius:11px;color:#a8cbb9;font-size:10px}.hidden{display:none!important}@media(max-width:760px){.proofs{grid-template-columns:1fr 1fr}.proof:last-child{grid-column:1/-1}.grid3,.grid2,.commandGrid{grid-template-columns:1fr}.metricRow{grid-template-columns:1fr 1fr}.top{align-items:stretch}.brand h1{font-size:25px}}@media(max-width:430px){.proofs{grid-template-columns:1fr}.proof:last-child{grid-column:auto}.metricRow{grid-template-columns:1fr 1fr}.hero h2{font-size:23px}}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="top">
+  <div class="brand"><small>ACE LOOP OS · V3</small><h1>Adaptive Capability Engine</h1><p>Direction × Capability × Consistency × Recovery × Learning</p></div>
+  <input id="date" class="date" type="date">
+</div>
+
+<section id="today" class="screen active">
+  <div class="hero">
+    <div class="label">TODAY'S WIN</div>
+    <h2 id="heroWin">Define the win.</h2>
+    <p id="heroMove">Set one physical next move. Then execute.</p>
+    <span class="mode" id="dayMode">STANDARD DAY</span>
+  </div>
+
+  <button class="next" id="startMove"><div><b>NEXT MOVE</b><span id="nextMoveText">Noch nicht definiert.</span></div><div class="arrow">→</div></button>
+
+  <div class="card">
+    <div class="sectionHead"><span class="n">01</span><h3>COMMAND</h3><span class="auto" id="autosave">READY</span></div>
+    <div class="grid3">
+      <label>Schlaf<input id="sleep" type="number" min="0" max="24" step="0.5" placeholder="h"></label>
+      <label>Energie<input id="energy" type="number" min="1" max="10" placeholder="1–10"></label>
+      <label>Zustand<select id="state"><option value="">—</option><option value="green">GRÜN</option><option value="yellow">GELB</option><option value="red">ROT</option></select></label>
+    </div>
+    <div class="grid2" style="margin-top:10px">
+      <label>Today's Win<textarea id="win" placeholder="Wenn nur eine Sache heute zählt …"></textarea></label>
+      <label>Next Physical Move<textarea id="nextMove" placeholder="Was tue ich als Nächstes mit Telefon, Körper, Tastatur oder Gespräch?"></textarea></label>
+    </div>
+    <div class="grid3" style="margin-top:10px">
+      <label>Skill Focus<input id="skillFocus" placeholder="z. B. Follow-up Precision"></label>
+      <label>Unbequeme Pflicht<input id="uncomfortable" placeholder="Was werde ich wahrscheinlich vermeiden?"></label>
+      <label>Wenn–Dann<input id="ifThen" placeholder="Wenn ich ausweiche, dann …"></label>
+    </div>
+    <div class="actions"><button class="btn soft" id="lockDay">DAY COMMIT</button><span class="muted" id="lockState">Plan ist offen.</span></div>
+  </div>
+
+  <div class="proofs" id="proofs"></div>
+
+  <div class="card">
+    <div class="sectionHead"><span class="n">02</span><h3>EXECUTION BLOCK</h3></div>
+    <div class="grid2"><div><div class="timer" id="timer">10:00</div><div class="muted" id="timerNote">Ein klarer Start schlägt weitere Planung.</div></div><div class="actions"><button class="btn primary" id="timerStart">10 MIN START</button><button class="btn" id="timerReset">RESET</button></div></div>
+  </div>
+
+  <div id="recoveryNotice" class="warning hidden"></div>
+</section>
+
+<section id="growth" class="screen">
+  <div class="hero"><div class="label">GROWTH</div><h2>Capability over identity.</h2><p>Das System bewertet nicht, wie stark du dich fühlst, sondern welche Fähigkeiten durch reale Wiederholung belastbarer werden.</p></div>
+  <div class="metricRow">
+    <div class="metric"><span>Ø 7 TAGE</span><b id="avg7">—</b></div>
+    <div class="metric"><span>RETURN SPEED</span><b id="returnSpeed">—</b></div>
+    <div class="metric"><span>EVIDENCE RATE</span><b id="evidenceRate">0%</b></div>
+    <div class="metric"><span>GETRACKTE TAGE</span><b id="tracked">0</b></div>
+  </div>
+  <div id="realitySignal" class="signal">Noch keine belastbaren Daten.</div>
+  <div class="card"><div class="sectionHead"><span class="n">03</span><h3>CAPABILITY STACK</h3></div><div id="skills" class="list"></div></div>
+  <div class="card"><div class="sectionHead"><span class="n">04</span><h3>PROOF PATTERNS</h3></div><div id="pillars" class="list"></div></div>
+  <div class="card"><div class="sectionHead"><span class="n">05</span><h3>SEASON</h3></div><div class="grid3"><label>Primary<input id="seasonPrimary" placeholder="z. B. Revenue Execution"></label><label>Secondary<input id="seasonSecondary" placeholder="z. B. Leadership"></label><label>Maintain<input id="seasonMaintain" placeholder="z. B. Body"></label></div></div>
+</section>
+
+<section id="review" class="screen">
+  <div class="hero"><div class="label">REVIEW</div><h2 id="reviewScore">0 / 5</h2><p>Keine Identitätsgeschichte. Nur Ergebnis, Ursache, Korrektur.</p></div>
+  <div class="card"><div class="sectionHead"><span class="n">06</span><h3>REALITY CHECK</h3></div>
+    <div class="grid2"><label>Wichtigster Output<textarea id="biggest"></textarea></label><label>Größte Abweichung<textarea id="deviation"></textarea></label></div>
+    <div class="grid3" style="margin-top:10px">
+      <label>Failure Type<select id="failureType"><option value="">—</option><option>TIME</option><option>ENERGY</option><option>BAD PLAN</option><option>AVOIDANCE</option><option>EXTERNAL</option><option>NONE</option></select></label>
+      <label>Morgen korrigiere ich<input id="correction"></label>
+      <label>Skill Evidence<input id="skillEvidence" placeholder="Welche Fähigkeit wurde real trainiert?"></label>
+    </div>
+  </div>
+  <div class="card"><div class="sectionHead"><span class="n">07</span><h3>HISTORY</h3></div><div id="history" class="history"></div></div>
+</section>
+
+<section id="command" class="screen">
+  <div class="hero"><div class="label">COMMAND</div><h2>Maschinenraum.</h2><p>Projekte, Skill-Graph, Export und Systemdaten. Nicht für Daueraufenthalt gedacht.</p></div>
+  <div class="commandGrid">
+    <div class="card"><div class="sectionHead"><span class="n">08</span><h3>PROJECTS</h3></div><label>Aktive Projekte<textarea id="projectsText" placeholder="Ein Projekt pro Zeile"></textarea></label></div>
+    <div class="card"><div class="sectionHead"><span class="n">09</span><h3>SKILL GRAPH</h3></div><label>Skills (Name|Level 0-7)<textarea id="skillsText" placeholder="Sales|3&#10;Leadership|2"></textarea></label></div>
+  </div>
+  <div class="card"><div class="sectionHead"><span class="n">10</span><h3>PORTABILITY</h3></div><div class="actions"><button class="btn primary" id="export">JSON EXPORT</button><label class="btn">JSON IMPORT<input id="import" type="file" accept="application/json" hidden></label></div><p class="muted">Deine Daten bleiben in dieser Version lokal auf diesem Gerät. Der Export ist die Brücke für spätere Cloud-/OXIDIA-/Quintera-/PANTHERA-Integration.</p></div>
+  <div class="card"><div class="sectionHead"><span class="n">11</span><h3>EVENT STREAM</h3></div><div id="events" class="list"></div></div>
+</section>
+</div>
+
+<div class="bottom"><div class="nav">
+<button data-screen="today" class="active">TODAY</button>
+<button data-screen="growth">GROWTH</button>
+<button data-screen="review">REVIEW</button>
+<button data-screen="command">COMMAND</button>
+</div></div>
+
+<script>
+const KEY='ace-loop-os.v3', V2='ace-loop-os.entries.v2';
+const proofMeta={body:['BODY','Leistungsfähigkeit erhalten oder erhöhen.'],revenue:['REVENUE','Markt, Pipeline oder Geld real berühren.'],people:['PEOPLE','Einen Menschen klarer oder unabhängiger machen.'],build:['BUILD','Ein Asset schaffen, das morgen noch existiert.'],close:['CLOSE','Einen offenen Loop endgültig schließen.']};
+const proofKeys=Object.keys(proofMeta);
+const $=id=>document.getElementById(id);
+const todayISO=()=>{const d=new Date();return new Date(d-d.getTimezoneOffset()*60000).toISOString().slice(0,10)};
+const uid=()=>crypto.randomUUID();
+
+function defaultSystem(){return{
+ version:3,
+ entries:[],
+ skills:[{name:'Sales',level:3},{name:'Leadership',level:2},{name:'Communication',level:3},{name:'Systems',level:3},{name:'Self-Leadership',level:3},{name:'Learning',level:2},{name:'Brand / Creation',level:2},{name:'Strategy',level:3},{name:'Relationships',level:2},{name:'Body',level:3}],
+ projects:[],
+ season:{primary:'Revenue Execution',secondary:'Leadership',maintain:'Body'},
+ events:[]
+}}
+function freshEntry(date){return{
+ id:uid(),date,sleep:null,energy:null,state:'',win:'',nextMove:'',skillFocus:'',uncomfortable:'',ifThen:'',locked:false,
+ proofs:Object.fromEntries(proofKeys.map(k=>[k,{target:'',done:false,evidence:''}])),
+ biggest:'',deviation:'',failureType:'',correction:'',skillEvidence:'',createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()
+}}
+function migrateV2(){
+ try{
+  const raw=localStorage.getItem(V2); if(!raw)return null;
+  const old=JSON.parse(raw); const sys=defaultSystem();
+  sys.entries=(Array.isArray(old)?old:[]).map(e=>({
+    ...freshEntry(e.date),id:e.id||uid(),sleep:e.sleepHours??null,energy:e.energy??null,state:e.state||'',win:e.win||'',nextMove:e.nextMove||'',
+    proofs:Object.fromEntries(proofKeys.map(k=>[k,{target:e.proofs?.[k]?.target||'',done:!!e.proofs?.[k]?.done,evidence:e.proofs?.[k]?.evidence||''}])),
+    biggest:e.biggestOutput||'',deviation:e.deviation||'',correction:e.correction||'',createdAt:e.createdAt||new Date().toISOString(),updatedAt:e.updatedAt||new Date().toISOString()
+  }));
+  return sys;
+ }catch{return null}
+}
+function readSystem(){try{const raw=localStorage.getItem(KEY);if(raw)return normalize(JSON.parse(raw));const m=migrateV2();if(m){writeSystem(m);return m}return defaultSystem()}catch{return defaultSystem()}}
+function normalize(sys){const base=defaultSystem();const out={...base,...sys};out.entries=Array.isArray(sys.entries)?sys.entries:[];out.skills=Array.isArray(sys.skills)&&sys.skills.length?sys.skills:base.skills;out.projects=Array.isArray(sys.projects)?sys.projects:[];out.events=Array.isArray(sys.events)?sys.events:[];out.season={...base.season,...(sys.season||{})};return out}
+function writeSystem(sys){localStorage.setItem(KEY,JSON.stringify(sys))}
+let system=readSystem(), current, saveTimer=null, timerHandle=null;
+
+function getEntry(date){let e=system.entries.find(x=>x.date===date);if(!e){e=freshEntry(date);system.entries.push(e)}return e}
+function score(e){return proofKeys.filter(k=>e.proofs[k].done).length}
+function evidenceRate(entries){const done=entries.flatMap(e=>proofKeys.map(k=>e.proofs[k])).filter(p=>p.done);return done.length?Math.round(done.filter(p=>p.evidence.trim()).length/done.length*100):0}
+function event(type,payload={}){system.events.unshift({id:uid(),at:new Date().toISOString(),type,payload});system.events=system.events.slice(0,120)}
+function persist(reason='autosave'){current.updatedAt=new Date().toISOString();const i=system.entries.findIndex(e=>e.date===current.date);if(i>=0)system.entries[i]=current;writeSystem(system);$('autosave').textContent='SAVED';renderAll();if(reason!=='autosave')event('system.'+reason,{date:current.date})}
+function schedule(){clearTimeout(saveTimer);$('autosave').textContent='UNSAVED';saveTimer=setTimeout(()=>persist(),650)}
+function modeFor(e){if((e.sleep!==null&&e.sleep<5.5)||(e.energy!==null&&e.energy<=3)||e.state==='red')return 'RECOVERY DAY';if((e.sleep===null||e.sleep>=7)&&(e.energy===null||e.energy>=8)&&e.state!=='red')return 'ATTACK DAY';return 'STANDARD DAY'}
+
+function renderEntry(){
+ $('sleep').value=current.sleep??'';$('energy').value=current.energy??'';$('state').value=current.state||'';$('win').value=current.win;$('nextMove').value=current.nextMove;$('skillFocus').value=current.skillFocus;$('uncomfortable').value=current.uncomfortable;$('ifThen').value=current.ifThen;
+ $('biggest').value=current.biggest;$('deviation').value=current.deviation;$('failureType').value=current.failureType;$('correction').value=current.correction;$('skillEvidence').value=current.skillEvidence;
+ $('heroWin').textContent=current.win.trim()||'Define the win.';$('heroMove').textContent=current.nextMove.trim()||'Set one physical next move. Then execute.';$('nextMoveText').textContent=current.nextMove.trim()||'Noch nicht definiert.';
+ $('dayMode').textContent=modeFor(current);$('reviewScore').textContent=score(current)+' / 5';$('lockState').textContent=current.locked?'Commitments sind gesetzt.':'Plan ist offen.';$('lockDay').textContent=current.locked?'DAY UNLOCK':'DAY COMMIT';
+ renderProofs();renderRecovery()
+}
+function renderProofs(){
+ const wrap=$('proofs');wrap.innerHTML='';
+ proofKeys.forEach(k=>{const p=current.proofs[k],m=proofMeta[k],el=document.createElement('div');el.className='proof'+(p.done?' done':'');
+ el.innerHTML='<h4>'+m[0]+'</h4><p>'+m[1]+'</p><button aria-label="done">'+(p.done?'✓':'')+'</button><textarea class="target" placeholder="Commitment">'+esc(p.target)+'</textarea><textarea class="evidence" placeholder="Evidence / Result">'+esc(p.evidence)+'</textarea>';
+ const target=el.querySelector('.target'),evidence=el.querySelector('.evidence');target.disabled=current.locked;
+ target.oninput=x=>{p.target=x.target.value;schedule()};evidence.oninput=x=>{p.evidence=x.target.value;schedule()};
+ el.querySelector('button').onclick=()=>{if(!p.done&&!p.evidence.trim()){alert('Evidence Gate: Trage zuerst das reale Ergebnis ein.');evidence.focus();return}p.done=!p.done;event('proof.'+(p.done?'completed':'reopened'),{proof:k,date:current.date});persist('proof');};
+ wrap.appendChild(el)})
+}
+function esc(v){return String(v||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
+
+function renderGrowth(){
+ const entries=[...system.entries].sort((a,b)=>b.date.localeCompare(a.date)),last7=entries.slice(0,7),last30=entries.slice(0,30);
+ $('tracked').textContent=entries.length;$('avg7').textContent=last7.length?(last7.reduce((a,e)=>a+score(e),0)/last7.length).toFixed(1):'—';$('evidenceRate').textContent=evidenceRate(last7)+'%';
+ let recovery='—';for(let i=0;i<entries.length-1;i++){if(score(entries[i])>=4&&score(entries[i+1])<4){recovery='1d';break}}$('returnSpeed').textContent=recovery;
+ const proofStats=proofKeys.map(k=>({k,p7:last7.length?Math.round(last7.filter(e=>e.proofs[k].done).length/last7.length*100):0,p30:last30.length?Math.round(last30.filter(e=>e.proofs[k].done).length/last30.length*100):0}));
+ if(last7.length){const weak=[...proofStats].sort((a,b)=>a.p7-b.p7)[0];$('realitySignal').innerHTML='<b>REALITY SIGNAL · '+proofMeta[weak.k][0]+'</b><br>'+weak.p7+'% in 7 Tagen. Nicht dramatisieren – nächsten Test verbessern.'}
+ $('pillars').innerHTML=proofStats.map(s=>'<div class="row"><div><strong>'+proofMeta[s.k][0]+'</strong><small>7T '+s.p7+'% · 30T '+s.p30+'%</small><div class="bar"><i style="width:'+s.p7+'%"></i></div></div><span class="pill">'+s.p7+'%</span></div>').join('');
+ $('skills').innerHTML=system.skills.map(s=>'<div class="row"><div><strong>'+esc(s.name)+'</strong><small>S'+s.level+' · '+skillLabel(s.level)+'</small><div class="bar"><i style="width:'+Math.round((s.level/7)*100)+'%"></i></div></div><span class="pill">S'+s.level+'</span></div>').join('');
+ $('seasonPrimary').value=system.season.primary;$('seasonSecondary').value=system.season.secondary;$('seasonMaintain').value=system.season.maintain
+}
+function skillLabel(l){return ['UNKNOWN','LITERACY','UNDERSTANDING','APPLICATION','PRACTITIONER','EXPERT INTERFACE','CREATION','TRANSCENDENCE'][Math.max(0,Math.min(7,l))]}
+
+function renderHistory(){
+ const entries=[...system.entries].sort((a,b)=>b.date.localeCompare(a.date));$('history').innerHTML='';
+ entries.slice(0,20).forEach(e=>{const b=document.createElement('button');b.innerHTML='<span>'+e.date+'</span><b>'+score(e)+'/5</b>';b.onclick=()=>{$('date').value=e.date;load(e.date);show('review')};$('history').appendChild(b)})
+}
+function renderCommand(){
+ $('projectsText').value=system.projects.join('\n');$('skillsText').value=system.skills.map(s=>s.name+'|'+s.level).join('\n');
+ $('events').innerHTML=system.events.slice(0,20).map(e=>'<div class="row"><div><strong>'+esc(e.type)+'</strong><small>'+new Date(e.at).toLocaleString('de-DE')+'</small></div><span class="pill">'+esc(e.payload?.proof||e.payload?.date||'event')+'</span></div>').join('')||'<div class="muted">Noch keine Events.</div>'
+}
+function renderRecovery(){
+ const previous=[...system.entries].filter(e=>e.date<current.date).sort((a,b)=>b.date.localeCompare(a.date))[0],el=$('recoveryNotice');
+ if(previous&&score(previous)<4){el.classList.remove('hidden');el.textContent='RECOVERY PROTOCOL · Der letzte getrackte Tag lag unter 4/5. Heute zuerst einen realen Loop schließen. Keine Strafe, keine Identitätsgeschichte.'}else el.classList.add('hidden')
+}
+function renderAll(){renderEntry();renderGrowth();renderHistory();renderCommand()}
+
+function load(date){current=getEntry(date);renderAll();$('autosave').textContent='READY'}
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active',s.id===id));document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.screen===id));if(id==='growth')renderGrowth();if(id==='review')renderHistory();if(id==='command')renderCommand()}
+
+document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>show(b.dataset.screen));
+$('date').onchange=e=>load(e.target.value);
+const map={sleep:'sleep',energy:'energy',state:'state',win:'win',nextMove:'nextMove',skillFocus:'skillFocus',uncomfortable:'uncomfortable',ifThen:'ifThen',biggest:'biggest',deviation:'deviation',failureType:'failureType',correction:'correction',skillEvidence:'skillEvidence'};
+Object.entries(map).forEach(([id,key])=>{$(id).addEventListener('input',e=>{let v=e.target.value;if(id==='sleep'||id==='energy')v=v===''?null:Number(v);current[key]=v;schedule()})});
+['seasonPrimary','seasonSecondary','seasonMaintain'].forEach(id=>$(id).addEventListener('input',e=>{system.season[id.replace('season','').toLowerCase()]=e.target.value;writeSystem(system)}));
+$('lockDay').onclick=()=>{if(!current.locked){if(!current.win.trim()||!current.nextMove.trim()){alert('Definiere zuerst Today's Win und Next Move.');return}current.locked=true;event('day.committed',{date:current.date})}else{const reason=prompt('Warum änderst du den bereits gesetzten Plan?');if(!reason||reason.trim().length<5)return;current.locked=false;event('day.unlocked',{date:current.date,reason:reason.trim()})}persist('commitment')};
+
+function runTimer(seconds){clearInterval(timerHandle);const end=Date.now()+seconds*1000;const draw=()=>{const left=Math.max(0,end-Date.now()),m=Math.floor(left/60000),s=Math.floor((left%60000)/1000);$('timer').textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');if(left<=0){clearInterval(timerHandle);$('timerNote').textContent='Block beendet. Jetzt Evidence festhalten.'}};draw();timerHandle=setInterval(draw,250)}
+$('timerStart').onclick=()=>{if(!current.nextMove.trim()){alert('Definiere zuerst deinen Next Move.');return}event('execution.block.started',{date:current.date,move:current.nextMove});writeSystem(system);$('timerNote').textContent='Keine neue Analyse. Nur der definierte Move.';runTimer(600)};
+$('timerReset').onclick=()=>{clearInterval(timerHandle);$('timer').textContent='10:00';$('timerNote').textContent='Ein klarer Start schlägt weitere Planung.'};
+$('startMove').onclick=()=>{if(!current.nextMove.trim()){show('today');$('nextMove').focus();return}event('execution.next_move',{date:current.date,move:current.nextMove});writeSystem(system);runTimer(600);window.scrollTo({top:document.body.scrollHeight/2,behavior:'smooth'})};
+
+$('projectsText').oninput=e=>{system.projects=e.target.value.split('\n').map(x=>x.trim()).filter(Boolean);writeSystem(system)};
+$('skillsText').oninput=e=>{system.skills=e.target.value.split('\n').map(x=>x.trim()).filter(Boolean).map(line=>{const [name,l]=line.split('|');return{name:(name||'').trim(),level:Math.max(0,Math.min(7,Number(l)||0))}});writeSystem(system);renderGrowth()};
+$('export').onclick=()=>{const payload={product:'ACE Loop OS',version:3,exportedAt:new Date().toISOString(),data:system},blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='ace-loop-os-'+todayISO()+'.json';a.click();URL.revokeObjectURL(a.href)};
+$('import').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const raw=JSON.parse(r.result),data=raw.data||raw;system=normalize(data);writeSystem(system);load($('date').value);alert('Import erfolgreich.')}catch{alert('Ungültige Datei.')}};r.readAsText(f)};
+
+$('date').value=todayISO();load(todayISO());
+</script>
+<script>if('serviceWorker'in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js').catch(()=>{}));}</script>
+</body>
+</html>
