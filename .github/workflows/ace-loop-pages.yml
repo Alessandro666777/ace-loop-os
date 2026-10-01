@@ -11,7 +11,23 @@ concurrency:
   group: pages
   cancel-in-progress: true
 jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Install test runtime
+        run: npm install --no-audit --no-fund
+      - name: Run 60 user-scenario regression suite
+        run: npm test
+
   deploy:
+    needs: regression
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -28,5 +44,3 @@ jobs:
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
-
-# deploy-touch: password-recovery
