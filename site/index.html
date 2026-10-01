@@ -195,6 +195,18 @@
         <label>Quelle / URL<input id="knowledgeUrl" inputmode="url" placeholder="https://…"></label>
         <label>Tags<input id="knowledgeTags" placeholder="sales, leadership, ai"></label>
       </div>
+      <div class="divider"></div>
+      <div class="grid2">
+        <label>Readwise Reader Token<input id="readwiseToken" type="password" autocomplete="off" placeholder="Token wird verschlüsselt in Supabase Vault gespeichert"></label>
+        <div>
+          <div class="actions">
+            <button class="btn soft" id="connectReadwise">READWISE CONNECT</button>
+            <button class="btn" id="syncReadwise">READWISE SYNC</button>
+            <button class="btn danger" id="disconnectReadwise">DISCONNECT</button>
+          </div>
+          <div class="tagline" id="readwiseSyncNote">Token bekommst du über readwise.io/access_token. Er wird nach dem Senden sofort aus dem Eingabefeld entfernt.</div>
+        </div>
+      </div>
       <label style="margin-top:10px">Private Notiz<textarea id="knowledgeNote" placeholder="Was ist daran relevant? Rohwissen bleibt privat, bis du es bewusst zum Learning Candidate machst."></textarea></label>
       <div class="actions"><button class="btn soft" id="captureKnowledge">PRIVATE CAPTURE</button></div>
       <div class="divider"></div>
@@ -509,8 +521,58 @@ function renderKnowledgePort(){
  }
  const readwise=knowledgeSources.find(x=>x.provider==="readwise"),manual=knowledgeSources.find(x=>x.provider==="manual");
  st.textContent="MANUAL "+(manual?.status||"—").toUpperCase()+" · READWISE "+(readwise?.status||"—").toUpperCase().replaceAll("_"," ");
+ if(readwise?.last_sync_at)$("readwiseSyncNote").textContent="READWISE VERIFIED · letzter vollständiger Sync "+readwise.last_sync_at.slice(0,16).replace("T"," ");
  wrap.innerHTML=knowledgeResults.length?knowledgeResults.map(k=>'<div class="row"><div><strong>'+escapeHTML(k.title||k.source_url||"Untitled")+'</strong><small>'+escapeHTML((k.provider||"manual").toUpperCase())+' · '+escapeHTML(k.category||"general")+' · '+escapeHTML((k.ingestion_status||"normalized").toUpperCase())+(k.summary?' · '+escapeHTML(k.summary.slice(0,120)):'')+(k.notes?' · '+escapeHTML(k.notes.slice(0,120)):'')+'</small></div><button class="btn" onclick="promoteKnowledge(\''+String(k.id).replace(/'/g,"")+'\')">CANDIDATE</button></div>').join(""):'<div class="muted">Noch kein privates Wissen im Knowledge Port.</div>';
 }
+async function readwiseBridge(action,token=null){
+ if(!cloudSession)throw new Error("Cloud-Login nötig.");
+ if(!(await ensureSession()))throw new Error("Session abgelaufen.");
+ const body={action};if(token)body.token=token;
+ const r=await fetch(SUPA_URL+"/functions/v1/knowledge-readwise",{
+  method:"POST",
+  headers:authHeaders(),
+  body:JSON.stringify(body)
+ });
+ const data=await r.json().catch(()=>({}));
+ if(!r.ok)throw new Error(data.error||"Readwise Adapter fehlgeschlagen.");
+ return data;
+}
+async function connectReadwise(){
+ const token=$("readwiseToken").value.trim();
+ if(!token)throw new Error("Readwise Token einfügen.");
+ $("readwiseSyncNote").textContent="Token wird geprüft und verschlüsselt gespeichert…";
+ try{
+  await readwiseBridge("set_token",token);
+  $("readwiseToken").value="";
+  $("readwiseSyncNote").textContent="READWISE VERIFIED · bereit für Sync.";
+  await fullSync();
+ }catch(e){
+  $("readwiseToken").value="";
+  $("readwiseSyncNote").textContent="READWISE ERROR · "+String(e.message||e);
+  throw e;
+ }
+}
+async function syncReadwise(){
+ $("readwiseSyncNote").textContent="READWISE SYNC · läuft…";
+ let total={seen:0,created:0,updated:0},complete=false;
+ for(let i=0;i<5&&!complete;i++){
+  const r=await readwiseBridge("sync");
+  total.seen+=Number(r.items_seen||0);
+  total.created+=Number(r.items_created||0);
+  total.updated+=Number(r.items_updated||0);
+  complete=!!r.complete;
+ }
+ $("readwiseSyncNote").textContent=(complete?"READWISE SYNCED":"READWISE PARTIAL · erneut SYNC drücken")+" · "+total.seen+" gesehen · "+total.created+" neu · "+total.updated+" aktualisiert";
+ await fullSync();
+}
+async function disconnectReadwise(){
+ if(!confirm("Readwise-Verbindung aus PANTHERA entfernen? Bereits importierte private Knowledge Objects bleiben erhalten."))return;
+ await readwiseBridge("disconnect");
+ $("readwiseToken").value="";
+ $("readwiseSyncNote").textContent="READWISE DISCONNECTED · importiertes Wissen bleibt privat erhalten.";
+ await fullSync();
+}
+
 async function loadKnowledgePort(){
  if(!cloudSession){knowledgeSources=[];knowledgeResults=[];renderKnowledgePort();return}
  const [sources,items]=await Promise.all([
@@ -570,6 +632,9 @@ $("closeReview").onclick=()=>{const s=skillByName(current.skillFocus);if(current
 $("addPrediction").onclick=()=>{const st=$("predictionStatement").value.trim(),pr=Number($("predictionProbability").value),due=$("predictionDue").value;if(!st||!pr){alert("Vorhersage und Wahrscheinlichkeit eintragen.");return}const p={id:uid(),statement:st,probability:pr,dueDate:due||null,outcome:null,createdAt:new Date().toISOString(),resolvedAt:null};system.predictions.push(p);event("prediction.created",{id:p.id,probability:pr});$("predictionStatement").value="";save();renderAll();if(cloudSession)cloudPushPrediction(p).catch(cloudError)};
 $("captureKnowledge").onclick=()=>captureKnowledge().catch(e=>alert(String(e.message||e)));
 $("searchKnowledge").onclick=()=>searchKnowledgePort().catch(e=>alert(String(e.message||e)));
+$("connectReadwise").onclick=()=>connectReadwise().catch(e=>alert(String(e.message||e)));
+$("syncReadwise").onclick=()=>syncReadwise().catch(e=>alert(String(e.message||e)));
+$("disconnectReadwise").onclick=()=>disconnectReadwise().catch(e=>alert(String(e.message||e)));
 $("knowledgeQuery").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();searchKnowledgePort().catch(err=>alert(String(err.message||err)))}});
 
 $("prepareCompanyInvite").onclick=async()=>{try{
