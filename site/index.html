@@ -3,401 +3,349 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#07080a">
+<meta name="theme-color" content="#07090c">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="ACE Loop">
+<meta name="apple-mobile-web-app-title" content="PANTHERA">
 <link rel="manifest" href="manifest.webmanifest">
-<title>ACE Loop OS V3</title>
+<title>PANTHERA · ACE OS V4</title>
 <style>
-*{box-sizing:border-box}html,body{margin:0;background:#07080a;color:#f5f7fa;font-family:Inter,Arial,sans-serif}body{min-height:100vh;background:radial-gradient(circle at 85% -5%,#17263c 0,transparent 32%),#07080a}button,input,textarea,select{font:inherit}button{cursor:pointer}.app{max-width:980px;margin:auto;padding:24px 16px calc(100px + env(safe-area-inset-bottom))}.top{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}.brand small,.eyebrow{font-size:10px;letter-spacing:.18em;color:#79a1d1;font-weight:800}.brand h1{font-size:28px;letter-spacing:-.04em;margin:5px 0 2px}.brand p{margin:0;color:#6f7b8a;font-size:12px}.date{background:#0d1116;border:1px solid #27303a;color:#fff;border-radius:10px;padding:9px 10px}.screen{display:none}.screen.active{display:block}.hero{margin:18px 0 12px;padding:20px;border:1px solid #26374c;background:linear-gradient(145deg,#111b28,#0b1016);border-radius:18px}.hero .label{font-size:9px;letter-spacing:.16em;color:#7897bc}.hero h2{font-size:26px;letter-spacing:-.03em;margin:7px 0 5px}.hero p{color:#8e9bab;font-size:13px;margin:0;line-height:1.45}.mode{display:inline-flex;margin-top:12px;padding:6px 9px;border:1px solid #34465b;border-radius:999px;font-size:9px;letter-spacing:.12em;color:#b8c8da}.card{background:#0e1217;border:1px solid #232b35;border-radius:16px;padding:16px;margin:10px 0}.sectionHead{display:flex;align-items:center;gap:9px;margin-bottom:11px}.sectionHead h3{font-size:13px;letter-spacing:.09em;margin:0}.n{color:#6d91bc;font-size:10px;letter-spacing:.14em}.auto{margin-left:auto;color:#5f6d7c;font-size:9px;letter-spacing:.1em}.grid2,.grid3{display:grid;gap:10px}.grid2{grid-template-columns:1fr 1fr}.grid3{grid-template-columns:repeat(3,1fr)}label{display:flex;flex-direction:column;gap:6px;color:#87919e;font-size:9px;letter-spacing:.07em}input,textarea,select{width:100%;background:#080a0d;border:1px solid #29323d;color:#fff;border-radius:9px;padding:10px;outline:none}textarea{min-height:64px;resize:vertical;line-height:1.4}input:focus,textarea:focus,select:focus{border-color:#55779d}.next{display:flex;align-items:center;gap:12px;padding:16px;background:#f0f3f6;color:#0a0b0d;border-radius:14px;border:0;width:100%;text-align:left}.next b{font-size:14px}.next span{display:block;color:#55616e;font-size:10px;margin-top:2px}.next .arrow{margin-left:auto;font-size:22px}.proofs{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:10px 0}.proof{background:#0d1116;border:1px solid #252d37;border-radius:13px;padding:12px;min-height:112px}.proof.done{border-color:#476786;background:#101925}.proof h4{font-size:12px;margin:0 0 8px}.proof p{font-size:10px;color:#818c99;line-height:1.35;min-height:28px}.proof button{width:32px;height:32px;border-radius:50%;border:1px solid #37414c;background:#080a0d;color:#fff}.proof.done button{background:#223952}.proof textarea{min-height:50px;font-size:11px;margin-top:7px}.proof .evidence{opacity:.8}.metricRow{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.metric{padding:14px;background:#0b0f13;border:1px solid #222a33;border-radius:12px}.metric span{font-size:8px;color:#687484;letter-spacing:.12em}.metric b{display:block;font-size:20px;margin-top:4px}.signal{margin:10px 0;padding:12px 14px;border:1px solid #30435b;background:#0c1219;border-radius:12px;font-size:11px;color:#9aa8b8}.signal b{color:#dfe9f4}.list{display:grid;gap:8px}.row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:12px;background:#090c10;border:1px solid #202832;border-radius:11px}.row strong{font-size:12px}.row small{display:block;color:#707d8c;margin-top:3px}.pill{font-size:9px;border:1px solid #364658;border-radius:999px;padding:5px 8px;color:#a8bbd0}.bar{height:7px;background:#080a0d;border:1px solid #242d37;border-radius:999px;overflow:hidden;margin-top:8px}.bar i{display:block;height:100%;background:linear-gradient(90deg,#2f4d70,#7c9fc7)}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.btn{border:1px solid #2d3640;background:#11161c;color:#edf1f5;padding:10px 13px;border-radius:9px;font-size:9px;letter-spacing:.08em}.btn.primary{background:#f1f4f6;color:#090b0e;font-weight:800}.btn.soft{background:#111925;border-color:#31445a}.timer{font-size:30px;font-variant-numeric:tabular-nums;font-weight:800;letter-spacing:.04em}.muted{color:#6f7a87;font-size:10px;line-height:1.45}.commandGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.bottom{position:fixed;left:0;right:0;bottom:0;background:rgba(8,10,13,.94);backdrop-filter:blur(16px);border-top:1px solid #202832;padding:8px 12px calc(8px + env(safe-area-inset-bottom));z-index:30}.nav{max-width:650px;margin:auto;display:grid;grid-template-columns:repeat(4,1fr);gap:5px}.nav button{background:transparent;border:0;color:#657181;padding:9px 4px;border-radius:10px;font-size:9px;letter-spacing:.08em}.nav button.active{background:#141b23;color:#f1f4f7}.history button{width:100%;display:flex;justify-content:space-between;background:#090c10;border:1px solid #222a33;color:#dce2e8;border-radius:9px;padding:10px;margin:5px 0}.warning{padding:12px;border:1px solid #594b2e;background:#17140d;border-radius:11px;color:#c8ba93;font-size:10px}.success{padding:12px;border:1px solid #2f5947;background:#0e1713;border-radius:11px;color:#a8cbb9;font-size:10px}.hidden{display:none!important}@media(max-width:760px){.proofs{grid-template-columns:1fr 1fr}.proof:last-child{grid-column:1/-1}.grid3,.grid2,.commandGrid{grid-template-columns:1fr}.metricRow{grid-template-columns:1fr 1fr}.top{align-items:stretch}.brand h1{font-size:25px}}@media(max-width:430px){.proofs{grid-template-columns:1fr}.proof:last-child{grid-column:auto}.metricRow{grid-template-columns:1fr 1fr}.hero h2{font-size:23px}}
-
-.cloudBadge{background:#0d141c;border:1px solid #2c3a49;color:#9eb1c7;border-radius:10px;padding:9px 10px;font-size:9px;letter-spacing:.08em}.cloudBadge.ok{border-color:#35624f;color:#aad2bd;background:#0d1713}.cloudBadge.sync{border-color:#65532f;color:#d3c08f}.authOverlay{position:fixed;inset:0;z-index:100;background:rgba(5,7,9,.94);backdrop-filter:blur(18px);display:flex;align-items:center;justify-content:center;padding:20px}.authBox{width:min(440px,100%);background:#0d1218;border:1px solid #2a3644;border-radius:20px;padding:22px;box-shadow:0 30px 80px rgba(0,0,0,.5)}.authBox h2{margin:7px 0 6px;font-size:26px;letter-spacing:-.03em}.authBox p{color:#788596;font-size:12px;line-height:1.5}.authBox .stack{display:grid;gap:9px;margin-top:15px}.authBox .actions{margin-top:14px}.cloudMeta{font-size:10px;color:#74808d;line-height:1.5}.integrationGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.integrationCard{background:#090d11;border:1px solid #222b34;border-radius:11px;padding:12px}.integrationCard b{font-size:11px}.integrationCard small{display:block;color:#6f7b88;margin-top:4px}@media(max-width:520px){.integrationGrid{grid-template-columns:1fr}}
+*{box-sizing:border-box}html,body{margin:0;background:#07090c;color:#f4f6f8;font-family:Inter,-apple-system,BlinkMacSystemFont,"SF Pro Display",Arial,sans-serif}body{min-height:100vh;background:radial-gradient(circle at 82% -8%,#17273c 0,transparent 32%),radial-gradient(circle at -10% 40%,#111824 0,transparent 26%),#07090c}button,input,textarea,select{font:inherit}button{cursor:pointer}.app{max-width:1040px;margin:auto;padding:24px 16px calc(105px + env(safe-area-inset-bottom))}.top{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}.brand small,.eyebrow{font-size:9px;letter-spacing:.2em;color:#7ea3d1;font-weight:800}.brand h1{font-size:29px;letter-spacing:-.045em;margin:5px 0 3px}.brand p{margin:0;color:#697584;font-size:11px}.toptools{display:flex;gap:7px;align-items:center}.date,.cloud{background:#0d1218;border:1px solid #27313d;color:#f5f7fa;border-radius:10px;padding:9px 10px}.cloud{font-size:9px;letter-spacing:.08em}.cloud.ok{border-color:#35624f;color:#acd4bd;background:#0d1713}.cloud.sync{border-color:#66532e;color:#d7c28f}.screen{display:none}.screen.active{display:block}.hero{margin:18px 0 12px;padding:21px;border:1px solid #263a53;background:linear-gradient(145deg,#111c29,#0b1016);border-radius:19px;position:relative;overflow:hidden}.hero:after{content:"";position:absolute;width:180px;height:180px;border-radius:50%;background:#203957;filter:blur(80px);opacity:.22;right:-60px;top:-80px}.hero .label{font-size:9px;letter-spacing:.18em;color:#7899bf;position:relative;z-index:1}.hero h2{font-size:27px;letter-spacing:-.035em;margin:7px 0 6px;position:relative;z-index:1}.hero p{color:#8c99a8;font-size:12px;margin:0;line-height:1.5;position:relative;z-index:1}.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px;position:relative;z-index:1}.chip{display:inline-flex;padding:6px 9px;border:1px solid #33475d;border-radius:999px;font-size:8px;letter-spacing:.11em;color:#b2c4d9}.card{background:#0e1217;border:1px solid #232c36;border-radius:16px;padding:16px;margin:10px 0}.section{display:flex;align-items:center;gap:9px;margin-bottom:11px}.section h3{font-size:12px;letter-spacing:.1em;margin:0}.n{color:#6f95c0;font-size:9px;letter-spacing:.14em}.auto{margin-left:auto;color:#607080;font-size:8px;letter-spacing:.11em}.grid2,.grid3,.grid4{display:grid;gap:9px}.grid2{grid-template-columns:1fr 1fr}.grid3{grid-template-columns:repeat(3,1fr)}.grid4{grid-template-columns:repeat(4,1fr)}label{display:flex;flex-direction:column;gap:6px;color:#8692a0;font-size:9px;letter-spacing:.06em}input,textarea,select{width:100%;background:#080b0f;border:1px solid #29343f;color:#f5f7fa;border-radius:9px;padding:10px;outline:none}textarea{min-height:60px;resize:vertical;line-height:1.4}input:focus,textarea:focus,select:focus{border-color:#587aa1}.btn{border:1px solid #2d3742;background:#11171e;color:#edf1f5;padding:10px 13px;border-radius:9px;font-size:9px;letter-spacing:.08em}.btn.primary{background:#f1f4f6;color:#080a0d;border-color:#f1f4f6;font-weight:800}.btn.soft{background:#111b28;border-color:#31475f}.btn.danger{border-color:#5f3a3a;color:#d8aaaa;background:#170f10}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.next{display:flex;align-items:center;gap:12px;padding:17px;background:#f1f4f6;color:#090b0e;border-radius:14px;border:0;width:100%;text-align:left}.next b{font-size:14px}.next span{display:block;color:#586471;font-size:10px;margin-top:3px}.next .arrow{margin-left:auto;font-size:22px}.mission{margin:10px 0;padding:15px;border:1px solid #315073;background:#0d1620;border-radius:14px}.mission .kicker{font-size:8px;letter-spacing:.14em;color:#779bc4}.mission b{display:block;font-size:14px;margin:5px 0}.mission p{margin:4px 0;color:#8c9aaa;font-size:10px;line-height:1.45}.proofs{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:10px 0}.proof{background:#0d1116;border:1px solid #252f39;border-radius:13px;padding:12px;min-height:114px}.proof.done{border-color:#476989;background:#101a25}.proof h4{font-size:11px;margin:0 0 7px}.proof p{font-size:9px;color:#788593;line-height:1.4;min-height:26px}.proof button{width:31px;height:31px;border-radius:50%;border:1px solid #394550;background:#080b0f;color:#fff}.proof.done button{background:#243d58}.proof textarea{min-height:48px;font-size:10px;margin-top:7px}.metricRow{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}.metric{padding:13px;background:#0b0f14;border:1px solid #222b35;border-radius:12px}.metric span{font-size:7px;color:#657383;letter-spacing:.12em}.metric b{display:block;font-size:19px;margin-top:4px}.signal{margin:10px 0;padding:13px 14px;border:1px solid #30445c;background:#0c131a;border-radius:12px;font-size:10px;color:#96a5b6;line-height:1.5}.signal b{color:#e1eaf4}.skillGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.skill{padding:14px;background:#0a0e13;border:1px solid #222c36;border-radius:13px}.skill.active{border-color:#3e5873}.skillHead{display:flex;justify-content:space-between;gap:8px;align-items:center}.skill h4{margin:0;font-size:12px}.skill small{color:#6f7d8d}.triad{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:10px}.triad div{background:#080b0e;border:1px solid #222b34;border-radius:8px;padding:7px}.triad span{display:block;font-size:7px;letter-spacing:.11em;color:#647385}.triad b{font-size:14px}.bar{height:5px;background:#080a0d;border:1px solid #222b34;border-radius:999px;overflow:hidden;margin-top:7px}.bar i{display:block;height:100%;background:linear-gradient(90deg,#315274,#83a6cc)}.tiny{font-size:9px;color:#6f7c8b;line-height:1.45}.list{display:grid;gap:7px}.row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:11px;background:#090d11;border:1px solid #202a34;border-radius:10px}.row strong{font-size:11px}.row small{display:block;color:#6e7c8b;margin-top:3px}.pill{font-size:8px;border:1px solid #35485b;border-radius:999px;padding:5px 8px;color:#a8bdd2}.warning,.success{padding:12px 14px;border-radius:12px;font-size:10px;line-height:1.5}.warning{border:1px solid #594b2f;background:#17140e;color:#caba94}.success{border:1px solid #315846;background:#0e1713;color:#a9ccb9}.timer{font-size:30px;font-variant-numeric:tabular-nums;font-weight:800;letter-spacing:.04em}.history button{width:100%;display:flex;justify-content:space-between;background:#090d11;border:1px solid #222b35;color:#dde3e9;border-radius:9px;padding:10px;margin:5px 0}.decisionCard{border-left:3px solid #365d84}.decisionCard.high{border-left-color:#8c5d4f}.blindgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.moduleGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.module{padding:12px;background:#090d11;border:1px solid #222b35;border-radius:11px}.module b{font-size:10px}.module small{display:block;color:#6d7a88;margin-top:4px;line-height:1.4}.bottom{position:fixed;left:0;right:0;bottom:0;background:rgba(8,10,13,.95);backdrop-filter:blur(16px);border-top:1px solid #202832;padding:8px 12px calc(8px + env(safe-area-inset-bottom));z-index:30}.nav{max-width:680px;margin:auto;display:grid;grid-template-columns:repeat(4,1fr);gap:5px}.nav button{background:transparent;border:0;color:#657181;padding:9px 4px;border-radius:10px;font-size:9px;letter-spacing:.08em}.nav button.active{background:#141c24;color:#f1f4f7}.modal{position:fixed;inset:0;z-index:100;background:rgba(4,6,8,.92);backdrop-filter:blur(18px);display:flex;align-items:center;justify-content:center;padding:18px}.modalBox{width:min(650px,100%);max-height:90vh;overflow:auto;background:#0d1218;border:1px solid #2a3745;border-radius:20px;padding:20px}.modalBox h2{margin:6px 0 4px}.hidden{display:none!important}.divider{height:1px;background:#202a34;margin:14px 0}.commandGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.muted{color:#6f7c8a;font-size:10px;line-height:1.5}.tagline{font-size:10px;color:#8ea2b7;margin-top:8px}.good{color:#9bc8ae}.bad{color:#d4a4a4}@media(max-width:820px){.skillGrid,.moduleGrid{grid-template-columns:1fr 1fr}.grid4{grid-template-columns:1fr 1fr}.metricRow{grid-template-columns:1fr 1fr}.proofs{grid-template-columns:1fr 1fr}.proof:last-child{grid-column:1/-1}}@media(max-width:600px){.top{align-items:stretch}.brand h1{font-size:25px}.grid2,.grid3,.commandGrid,.blindgrid,.skillGrid,.moduleGrid{grid-template-columns:1fr}.proofs{grid-template-columns:1fr}.proof:last-child{grid-column:auto}.hero h2{font-size:23px}.date{max-width:130px}.toptools{align-items:flex-end;flex-direction:column}}
 </style>
 </head>
 <body>
 <div class="app">
-<div class="top">
-  <div class="brand"><small>ACE LOOP OS · V3</small><h1>Adaptive Capability Engine</h1><p>Direction × Capability × Consistency × Recovery × Learning</p></div>
-  <div style="display:flex;gap:7px;align-items:center"><input id="date" class="date" type="date"><button id="cloudBadge" class="cloudBadge">LOCAL</button></div>
+  <div class="top">
+    <div class="brand"><small>PANTHERA · ACE OS V4</small><h1>Capability Engine</h1><p>Reality → Capability → Execution → Evidence → Update</p></div>
+    <div class="toptools"><input id="date" class="date" type="date"><button id="cloudBadge" class="cloud">LOCAL</button></div>
+  </div>
+
+  <section id="today" class="screen active">
+    <div class="hero">
+      <div class="label">TODAY</div>
+      <h2 id="heroWin">Definiere den Sieg.</h2>
+      <p id="heroMove">Ein klarer nächster physischer Zug schlägt weitere Architektur.</p>
+      <div class="chips"><span class="chip" id="dayMode">STANDARD DAY</span><span class="chip" id="focusChip">FOCUS · —</span><span class="chip" id="budgetChip">COMPLEXITY · 1</span></div>
+    </div>
+
+    <button class="next" id="startMove"><div><b>NEXT MOVE</b><span id="nextMoveText">Noch nicht definiert.</span></div><div class="arrow">→</div></button>
+
+    <div class="mission" id="mission">
+      <div class="kicker">ADAPTIVE SKILL MISSION</div>
+      <b id="missionTitle">Noch keine aktive Mission.</b>
+      <p id="missionDrill">Das System wählt den aktuell sinnvollsten Trainingsengpass aus maximal drei aktiven Skills.</p>
+      <p id="missionField"></p>
+    </div>
+
+    <div class="card">
+      <div class="section"><span class="n">01</span><h3>COMMAND</h3><span class="auto" id="autosave">READY</span></div>
+      <div class="grid3">
+        <label>Schlaf<input id="sleep" type="number" min="0" max="24" step="0.5" placeholder="h"></label>
+        <label>Energie<input id="energy" type="number" min="1" max="10" placeholder="1–10"></label>
+        <label>Zustand<select id="state"><option value="">—</option><option value="green">GRÜN</option><option value="yellow">GELB</option><option value="red">ROT</option></select></label>
+      </div>
+      <div class="grid2" style="margin-top:10px">
+        <label>Today's Win<textarea id="win" placeholder="Wenn heute nur eine Sache wirklich zählt …"></textarea></label>
+        <label>Next Physical Move<textarea id="nextMove" placeholder="Telefonieren, schreiben, bauen, trainieren, sprechen …"></textarea></label>
+      </div>
+      <div class="grid3" style="margin-top:10px">
+        <label>Skill Focus<select id="skillFocus"></select></label>
+        <label>Unbequeme Pflicht<input id="uncomfortable" placeholder="Was werde ich wahrscheinlich vermeiden?"></label>
+        <label>Wenn–Dann<input id="ifThen" placeholder="Wenn ich ausweiche, dann …"></label>
+      </div>
+      <div class="actions"><button class="btn soft" id="lockDay">DAY COMMIT</button><span class="muted" id="lockState">Plan ist offen.</span></div>
+    </div>
+
+    <div class="proofs" id="proofs"></div>
+
+    <div class="card">
+      <div class="section"><span class="n">02</span><h3>EXECUTION</h3></div>
+      <div class="grid2"><div><div class="timer" id="timer">10:00</div><div class="muted" id="timerNote">Keine neue Analyse, sobald ausreichende Klarheit da ist.</div></div><div class="actions"><button class="btn primary" id="timerStart">10 MIN START</button><button class="btn" id="timerReset">RESET</button></div></div>
+    </div>
+    <div id="recoveryNotice" class="warning hidden"></div>
+  </section>
+
+  <section id="growth" class="screen">
+    <div class="hero"><div class="label">GROWTH</div><h2>Beweise statt Selbstbild.</h2><p>Wissen, reale Fähigkeit und Druckstabilität werden getrennt bewertet. Level ohne Evidenz bleiben vorläufig.</p></div>
+    <div class="metricRow">
+      <div class="metric"><span>Ø 7 TAGE</span><b id="avg7">—</b></div>
+      <div class="metric"><span>EVIDENCE</span><b id="evidenceRate">0%</b></div>
+      <div class="metric"><span>RETURN SPEED</span><b id="returnSpeed">—</b></div>
+      <div class="metric"><span>CALIBRATION</span><b id="calibration">—</b></div>
+      <div class="metric"><span>INDEPENDENCE</span><b id="independence">—</b></div>
+    </div>
+    <div id="bottleneckSignal" class="signal">Noch keine belastbare Bottleneck-Evidenz.</div>
+    <div class="card"><div class="section"><span class="n">03</span><h3>ACTIVE CAPABILITY STACK</h3><span class="auto">MAX 3</span></div><div id="skills" class="skillGrid"></div></div>
+    <div class="card"><div class="section"><span class="n">04</span><h3>PROOF PATTERNS</h3></div><div id="pillars" class="list"></div></div>
+    <div class="card"><div class="section"><span class="n">05</span><h3>SEASON</h3></div><div class="grid3"><label>Primary<input id="seasonPrimary"></label><label>Secondary<input id="seasonSecondary"></label><label>Maintain<input id="seasonMaintain"></label></div></div>
+  </section>
+
+  <section id="review" class="screen">
+    <div class="hero"><div class="label">REVIEW</div><h2 id="reviewScore">0 / 5</h2><p>Expected → Observed → Error → Update. Keine nachträgliche Genialität.</p></div>
+    <div class="card">
+      <div class="section"><span class="n">06</span><h3>REALITY CHECK</h3></div>
+      <div class="grid2"><label>Wichtigster Output<textarea id="biggest"></textarea></label><label>Größte Abweichung<textarea id="deviation"></textarea></label></div>
+      <div class="grid4" style="margin-top:10px">
+        <label>Failure Type<select id="failureType"><option value="">—</option><option>TIME</option><option>ENERGY</option><option>BAD PLAN</option><option>AVOIDANCE</option><option>EXTERNAL</option><option>NONE</option></select></label>
+        <label>Evidence Quality<select id="evidenceQuality"><option value="3">3 · normal</option><option value="1">1 · schwach</option><option value="2">2 · begrenzt</option><option value="4">4 · stark</option><option value="5">5 · sehr stark</option></select></label>
+        <label>Druck<select id="pressureEvidence"><option value="no">normal</option><option value="yes">unter Druck</option></select></label>
+        <label>Hilfe<select id="assistanceLevel"><option value="0">0 · selbstständig</option><option value="1">1 · minimal</option><option value="2">2 · etwas</option><option value="3">3 · deutlich</option><option value="4">4 · stark</option><option value="5">5 · vollständig geführt</option></select></label>
+      </div>
+      <div class="grid2" style="margin-top:10px"><label>Skill Evidence<textarea id="skillEvidence" placeholder="Was hast du real gezeigt?"></textarea></label><label>Morgen korrigiere ich<textarea id="correction"></textarea></label></div>
+      <div class="actions"><button class="btn primary" id="closeReview">REVIEW SCHLIESSEN</button></div>
+    </div>
+
+    <div class="card">
+      <div class="section"><span class="n">07</span><h3>PREDICTION LEDGER</h3><span class="auto" id="predictionCount">0 RESOLVED</span></div>
+      <div class="grid3"><label>Vorhersage<input id="predictionStatement" placeholder="Was erwartest du?"></label><label>Wahrscheinlichkeit %<input id="predictionProbability" type="number" min="1" max="99" value="70"></label><label>Bis wann?<input id="predictionDue" type="date"></label></div>
+      <div class="actions"><button class="btn soft" id="addPrediction">PREDICTION SPEICHERN</button></div>
+      <div id="predictions" class="list" style="margin-top:10px"></div>
+    </div>
+
+    <div class="card"><div class="section"><span class="n">08</span><h3>HISTORY</h3></div><div id="history" class="history"></div></div>
+  </section>
+
+  <section id="command" class="screen">
+    <div class="hero"><div class="label">COMMAND</div><h2>Maschinenraum, nicht Wohnzimmer.</h2><p>Architektur, Entscheidungen und Systemstatus bleiben hier. Der Alltag bleibt auf TODAY.</p><div class="chips"><span class="chip">PANTHERA 3.0</span><span class="chip" id="freezeChip">ARCHITECTURE FREEZE</span><span class="chip">MAX 3 ACTIVE SKILLS</span></div></div>
+
+    <div class="commandGrid">
+      <div class="card"><div class="section"><span class="n">09</span><h3>PROJECTS</h3></div><label>Aktive Projekte<textarea id="projectsText" placeholder="Ein Projekt pro Zeile"></textarea></label></div>
+      <div class="card"><div class="section"><span class="n">10</span><h3>SKILL CONTROL</h3></div><label>Alle Skills · Name|K|C|P|class<textarea id="skillsText" placeholder="Sales|3|2|1|core"></textarea></label><p class="muted">K = Knowledge · C = Capability · P = Pressure. Änderungen sind vorläufig, bis Evidence sie bestätigt.</p></div>
+    </div>
+
+    <div class="card decisionCard">
+      <div class="section"><span class="n">11</span><h3>DECISION LAB + BLIND-SPOT FIREWALL</h3></div>
+      <div class="grid3"><label>Entscheidung<input id="decisionTitle" placeholder="Was muss entschieden werden?"></label><label>Klasse<select id="decisionClass"><option>strategy</option><option>social</option><option>business</option><option>skill</option><option>brand</option><option>execution</option><option>risk</option></select></label><label>Stakes<select id="decisionStakes"><option value="low">LOW</option><option value="medium" selected>MEDIUM</option><option value="high">HIGH</option></select></label></div>
+      <div class="grid3" style="margin-top:10px"><label>Reversibilität<select id="decisionReversibility"><option value="high">HOCH</option><option value="medium" selected>MITTEL</option><option value="low">NIEDRIG</option></select></label><label>Ziel<input id="decisionGoal"></label><label>Erwartetes Ergebnis<input id="decisionExpected"></label></div>
+      <div class="blindgrid" style="margin-top:10px">
+        <label>Fehlende Variable<textarea id="bsVariable" placeholder="Was könnte fehlen?"></textarea></label>
+        <label>Falsche Kausalität<textarea id="bsCausal" placeholder="Was könnte nur korrelieren?"></textarea></label>
+        <label>Basisrate<textarea id="bsBaseRate" placeholder="Welche Grundrate ignorieren wir?"></textarea></label>
+        <label>Versteckter Akteur<textarea id="bsActor" placeholder="Wer ist nicht im Modell?"></textarea></label>
+        <label>Korrelierte Evidenz<textarea id="bsEvidence" placeholder="Welche Hinweise stammen eigentlich aus derselben Quelle?"></textarea></label>
+        <label>2.-Ordnung-Effekt<textarea id="bsSecond" placeholder="Was passiert danach?"></textarea></label>
+      </div>
+      <div class="grid2" style="margin-top:10px"><label>Stärkstes Gegenargument<textarea id="decisionCounter"></textarea></label><label>Falsifier<textarea id="decisionFalsifier" placeholder="Was würde zeigen, dass die Kernannahme falsch ist?"></textarea></label></div>
+      <div id="routePreview" class="signal">Route wird aus Stakes, Reversibilität und Problemklasse berechnet.</div>
+      <div class="actions"><button class="btn primary" id="saveDecision">DECISION COMMIT</button></div>
+      <div id="decisions" class="list" style="margin-top:10px"></div>
+    </div>
+
+    <div class="card">
+      <div class="section"><span class="n">12</span><h3>SYSTEM GOVERNANCE</h3></div>
+      <div id="modules" class="moduleGrid"></div>
+      <div class="divider"></div>
+      <p class="muted"><b>Delete Test:</b> Ein Modul bleibt nur aktiv, wenn sein Entfernen ein reales Ergebnis messbar verschlechtern würde. Neue Major-Module sind während des Architecture Freeze gesperrt.</p>
+    </div>
+
+    <div class="card">
+      <div class="section"><span class="n">13</span><h3>DATA + CLOUD</h3></div>
+      <div class="actions"><button class="btn soft" id="openCloud">CLOUD LOGIN</button><button class="btn" id="syncNow">SYNC NOW</button><button class="btn" id="export">JSON EXPORT</button><label class="btn">JSON IMPORT<input id="import" type="file" accept="application/json" hidden></label></div>
+      <p class="muted">Local-first ist die sichere Betriebsbasis. Cloud wird zur geräteübergreifenden Wahrheitsschicht, sobald die Auth-Session steht.</p>
+    </div>
+  </section>
 </div>
 
-<section id="today" class="screen active">
-  <div class="hero">
-    <div class="label">TODAY'S WIN</div>
-    <h2 id="heroWin">Define the win.</h2>
-    <p id="heroMove">Set one physical next move. Then execute.</p>
-    <span class="mode" id="dayMode">STANDARD DAY</span>
-  </div>
-
-  <button class="next" id="startMove"><div><b>NEXT MOVE</b><span id="nextMoveText">Noch nicht definiert.</span></div><div class="arrow">→</div></button>
-
-  <div class="card">
-    <div class="sectionHead"><span class="n">01</span><h3>COMMAND</h3><span class="auto" id="autosave">READY</span></div>
-    <div class="grid3">
-      <label>Schlaf<input id="sleep" type="number" min="0" max="24" step="0.5" placeholder="h"></label>
-      <label>Energie<input id="energy" type="number" min="1" max="10" placeholder="1–10"></label>
-      <label>Zustand<select id="state"><option value="">—</option><option value="green">GRÜN</option><option value="yellow">GELB</option><option value="red">ROT</option></select></label>
-    </div>
-    <div class="grid2" style="margin-top:10px">
-      <label>Today's Win<textarea id="win" placeholder="Wenn nur eine Sache heute zählt …"></textarea></label>
-      <label>Next Physical Move<textarea id="nextMove" placeholder="Was tue ich als Nächstes mit Telefon, Körper, Tastatur oder Gespräch?"></textarea></label>
-    </div>
-    <div class="grid3" style="margin-top:10px">
-      <label>Skill Focus<input id="skillFocus" placeholder="z. B. Follow-up Precision"></label>
-      <label>Unbequeme Pflicht<input id="uncomfortable" placeholder="Was werde ich wahrscheinlich vermeiden?"></label>
-      <label>Wenn–Dann<input id="ifThen" placeholder="Wenn ich ausweiche, dann …"></label>
-    </div>
-    <div class="actions"><button class="btn soft" id="lockDay">DAY COMMIT</button><span class="muted" id="lockState">Plan ist offen.</span></div>
-  </div>
-
-  <div class="proofs" id="proofs"></div>
-
-  <div class="card">
-    <div class="sectionHead"><span class="n">02</span><h3>EXECUTION BLOCK</h3></div>
-    <div class="grid2"><div><div class="timer" id="timer">10:00</div><div class="muted" id="timerNote">Ein klarer Start schlägt weitere Planung.</div></div><div class="actions"><button class="btn primary" id="timerStart">10 MIN START</button><button class="btn" id="timerReset">RESET</button></div></div>
-  </div>
-
-  <div id="recoveryNotice" class="warning hidden"></div>
-</section>
-
-<section id="growth" class="screen">
-  <div class="hero"><div class="label">GROWTH</div><h2>Capability over identity.</h2><p>Das System bewertet nicht, wie stark du dich fühlst, sondern welche Fähigkeiten durch reale Wiederholung belastbarer werden.</p></div>
-  <div class="metricRow">
-    <div class="metric"><span>Ø 7 TAGE</span><b id="avg7">—</b></div>
-    <div class="metric"><span>RETURN SPEED</span><b id="returnSpeed">—</b></div>
-    <div class="metric"><span>EVIDENCE RATE</span><b id="evidenceRate">0%</b></div>
-    <div class="metric"><span>GETRACKTE TAGE</span><b id="tracked">0</b></div>
-  </div>
-  <div id="realitySignal" class="signal">Noch keine belastbaren Daten.</div>
-  <div class="card"><div class="sectionHead"><span class="n">03</span><h3>CAPABILITY STACK</h3></div><div id="skills" class="list"></div></div>
-  <div class="card"><div class="sectionHead"><span class="n">04</span><h3>PROOF PATTERNS</h3></div><div id="pillars" class="list"></div></div>
-  <div class="card"><div class="sectionHead"><span class="n">05</span><h3>SEASON</h3></div><div class="grid3"><label>Primary<input id="seasonPrimary" placeholder="z. B. Revenue Execution"></label><label>Secondary<input id="seasonSecondary" placeholder="z. B. Leadership"></label><label>Maintain<input id="seasonMaintain" placeholder="z. B. Body"></label></div></div>
-</section>
-
-<section id="review" class="screen">
-  <div class="hero"><div class="label">REVIEW</div><h2 id="reviewScore">0 / 5</h2><p>Keine Identitätsgeschichte. Nur Ergebnis, Ursache, Korrektur.</p></div>
-  <div class="card"><div class="sectionHead"><span class="n">06</span><h3>REALITY CHECK</h3></div>
-    <div class="grid2"><label>Wichtigster Output<textarea id="biggest"></textarea></label><label>Größte Abweichung<textarea id="deviation"></textarea></label></div>
-    <div class="grid3" style="margin-top:10px">
-      <label>Failure Type<select id="failureType"><option value="">—</option><option>TIME</option><option>ENERGY</option><option>BAD PLAN</option><option>AVOIDANCE</option><option>EXTERNAL</option><option>NONE</option></select></label>
-      <label>Morgen korrigiere ich<input id="correction"></label>
-      <label>Skill Evidence<input id="skillEvidence" placeholder="Welche Fähigkeit wurde real trainiert?"></label>
-    </div>
-  </div>
-  <div class="card"><div class="sectionHead"><span class="n">07</span><h3>HISTORY</h3></div><div id="history" class="history"></div></div>
-</section>
-
-<section id="command" class="screen">
-  <div class="hero"><div class="label">COMMAND</div><h2>Maschinenraum.</h2><p>Projekte, Skill-Graph, Export und Systemdaten. Nicht für Daueraufenthalt gedacht.</p></div>
-  <div class="commandGrid">
-    <div class="card"><div class="sectionHead"><span class="n">08</span><h3>PROJECTS</h3></div><label>Aktive Projekte<textarea id="projectsText" placeholder="Ein Projekt pro Zeile"></textarea></label></div>
-    <div class="card"><div class="sectionHead"><span class="n">09</span><h3>SKILL GRAPH</h3></div><label>Skills (Name|Level 0-7)<textarea id="skillsText" placeholder="Sales|3&#10;Leadership|2"></textarea></label></div>
-  </div>
-  <div class="card"><div class="sectionHead"><span class="n">10</span><h3>PORTABILITY</h3></div><div class="actions"><button class="btn primary" id="export">JSON EXPORT</button><label class="btn">JSON IMPORT<input id="import" type="file" accept="application/json" hidden></label></div><p class="muted">Deine Daten bleiben in dieser Version lokal auf diesem Gerät. Der Export ist die Brücke für spätere Cloud-/OXIDIA-/Quintera-/PANTHERA-Integration.</p></div>
-  <div class="card"><div class="sectionHead"><span class="n">11</span><h3>INTEGRATIONS</h3></div><div id="integrations" class="integrationGrid"></div><div class="actions"><button class="btn soft" id="syncNow">CLOUD SYNC</button><button class="btn" id="logoutBtn">LOGOUT</button></div></div>
-<div class="card"><div class="sectionHead"><span class="n">12</span><h3>EVENT STREAM</h3></div><div id="events" class="list"></div></div>
-</section>
-</div>
-
-<div id="authOverlay" class="authOverlay">
-  <div class="authBox">
-    <div class="eyebrow">ACE PRIVATE CLOUD</div>
-    <h2>Dein OS. Deine Daten.</h2>
-    <p>Login synchronisiert Daily Execution, Skills, Projekte, Seasons und Events verschlüsselt über HTTPS mit deinem privaten Supabase-Datenkern. Die App bleibt weiterhin local-first.</p>
-    <div class="stack">
-      <label>E-Mail<input id="authEmail" type="email" autocomplete="email" value="aaamstadt@icloud.com" placeholder="deine@email.de"></label>
-    </div>
-    <div class="actions">
-      <button class="btn primary" id="magicBtn">LOGIN-LINK SENDEN</button>
-      <button class="btn" id="localBtn">LOCAL WEITER</button>
-    </div>
-    <p class="cloudMeta" id="authStatus">E-Mail → Login-Link senden → Mail öffnen → angemeldet.</p>
+<div id="cloudModal" class="modal hidden">
+  <div class="modalBox">
+    <div class="eyebrow">PRIVATE CLOUD</div><h2>Ein Klick statt Passwort.</h2>
+    <p class="muted">Die App funktioniert vollständig lokal. Für Sync: Login-Link an deine E-Mail senden und den neuesten Link genau einmal öffnen.</p>
+    <label>E-Mail<input id="authEmail" type="email" value="aaamstadt@icloud.com"></label>
+    <div class="actions"><button class="btn primary" id="magicBtn">LOGIN-LINK SENDEN</button><button class="btn" id="closeCloud">SCHLIESSEN</button><button class="btn danger hidden" id="logoutBtn">LOGOUT</button></div>
+    <div id="authStatus" class="tagline">LOCAL MODE ACTIVE</div>
   </div>
 </div>
 
-<div class="bottom"><div class="nav">
-<button data-screen="today" class="active">TODAY</button>
-<button data-screen="growth">GROWTH</button>
-<button data-screen="review">REVIEW</button>
-<button data-screen="command">COMMAND</button>
-</div></div>
+<div class="bottom"><div class="nav"><button data-screen="today" class="active">TODAY</button><button data-screen="growth">GROWTH</button><button data-screen="review">REVIEW</button><button data-screen="command">COMMAND</button></div></div>
 
 <script>
-const KEY='ace-loop-os.v3', V2='ace-loop-os.entries.v2';
-const SUPA_URL='https://gbzoxohtdlujrfljdwfz.supabase.co';
-const SUPA_KEY='sb_publishable_37BENm3_dZtzAhDfu6iDqw_aXtm4Iof';
-const AUTH_KEY='ace-loop-os.cloud.auth.v1';
-let cloudSession=null, cloudSyncTimer=null, integrationStatuses=[];
-const proofMeta={body:['BODY','Leistungsfähigkeit erhalten oder erhöhen.'],revenue:['REVENUE','Markt, Pipeline oder Geld real berühren.'],people:['PEOPLE','Einen Menschen klarer oder unabhängiger machen.'],build:['BUILD','Ein Asset schaffen, das morgen noch existiert.'],close:['CLOSE','Einen offenen Loop endgültig schließen.']};
-const proofKeys=Object.keys(proofMeta);
+const KEY="panthera-ace.v4",OLD3="ace-loop-os.v3",OLD2="ace-loop-os.entries.v2";
+const SUPA_URL="https://gbzoxohtdlujrfljdwfz.supabase.co";
+const SUPA_KEY="sb_publishable_37BENm3_dZtzAhDfu6iDqw_aXtm4Iof";
+const AUTH_KEY="ace-loop-os.cloud.auth.v1";
 const $=id=>document.getElementById(id);
-const todayISO=()=>{const d=new Date();return new Date(d-d.getTimezoneOffset()*60000).toISOString().slice(0,10)};
 const uid=()=>crypto.randomUUID();
-
-function defaultSystem(){return{
- version:3,
- entries:[],
- skills:[{name:'Sales',level:3},{name:'Leadership',level:2},{name:'Communication',level:3},{name:'Systems',level:3},{name:'Self-Leadership',level:3},{name:'Learning',level:2},{name:'Brand / Creation',level:2},{name:'Strategy',level:3},{name:'Relationships',level:2},{name:'Body',level:3}],
- projects:[],
- season:{primary:'Revenue Execution',secondary:'Leadership',maintain:'Body'},
- events:[]
-}}
-function freshEntry(date){return{
- id:uid(),date,sleep:null,energy:null,state:'',win:'',nextMove:'',skillFocus:'',uncomfortable:'',ifThen:'',locked:false,
- proofs:Object.fromEntries(proofKeys.map(k=>[k,{target:'',done:false,evidence:''}])),
- biggest:'',deviation:'',failureType:'',correction:'',skillEvidence:'',createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()
-}}
-function migrateV2(){
+const iso=()=>{const d=new Date();return new Date(d-d.getTimezoneOffset()*60000).toISOString().slice(0,10)};
+const days=(a,b)=>Math.round((new Date(b)-new Date(a))/86400000);
+const proofMeta={body:["BODY","Leistungsfähigkeit erhalten oder erhöhen."],revenue:["REVENUE","Markt, Pipeline oder Geld real berühren."],people:["PEOPLE","Einen Menschen klarer oder unabhängiger machen."],build:["BUILD","Ein Asset schaffen, das morgen noch existiert."],close:["CLOSE","Einen offenen Loop endgültig schließen."]};
+const proofKeys=Object.keys(proofMeta);
+const MODULES=[
+ {key:"constitution",name:"Constitution",type:"CONSTITUTION",status:"ACTIVE",fn:"Wahrheit · Ethik · Reality > Narrative"},
+ {key:"meta_conductor",name:"Meta Conductor",type:"ROUTER",status:"ACTIVE",fn:"Problemklasse + Complexity Budget + Routing"},
+ {key:"athenaeum",name:"Athenaeum",type:"SPECIALIST",status:"CONDITIONAL",fn:"Wahrnehmung · Hypothesen · soziale Kalibrierung"},
+ {key:"mastery",name:"Mastery Compiler",type:"SPECIALIST",status:"ACTIVE",fn:"Skill Graph · Drill · Field Test · Transfer"},
+ {key:"moon",name:"Moon Architect",type:"SPECIALIST",status:"CONDITIONAL",fn:"Verkörperung · Präsenz · Performance · Marke"},
+ {key:"seven_heads",name:"Seven Heads",type:"LENS",status:"CONDITIONAL",fn:"Adversarial Check · max. 2 Attack/Repair Runden"},
+ {key:"ace",name:"ACE Execution",type:"EXECUTION",status:"ACTIVE",fn:"Next Move · Evidence · Review"},
+ {key:"reality",name:"Reality",type:"REALITY",status:"ACTIVE",fn:"Feldresultat schlägt interne Eleganz"},
+ {key:"learning",name:"Learning Engine",type:"LEARNING",status:"ACTIVE",fn:"Error · Attribution · Retest · Update"}
+];
+function baseSkills(){
+ const rows=[
+ ["Sales",3,2,1,"core","10 gezielte Follow-ups; Opening und Klarheit bewusst beobachten.","Unbekannter oder kalter Lead; Ergebnis und Einwand dokumentieren.",true],
+ ["Leadership",2,1,1,"core","Eine reale Aufgabe mit Outcome, Owner und Definition of Done delegieren.","Delegation ohne Nachsteuerung durchführen und Ergebnisqualität prüfen.",true],
+ ["Communication",3,2,1,"core","In einem Gespräch erst zusammenfassen, dann Position formulieren.","Schwieriges Gespräch mit klarer Grenze und offenem Gegenüber.",false],
+ ["Systems",3,2,1,"core","Einen offenen Prozess auf einen wiederholbaren Standard reduzieren.","Jemand anderes führt den Prozess ohne deine Hilfe aus.",false],
+ ["Self-Leadership",3,2,1,"meta","Nach ausreichender Klarheit innerhalb von 10 Minuten den ersten physischen Move starten.","Unbequemen Move an einem widerstandsreichen Tag sauber beginnen.",true],
+ ["Learning",2,1,0,"meta","Eine Idee ohne Vorlage erklären und noch am selben Tag anwenden.","Nach 7 Tagen ohne Vorlage reproduzieren.",false],
+ ["Brand / Creation",2,1,0,"core","Ein Element veröffentlichen und reales Feedback messen.","Unbekanntes Publikum reagiert auf klare Botschaft.",false],
+ ["Strategy",3,2,1,"meta","Eine Entscheidung mit Gegenhypothese, Downside und Update-Signal dokumentieren.","Unbekannter Case mit begrenzten Informationen.",false],
+ ["Relationships",2,1,1,"adjacent","Ein Gespräch mit echtem Zuhören ohne unmittelbaren Nutzenfokus führen.","Konflikt oder Bedürfnis ohne Instrumentalisierung klären.",false],
+ ["Body",3,2,1,"core","Training oder Regeneration als konkrete Leistungsbasis abschließen.","Plan unter Zeitdruck sinnvoll anpassen, ohne ganz auszusteigen.",false]
+ ];
+ return rows.map(r=>({id:uid(),name:r[0],knowledge:r[1],capability:r[2],pressure:r[3],class:r[4],nextDrill:r[5],nextFieldTest:r[6],active:r[7],evidenceCount:0,confidence:.5,baselineVerified:false,lastUsedAt:null,lastTestedAt:null}));
+}
+function base(){
+ return {version:4,entries:[],skills:baseSkills(),projects:[],season:{primary:"Revenue Execution",secondary:"Leadership",maintain:"Body"},events:[],predictions:[],decisions:[],assessments:[],independenceChecks:[],trainingCycles:[],evidenceItems:[],config:{activeVersion:"3.0",freezeUntil:"2026-10-31",maxActiveSkills:3,complexityBudget:1,independenceTarget:.8,objective:"Real Capability × Judgment × Execution × Transfer × Sustainability"},modules:MODULES};
+}
+function freshEntry(date){return{id:uid(),date,sleep:null,energy:null,state:"",win:"",nextMove:"",skillFocus:"",uncomfortable:"",ifThen:"",locked:false,proofs:Object.fromEntries(proofKeys.map(k=>[k,{target:"",done:false,evidence:""}])),biggest:"",deviation:"",failureType:"",correction:"",skillEvidence:"",evidenceQuality:3,pressureEvidence:false,assistanceLevel:0,reviewClosed:false,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()}}
+function normalizeSkill(s){
+ const lvl=Number(s.level??s.knowledge??0);
+ return {id:s.id||uid(),name:s.name||"Skill",knowledge:Number(s.knowledge??s.knowledge_level??lvl),capability:Number(s.capability??s.capability_level??Math.max(0,lvl-1)),pressure:Number(s.pressure??s.pressure_level??Math.max(0,lvl-2)),class:s.class||s.skill_class||"adjacent",nextDrill:s.nextDrill||s.next_drill||"",nextFieldTest:s.nextFieldTest||s.next_field_test||"",active:!!(s.active??s.active_training),evidenceCount:Number(s.evidenceCount??s.evidence_count??0),confidence:Number(s.confidence??.5),baselineVerified:!!(s.baselineVerified??s.baseline_verified),lastUsedAt:s.lastUsedAt||s.last_used_at||null,lastTestedAt:s.lastTestedAt||s.last_tested_at||null};
+}
+function migrate(){
  try{
-  const raw=localStorage.getItem(V2); if(!raw)return null;
-  const old=JSON.parse(raw); const sys=defaultSystem();
-  sys.entries=(Array.isArray(old)?old:[]).map(e=>({
-    ...freshEntry(e.date),id:e.id||uid(),sleep:e.sleepHours??null,energy:e.energy??null,state:e.state||'',win:e.win||'',nextMove:e.nextMove||'',
-    proofs:Object.fromEntries(proofKeys.map(k=>[k,{target:e.proofs?.[k]?.target||'',done:!!e.proofs?.[k]?.done,evidence:e.proofs?.[k]?.evidence||''}])),
-    biggest:e.biggestOutput||'',deviation:e.deviation||'',correction:e.correction||'',createdAt:e.createdAt||new Date().toISOString(),updatedAt:e.updatedAt||new Date().toISOString()
-  }));
-  return sys;
- }catch{return null}
+  const raw=localStorage.getItem(KEY);if(raw)return normalize(JSON.parse(raw));
+  const v3=localStorage.getItem(OLD3);
+  if(v3){
+   const x=JSON.parse(v3),o=base();o.entries=(x.entries||[]).map(e=>({...freshEntry(e.date),...e}));o.skills=(x.skills||[]).map(normalizeSkill);o.projects=x.projects||[];o.season={...o.season,...(x.season||{})};o.events=x.events||[];return o;
+  }
+  const v2=localStorage.getItem(OLD2);
+  if(v2){
+   const x=JSON.parse(v2),o=base();o.entries=(Array.isArray(x)?x:[]).map(e=>({...freshEntry(e.date),sleep:e.sleepHours??e.sleep??null,energy:e.energy??null,state:e.state||"",win:e.win||"",nextMove:e.nextMove||"",proofs:e.proofs||freshEntry(e.date).proofs,biggest:e.biggestOutput||e.biggest||"",deviation:e.deviation||"",correction:e.correction||""}));return o;
+  }
+ }catch(e){}
+ return base();
 }
-function readSystem(){try{const raw=localStorage.getItem(KEY);if(raw)return normalize(JSON.parse(raw));const m=migrateV2();if(m){writeSystem(m);return m}return defaultSystem()}catch{return defaultSystem()}}
-function normalize(sys){const base=defaultSystem();const out={...base,...sys};out.entries=Array.isArray(sys.entries)?sys.entries:[];out.skills=Array.isArray(sys.skills)&&sys.skills.length?sys.skills:base.skills;out.projects=Array.isArray(sys.projects)?sys.projects:[];out.events=Array.isArray(sys.events)?sys.events:[];out.season={...base.season,...(sys.season||{})};return out}
-function writeSystem(sys){localStorage.setItem(KEY,JSON.stringify(sys))}
-function readAuth(){try{return JSON.parse(localStorage.getItem(AUTH_KEY)||'null')}catch{return null}}
-function writeAuth(v){if(v)localStorage.setItem(AUTH_KEY,JSON.stringify(v));else localStorage.removeItem(AUTH_KEY)}
-let system=readSystem(), current, saveTimer=null, timerHandle=null;
-
-function getEntry(date){let e=system.entries.find(x=>x.date===date);if(!e){e=freshEntry(date);system.entries.push(e)}return e}
-function score(e){return proofKeys.filter(k=>e.proofs[k].done).length}
-function evidenceRate(entries){const done=entries.flatMap(e=>proofKeys.map(k=>e.proofs[k])).filter(p=>p.done);return done.length?Math.round(done.filter(p=>p.evidence.trim()).length/done.length*100):0}
-function event(type,payload={}){const e={id:uid(),at:new Date().toISOString(),type,payload};system.events.unshift(e);system.events=system.events.slice(0,120);if(cloudSession)cloudUpsertEvent(e).catch(cloudFail)}
-function persist(reason='autosave'){current.updatedAt=new Date().toISOString();const i=system.entries.findIndex(e=>e.date===current.date);if(i>=0)system.entries[i]=current;writeSystem(system);$('autosave').textContent='SAVED';renderAll();if(cloudSession)queueCloudEntry();if(reason!=='autosave')event('system.'+reason,{date:current.date})}
-function schedule(){clearTimeout(saveTimer);$('autosave').textContent='UNSAVED';saveTimer=setTimeout(()=>persist(),650)}
-function modeFor(e){
- const hist=[...system.entries].filter(x=>x.date<e.date).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,2);
- const recentWeak=hist.length===2&&hist.every(x=>score(x)<3);
- if((e.sleep!==null&&e.sleep<5.5)||(e.energy!==null&&e.energy<=3)||e.state==='red'||recentWeak)return 'RECOVERY DAY';
- const prevStrong=!hist.length||score(hist[0])>=4;
- if((e.sleep===null||e.sleep>=7)&&(e.energy===null||e.energy>=8)&&e.state!=='red'&&prevStrong)return 'ATTACK DAY';
- return 'STANDARD DAY'
+function normalize(x){
+ const b=base(),o={...b,...x};o.entries=Array.isArray(x.entries)?x.entries.map(e=>({...freshEntry(e.date),...e})):[];o.skills=Array.isArray(x.skills)&&x.skills.length?x.skills.map(normalizeSkill):b.skills;o.projects=Array.isArray(x.projects)?x.projects:[];o.events=Array.isArray(x.events)?x.events:[];o.predictions=Array.isArray(x.predictions)?x.predictions:[];o.decisions=Array.isArray(x.decisions)?x.decisions:[];o.assessments=Array.isArray(x.assessments)?x.assessments:[];o.independenceChecks=Array.isArray(x.independenceChecks)?x.independenceChecks:[];o.trainingCycles=Array.isArray(x.trainingCycles)?x.trainingCycles:[];o.evidenceItems=Array.isArray(x.evidenceItems)?x.evidenceItems:[];o.config={...b.config,...(x.config||{})};o.modules=Array.isArray(x.modules)&&x.modules.length?x.modules:b.modules;o.season={...b.season,...(x.season||{})};return o;
 }
+let system=migrate(),current,saveTimer=null,timerHandle=null,cloudSession=null,cloudSyncTimer=null,cloudIntegrations=[];
+function save(){localStorage.setItem(KEY,JSON.stringify(system))}
+function getEntry(date){let e=system.entries.find(x=>x.date===date);if(!e){e=freshEntry(date);system.entries.push(e);save()}return e}
+function score(e){return proofKeys.filter(k=>e.proofs[k]?.done).length}
+function evRate(entries){const p=entries.flatMap(e=>proofKeys.map(k=>e.proofs[k])).filter(Boolean).filter(p=>p.done);return p.length?Math.round(p.filter(p=>String(p.evidence||"").trim()).length/p.length*100):0}
+function event(type,payload={}){const e={id:uid(),at:new Date().toISOString(),type,payload};system.events.unshift(e);system.events=system.events.slice(0,250);save();if(cloudSession)cloudEvent(e).catch(()=>{})}
+function persist(){current.updatedAt=new Date().toISOString();save();$("autosave").textContent="SAVED";renderAll();if(cloudSession){clearTimeout(cloudSyncTimer);cloudSyncTimer=setTimeout(()=>cloudPushEntry(current).catch(cloudError),900)}}
+function schedule(){clearTimeout(saveTimer);$("autosave").textContent="UNSAVED";saveTimer=setTimeout(persist,500)}
+function dayMode(e){const hist=[...system.entries].filter(x=>x.date<e.date).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,2);const weak=hist.length===2&&hist.every(x=>score(x)<3);if((e.sleep!=null&&e.sleep<5.5)||(e.energy!=null&&e.energy<=3)||e.state==="red"||weak)return"RECOVERY DAY";if((e.sleep==null||e.sleep>=7)&&(e.energy==null||e.energy>=8)&&e.state!=="red"&&(!hist.length||score(hist[0])>=4))return"ATTACK DAY";return"STANDARD DAY"}
+function activeSkills(){return system.skills.filter(s=>s.active).slice(0,system.config.maxActiveSkills||3)}
+function skillScore(s){return s.knowledge*.2+s.capability*.5+s.pressure*.3}
+function bottleneck(){const a=activeSkills();return a.length?[...a].sort((x,y)=>skillScore(x)-skillScore(y))[0]:null}
+function skillByName(n){return system.skills.find(s=>s.name===n)||bottleneck()||system.skills[0]}
+function retestDue(s){if(!s.baselineVerified)return true;if(!s.lastTestedAt)return true;return days(s.lastTestedAt.slice(0,10),iso())>=30}
+function escapeHTML(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
 
-function renderEntry(){
- $('sleep').value=current.sleep??'';$('energy').value=current.energy??'';$('state').value=current.state||'';$('win').value=current.win;$('nextMove').value=current.nextMove;$('skillFocus').value=current.skillFocus;$('uncomfortable').value=current.uncomfortable;$('ifThen').value=current.ifThen;
- $('biggest').value=current.biggest;$('deviation').value=current.deviation;$('failureType').value=current.failureType;$('correction').value=current.correction;$('skillEvidence').value=current.skillEvidence;
- $('heroWin').textContent=current.win.trim()||'Define the win.';$('heroMove').textContent=current.nextMove.trim()||'Set one physical next move. Then execute.';$('nextMoveText').textContent=current.nextMove.trim()||'Noch nicht definiert.';
- $('dayMode').textContent=modeFor(current);$('reviewScore').textContent=score(current)+' / 5';$('lockState').textContent=current.locked?'Commitments sind gesetzt.':'Plan ist offen.';$('lockDay').textContent=current.locked?'DAY UNLOCK':'DAY COMMIT';
+function renderToday(){
+ $("sleep").value=current.sleep??"";$("energy").value=current.energy??"";$("state").value=current.state||"";$("win").value=current.win;$("nextMove").value=current.nextMove;$("uncomfortable").value=current.uncomfortable;$("ifThen").value=current.ifThen;
+ $("heroWin").textContent=current.win.trim()||"Definiere den Sieg.";$("heroMove").textContent=current.nextMove.trim()||"Ein klarer nächster physischer Zug schlägt weitere Architektur.";$("nextMoveText").textContent=current.nextMove.trim()||"Noch nicht definiert.";$("dayMode").textContent=dayMode(current);$("budgetChip").textContent="COMPLEXITY · "+system.config.complexityBudget;
+ const select=$("skillFocus");select.innerHTML='<option value="">AUTO · BOTTLENECK</option>'+activeSkills().map(s=>'<option value="'+escapeHTML(s.name)+'">'+escapeHTML(s.name)+'</option>').join("");select.value=current.skillFocus||"";
+ const s=skillByName(current.skillFocus);$("focusChip").textContent="FOCUS · "+(s?s.name.toUpperCase():"—");$("missionTitle").textContent=s?s.name:"Noch keine aktive Mission.";$("missionDrill").textContent=s&&s.nextDrill?"DRILL · "+s.nextDrill:"Noch kein Drill definiert.";$("missionField").textContent=s&&s.nextFieldTest?"FIELD TEST · "+s.nextFieldTest:"";
+ $("lockState").textContent=current.locked?"Commitments gesetzt.":"Plan ist offen.";$("lockDay").textContent=current.locked?"DAY UNLOCK":"DAY COMMIT";
  renderProofs();renderRecovery()
 }
 function renderProofs(){
- const wrap=$('proofs');wrap.innerHTML='';
- proofKeys.forEach(k=>{const p=current.proofs[k],m=proofMeta[k],el=document.createElement('div');el.className='proof'+(p.done?' done':'');
- el.innerHTML='<h4>'+m[0]+'</h4><p>'+m[1]+'</p><button aria-label="done">'+(p.done?'✓':'')+'</button><textarea class="target" placeholder="Commitment">'+esc(p.target)+'</textarea><textarea class="evidence" placeholder="Evidence / Result">'+esc(p.evidence)+'</textarea>';
- const target=el.querySelector('.target'),evidence=el.querySelector('.evidence');target.disabled=current.locked;
- target.oninput=x=>{p.target=x.target.value;schedule()};evidence.oninput=x=>{p.evidence=x.target.value;schedule()};
- el.querySelector('button').onclick=()=>{if(!p.done&&!p.evidence.trim()){alert('Evidence Gate: Trage zuerst das reale Ergebnis ein.');evidence.focus();return}p.done=!p.done;event('proof.'+(p.done?'completed':'reopened'),{proof:k,date:current.date});persist('proof');};
- wrap.appendChild(el)})
-}
-function esc(v){return String(v||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
-
-function renderGrowth(){
- const entries=[...system.entries].sort((a,b)=>b.date.localeCompare(a.date)),last7=entries.slice(0,7),last30=entries.slice(0,30);
- $('tracked').textContent=entries.length;$('avg7').textContent=last7.length?(last7.reduce((a,e)=>a+score(e),0)/last7.length).toFixed(1):'—';$('evidenceRate').textContent=evidenceRate(last7)+'%';
- let gaps=[];const asc=[...entries].sort((a,b)=>a.date.localeCompare(b.date));for(let i=0;i<asc.length;i++){if(score(asc[i])>=4)continue;for(let j=i+1;j<asc.length;j++){if(score(asc[j])>=4){gaps.push(Math.max(1,Math.round((new Date(asc[j].date)-new Date(asc[i].date))/86400000)));break}}}$('returnSpeed').textContent=gaps.length?(gaps.reduce((a,b)=>a+b,0)/gaps.length).toFixed(1)+'d':'—';
- const proofStats=proofKeys.map(k=>({k,p7:last7.length?Math.round(last7.filter(e=>e.proofs[k].done).length/last7.length*100):0,p30:last30.length?Math.round(last30.filter(e=>e.proofs[k].done).length/last30.length*100):0}));
- if(last7.length){const weak=[...proofStats].sort((a,b)=>a.p7-b.p7)[0];$('realitySignal').innerHTML='<b>REALITY SIGNAL · '+proofMeta[weak.k][0]+'</b><br>'+weak.p7+'% in 7 Tagen. Nicht dramatisieren – nächsten Test verbessern.'}
- $('pillars').innerHTML=proofStats.map(s=>'<div class="row"><div><strong>'+proofMeta[s.k][0]+'</strong><small>7T '+s.p7+'% · 30T '+s.p30+'%</small><div class="bar"><i style="width:'+s.p7+'%"></i></div></div><span class="pill">'+s.p7+'%</span></div>').join('');
- $('skills').innerHTML=system.skills.map(s=>'<div class="row"><div><strong>'+esc(s.name)+'</strong><small>S'+s.level+' · '+skillLabel(s.level)+' · '+(s.evidenceCount||0)+' Evidenzen</small><div class="bar"><i style="width:'+Math.round((s.level/7)*100)+'%"></i></div></div><span class="pill">S'+s.level+'</span></div>').join('');
- $('seasonPrimary').value=system.season.primary;$('seasonSecondary').value=system.season.secondary;$('seasonMaintain').value=system.season.maintain
-}
-function skillLabel(l){return ['UNKNOWN','LITERACY','UNDERSTANDING','APPLICATION','PRACTITIONER','EXPERT INTERFACE','CREATION','TRANSCENDENCE'][Math.max(0,Math.min(7,l))]}
-
-function renderHistory(){
- const entries=[...system.entries].sort((a,b)=>b.date.localeCompare(a.date));$('history').innerHTML='';
- entries.slice(0,20).forEach(e=>{const b=document.createElement('button');b.innerHTML='<span>'+e.date+'</span><b>'+score(e)+'/5</b>';b.onclick=()=>{$('date').value=e.date;load(e.date);show('review')};$('history').appendChild(b)})
-}
-function renderCommand(){
- $('projectsText').value=system.projects.join('\n');$('skillsText').value=system.skills.map(s=>s.name+'|'+s.level).join('\n');
- $('events').innerHTML=system.events.slice(0,20).map(e=>'<div class="row"><div><strong>'+esc(e.type)+'</strong><small>'+new Date(e.at).toLocaleString('de-DE')+'</small></div><span class="pill">'+esc(e.payload?.proof||e.payload?.date||'event')+'</span></div>').join('')||'<div class="muted">Noch keine Events.</div>';
- $('integrations').innerHTML=(integrationStatuses.length?integrationStatuses:[
-   {provider:'PANTHERA',status:'ready'},{provider:'OXIDIA',status:'ready'},{provider:'Quintera',status:'ready'},{provider:'n8n',status:'ready'},{provider:'Google Calendar',status:'disconnected'},{provider:'CRM',status:'disconnected'}
- ]).map(x=>'<div class="integrationCard"><b>'+esc(x.provider)+'</b><small>'+esc(String(x.status).toUpperCase())+(x.last_sync_at?' · '+new Date(x.last_sync_at).toLocaleString('de-DE'):'')+'</small></div>').join('')
+ const wrap=$("proofs");wrap.innerHTML="";
+ proofKeys.forEach(k=>{const p=current.proofs[k]||{target:"",done:false,evidence:""},m=proofMeta[k],el=document.createElement("div");el.className="proof"+(p.done?" done":"");el.innerHTML='<h4>'+m[0]+'</h4><p>'+m[1]+'</p><button>'+(p.done?"✓":"")+'</button><textarea class="target" placeholder="Commitment">'+escapeHTML(p.target)+'</textarea><textarea class="evidence" placeholder="Evidence / Result">'+escapeHTML(p.evidence)+'</textarea>';const t=el.querySelector(".target"),ev=el.querySelector(".evidence");t.disabled=current.locked;t.oninput=x=>{p.target=x.target.value;current.proofs[k]=p;schedule()};ev.oninput=x=>{p.evidence=x.target.value;current.proofs[k]=p;schedule()};el.querySelector("button").onclick=()=>{if(!p.done&&!String(p.evidence||"").trim()){alert("Evidence Gate: Erst reales Ergebnis eintragen.");ev.focus();return}p.done=!p.done;current.proofs[k]=p;event("proof."+(p.done?"completed":"reopened"),{proof:k,date:current.date});persist()};wrap.appendChild(el)})
 }
 function renderRecovery(){
- const previous=[...system.entries].filter(e=>e.date<current.date).sort((a,b)=>b.date.localeCompare(a.date))[0],el=$('recoveryNotice');
- if(previous&&score(previous)<4){el.classList.remove('hidden');el.textContent='RECOVERY PROTOCOL · Der letzte getrackte Tag lag unter 4/5. Heute zuerst einen realen Loop schließen. Keine Strafe, keine Identitätsgeschichte.'}else el.classList.add('hidden')
+ const prev=[...system.entries].filter(e=>e.date<current.date).sort((a,b)=>b.date.localeCompare(a.date))[0],el=$("recoveryNotice");if(prev&&score(prev)<4){el.classList.remove("hidden");el.textContent="RECOVERY PROTOCOL · Kein Selbstangriff. Heute zuerst einen realen Loop schließen und Rückkehrgeschwindigkeit trainieren."}else el.classList.add("hidden")
 }
-function renderAll(){renderEntry();renderGrowth();renderHistory();renderCommand()}
+function calcReturnSpeed(){
+ const asc=[...system.entries].sort((a,b)=>a.date.localeCompare(b.date)),g=[];for(let i=0;i<asc.length;i++){if(score(asc[i])>=4)continue;for(let j=i+1;j<asc.length;j++){if(score(asc[j])>=4){g.push(Math.max(1,days(asc[i].date,asc[j].date)));break}}}return g.length?(g.reduce((a,b)=>a+b,0)/g.length).toFixed(1)+"d":"—"
+}
+function calcCalibration(){
+ const r=system.predictions.filter(p=>p.outcome!==null&&p.outcome!==undefined);if(r.length<3)return"—";const b=r.reduce((a,p)=>{const pr=Number(p.probability)/100,o=p.outcome?1:0;return a+Math.pow(pr-o,2)},0)/r.length;return Math.round((1-b)*100)+"%"
+}
+function calcIndependence(){
+ const r=system.independenceChecks;if(!r.length)return"—";const x=r.slice(-20).reduce((a,c)=>a+(1-Number(c.assistanceLevel||0)/5),0)/Math.min(20,r.length);return Math.round(x*100)+"%"
+}
+function renderGrowth(){
+ const entries=[...system.entries].sort((a,b)=>b.date.localeCompare(a.date)),l7=entries.slice(0,7),l30=entries.slice(0,30);$("avg7").textContent=l7.length?(l7.reduce((a,e)=>a+score(e),0)/l7.length).toFixed(1):"—";$("evidenceRate").textContent=evRate(l7)+"%";$("returnSpeed").textContent=calcReturnSpeed();$("calibration").textContent=calcCalibration();$("independence").textContent=calcIndependence();
+ const b=bottleneck();$("bottleneckSignal").innerHTML=b?'<b>BOTTLENECK · '+escapeHTML(b.name)+'</b><br>Knowledge '+b.knowledge+' · Capability '+b.capability+' · Pressure '+b.pressure+(retestDue(b)?' · RETEST DUE':'')+'. Fokus bleibt auf dem schwächsten belegbaren Glied, nicht auf dem attraktivsten Thema.':"Noch keine aktiven Skills.";
+ $("skills").innerHTML=activeSkills().map(s=>'<div class="skill active"><div class="skillHead"><h4>'+escapeHTML(s.name)+'</h4><span class="pill">'+(s.baselineVerified?"VERIFIED":"PROVISIONAL")+'</span></div><div class="triad"><div><span>KNOWLEDGE</span><b>S'+s.knowledge+'</b></div><div><span>CAPABILITY</span><b>S'+s.capability+'</b></div><div><span>PRESSURE</span><b>S'+s.pressure+'</b></div></div><div class="bar"><i style="width:'+Math.round(skillScore(s)/7*100)+'%"></i></div><div class="tiny" style="margin-top:8px">'+s.evidenceCount+' Evidenzen · Confidence '+Math.round(s.confidence*100)+'%'+(retestDue(s)?" · Retest fällig":"")+'</div></div>').join("");
+ const ps=proofKeys.map(k=>({k,p7:l7.length?Math.round(l7.filter(e=>e.proofs[k]?.done).length/l7.length*100):0,p30:l30.length?Math.round(l30.filter(e=>e.proofs[k]?.done).length/l30.length*100):0}));$("pillars").innerHTML=ps.map(x=>'<div class="row"><div><strong>'+proofMeta[x.k][0]+'</strong><small>7T '+x.p7+'% · 30T '+x.p30+'%</small><div class="bar"><i style="width:'+x.p7+'%"></i></div></div><span class="pill">'+x.p7+'%</span></div>').join("");
+ $("seasonPrimary").value=system.season.primary;$("seasonSecondary").value=system.season.secondary;$("seasonMaintain").value=system.season.maintain
+}
+function renderReview(){
+ $("reviewScore").textContent=score(current)+" / 5";$("biggest").value=current.biggest;$("deviation").value=current.deviation;$("failureType").value=current.failureType;$("correction").value=current.correction;$("skillEvidence").value=current.skillEvidence;$("evidenceQuality").value=String(current.evidenceQuality||3);$("pressureEvidence").value=current.pressureEvidence?"yes":"no";$("assistanceLevel").value=String(current.assistanceLevel||0);
+ const resolved=system.predictions.filter(p=>p.outcome!==null&&p.outcome!==undefined).length;$("predictionCount").textContent=resolved+" RESOLVED";renderPredictions();renderHistory()
+}
+function renderPredictions(){
+ $("predictions").innerHTML=[...system.predictions].sort((a,b)=>b.createdAt.localeCompare(a.createdAt)).slice(0,12).map(p=>'<div class="row"><div><strong>'+escapeHTML(p.statement)+'</strong><small>'+p.probability+'% · '+(p.dueDate||"ohne Datum")+(p.outcome===true?" · EINGETRETEN":p.outcome===false?" · NICHT EINGETRETEN":" · OPEN")+'</small></div>'+(p.outcome===null||p.outcome===undefined?'<span><button class="btn" onclick="resolvePrediction(\''+p.id+'\',true)">✓</button> <button class="btn" onclick="resolvePrediction(\''+p.id+'\',false)">×</button></span>':'<span class="pill">DONE</span>')+'</div>').join("")||'<div class="muted">Noch keine Vorhersagen. Vor wichtigen Entscheidungen zuerst Erwartung speichern.</div>'
+}
+window.resolvePrediction=(id,outcome)=>{const p=system.predictions.find(x=>x.id===id);if(!p)return;p.outcome=outcome;p.resolvedAt=new Date().toISOString();event("prediction.resolved",{id,outcome,probability:p.probability});save();renderAll();if(cloudSession)cloudPushPrediction(p).catch(cloudError)}
+function renderHistory(){
+ const entries=[...system.entries].sort((a,b)=>b.date.localeCompare(a.date));$("history").innerHTML=entries.slice(0,20).map(e=>'<button onclick="openDay(\''+e.date+'\')"><span>'+e.date+'</span><b>'+score(e)+'/5</b></button>').join("")
+}
+window.openDay=d=>{$("date").value=d;load(d);show("review")}
+function routeDecision(){
+ const cls=$("decisionClass").value,stakes=$("decisionStakes").value,rev=$("decisionReversibility").value;let budget=1,mods=["Reality"],lenses=[];if(cls==="skill"){mods.unshift("Mastery Compiler")}else if(cls==="brand"){mods.unshift("Moon Architect")}else if(cls==="social"){mods.unshift("Athenaeum")}else if(cls==="execution"){mods.unshift("ACE Execution")}else{mods.unshift("Athenaeum")};if(stakes==="high"||rev==="low"){budget=4;mods.push("Seven Heads");lenses=["Auren","Machiavelli","Greene"]}else if(stakes==="medium"){budget=2;lenses=["Auren"]}if(cls==="brand")lenses.push("Jobs");if(cls==="execution")lenses.push("Kael");return{budget,mods:[...new Set(mods)],lenses:[...new Set(lenses)]}}
+function renderRoute(){const r=routeDecision();$("routePreview").innerHTML='<b>ROUTE · Complexity '+r.budget+'</b><br>'+r.mods.join(" → ")+(r.lenses.length?" · Counter-Lenses: "+r.lenses.join(", "):"")}
+function renderCommand(){
+ $("projectsText").value=system.projects.join("\n");$("skillsText").value=system.skills.map(s=>s.name+"|"+s.knowledge+"|"+s.capability+"|"+s.pressure+"|"+s.class).join("\n");$("freezeChip").textContent="FREEZE · "+system.config.freezeUntil;
+ $("modules").innerHTML=system.modules.map(m=>'<div class="module"><b>'+escapeHTML(m.name)+'</b><small>'+m.type+' · '+m.status+'</small><small>'+escapeHTML(m.fn)+'</small></div>').join("");
+ renderRoute();$("decisions").innerHTML=[...system.decisions].sort((a,b)=>b.createdAt.localeCompare(a.createdAt)).slice(0,8).map(d=>'<div class="row"><div><strong>'+escapeHTML(d.title)+'</strong><small>'+d.problemClass+' · '+d.stakes.toUpperCase()+' · Complexity '+d.complexityBudget+' · '+d.route.join(" → ")+'</small></div><span class="pill">'+d.status.toUpperCase()+'</span></div>').join("")||'<div class="muted">Noch keine dokumentierten Entscheidungen.</div>'
+}
+function renderAll(){renderToday();renderGrowth();renderReview();renderCommand();save()}
+function load(date){current=getEntry(date);renderAll();$("autosave").textContent="READY"}
+function show(id){document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("active",s.id===id));document.querySelectorAll(".nav button").forEach(b=>b.classList.toggle("active",b.dataset.screen===id));if(id==="growth")renderGrowth();if(id==="review")renderReview();if(id==="command")renderCommand()}
+document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>show(b.dataset.screen));
+$("date").onchange=e=>load(e.target.value);
+const entryMap={sleep:"sleep",energy:"energy",state:"state",win:"win",nextMove:"nextMove",skillFocus:"skillFocus",uncomfortable:"uncomfortable",ifThen:"ifThen",biggest:"biggest",deviation:"deviation",failureType:"failureType",correction:"correction",skillEvidence:"skillEvidence",evidenceQuality:"evidenceQuality",pressureEvidence:"pressureEvidence",assistanceLevel:"assistanceLevel"};
+Object.entries(entryMap).forEach(([id,key])=>$(id).addEventListener("input",e=>{let v=e.target.value;if(id==="sleep"||id==="energy"||id==="evidenceQuality"||id==="assistanceLevel")v=v===""?null:Number(v);if(id==="pressureEvidence")v=v==="yes";current[key]=v;schedule()}));
+["seasonPrimary","seasonSecondary","seasonMaintain"].forEach(id=>$(id).oninput=e=>{system.season[id.replace("season","").toLowerCase()]=e.target.value;save();if(cloudSession)queueFullSync()});
+$("lockDay").onclick=()=>{if(!current.locked){if(!current.win.trim()||!current.nextMove.trim()){alert("Definiere zuerst Sieg und Next Move.");return}const empty=proofKeys.filter(k=>!String(current.proofs[k]?.target||"").trim());if(empty.length){alert("Setze zuerst alle fünf Proof-Commitments.");return}current.locked=true;event("day.committed",{date:current.date,mode:dayMode(current)})}else{const r=prompt("Warum änderst du ein gesetztes Commitment?");if(!r||r.trim().length<5)return;current.locked=false;event("day.unlocked",{date:current.date,reason:r.trim()})}persist()};
+function runTimer(sec){clearInterval(timerHandle);const end=Date.now()+sec*1000;const draw=()=>{const left=Math.max(0,end-Date.now()),m=Math.floor(left/60000),s=Math.floor((left%60000)/1000);$("timer").textContent=String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");if(left<=0){clearInterval(timerHandle);$("timerNote").textContent="Block beendet. Jetzt Resultat festhalten."}};draw();timerHandle=setInterval(draw,250)}
+$("timerStart").onclick=()=>{if(!current.nextMove.trim()){alert("Definiere zuerst den Next Move.");return}event("execution.block.started",{date:current.date,move:current.nextMove});$("timerNote").textContent="Nur der definierte Move. Keine neue Architektur.";runTimer(600)};
+$("timerReset").onclick=()=>{clearInterval(timerHandle);$("timer").textContent="10:00";$("timerNote").textContent="Keine neue Analyse, sobald ausreichende Klarheit da ist."};
+$("startMove").onclick=()=>{if(!current.nextMove.trim()){$("nextMove").focus();return}event("execution.next_move",{date:current.date,move:current.nextMove});runTimer(600);document.querySelector("#timer").scrollIntoView({behavior:"smooth",block:"center"})};
+$("closeReview").onclick=()=>{const s=skillByName(current.skillFocus);if(current.skillEvidence.trim()&&s){const type=current.pressureEvidence?"pressure":"capability";const ev={id:uid(),skillId:s.id,skillName:s.name,date:current.date,type,quality:Number(current.evidenceQuality||3),independent:Number(current.assistanceLevel||0)===0,evidence:current.skillEvidence,createdAt:new Date().toISOString()};system.evidenceItems.push(ev);s.evidenceCount+=1;s.lastUsedAt=new Date().toISOString();s.confidence=Math.min(.99,s.confidence+.03*(ev.quality/3));if(ev.independent&&ev.quality>=4)s.confidence=Math.min(.99,s.confidence+.04);system.independenceChecks.push({id:uid(),skillId:s.id,date:current.date,assistanceLevel:Number(current.assistanceLevel||0),createdAt:new Date().toISOString()});event("skill.evidence",{skill:s.name,type,quality:ev.quality,independent:ev.independent})}current.reviewClosed=true;event("review.closed",{date:current.date,score:score(current),failure:current.failureType});persist();if(cloudSession)queueFullSync()};
+$("addPrediction").onclick=()=>{const st=$("predictionStatement").value.trim(),pr=Number($("predictionProbability").value),due=$("predictionDue").value;if(!st||!pr){alert("Vorhersage und Wahrscheinlichkeit eintragen.");return}const p={id:uid(),statement:st,probability:pr,dueDate:due||null,outcome:null,createdAt:new Date().toISOString(),resolvedAt:null};system.predictions.push(p);event("prediction.created",{id:p.id,probability:pr});$("predictionStatement").value="";save();renderAll();if(cloudSession)cloudPushPrediction(p).catch(cloudError)};
+["decisionClass","decisionStakes","decisionReversibility"].forEach(id=>$(id).onchange=renderRoute);
+$("saveDecision").onclick=()=>{const title=$("decisionTitle").value.trim();if(!title){alert("Entscheidung benennen.");return}const stakes=$("decisionStakes").value,rev=$("decisionReversibility").value;const bs={missingVariable:$("bsVariable").value.trim(),causal:$("bsCausal").value.trim(),baseRate:$("bsBaseRate").value.trim(),hiddenActor:$("bsActor").value.trim(),correlatedEvidence:$("bsEvidence").value.trim(),secondOrder:$("bsSecond").value.trim(),counter:$("decisionCounter").value.trim(),falsifier:$("decisionFalsifier").value.trim()};if(stakes==="high"||rev==="low"){const missing=Object.entries(bs).filter(([k,v])=>!v).map(([k])=>k);if(missing.length){alert("High-stakes Gate: Blind-Spot Firewall vollständig ausfüllen.");return}}const route=routeDecision(),unresolved=Object.values(bs).filter(v=>!v).length;const d={id:uid(),title,problemClass:$("decisionClass").value,stakes,reversibility:rev,goal:$("decisionGoal").value.trim(),expected:$("decisionExpected").value.trim(),blindSpots:bs,complexityBudget:route.budget,route:route.mods,counterLenses:route.lenses,status:"open",createdAt:new Date().toISOString()};system.decisions.push(d);system.config.complexityBudget=route.budget;event("decision.created",{id:d.id,stakes,complexity:route.budget,unresolved});save();renderAll();if(cloudSession)cloudPushDecision(d).catch(cloudError)};
+$("projectsText").oninput=e=>{system.projects=e.target.value.split("\n").map(x=>x.trim()).filter(Boolean);save();if(cloudSession)queueFullSync()};
+$("skillsText").onchange=e=>{const rows=e.target.value.split("\n").map(x=>x.trim()).filter(Boolean);const parsed=rows.map(line=>{const p=line.split("|");const old=system.skills.find(s=>s.name===p[0].trim());return normalizeSkill({...old,name:p[0].trim(),knowledge:Number(p[1]||0),capability:Number(p[2]||0),pressure:Number(p[3]||0),class:(p[4]||"adjacent").trim()})});const activeOld=activeSkills().map(s=>s.name);parsed.forEach(s=>s.active=activeOld.includes(s.name));system.skills=parsed;save();renderAll();if(cloudSession)queueFullSync()};
+$("export").onclick=()=>{const blob=new Blob([JSON.stringify({product:"PANTHERA ACE OS",version:4,exportedAt:new Date().toISOString(),data:system},null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="panthera-ace-"+iso()+".json";a.click();URL.revokeObjectURL(a.href)};
+$("import").onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const x=JSON.parse(r.result);system=normalize(x.data||x);save();load($("date").value);alert("Import erfolgreich.")}catch(e){alert("Ungültige Datei.")}};r.readAsText(f)};
 
-function load(date){current=getEntry(date);renderAll();$('autosave').textContent='READY'}
-function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active',s.id===id));document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.screen===id));if(id==='growth')renderGrowth();if(id==='review')renderHistory();if(id==='command')renderCommand()}
+// CLOUD: optional and non-blocking
+function readAuth(){try{return JSON.parse(localStorage.getItem(AUTH_KEY)||"null")}catch(e){return null}}
+function writeAuth(v){if(v)localStorage.setItem(AUTH_KEY,JSON.stringify(v));else localStorage.removeItem(AUTH_KEY)}
+function cloudBadge(text,mode=""){$("cloudBadge").textContent=text;$("cloudBadge").className="cloud"+(mode?" "+mode:"")}
+function authHeaders(extra={}){return{"apikey":SUPA_KEY,"Authorization":"Bearer "+cloudSession.access_token,"Content-Type":"application/json",...extra}}
+async function refreshSession(){if(!cloudSession?.refresh_token)return false;const r=await fetch(SUPA_URL+"/auth/v1/token?grant_type=refresh_token",{method:"POST",headers:{"apikey":SUPA_KEY,"Content-Type":"application/json"},body:JSON.stringify({refresh_token:cloudSession.refresh_token})});if(!r.ok){cloudSession=null;writeAuth(null);return false}const x=await r.json();cloudSession={...x,expires_at:Date.now()+(x.expires_in||3600)*1000};writeAuth(cloudSession);return true}
+async function ensureSession(){if(!cloudSession)return false;if((cloudSession.expires_at||0)<Date.now()+120000)return refreshSession();return true}
+async function api(table,query="",options={}){if(!(await ensureSession()))throw new Error("session_expired");const r=await fetch(SUPA_URL+"/rest/v1/"+table+query,{...options,headers:authHeaders(options.headers||{})});if(!r.ok)throw new Error(await r.text());const t=await r.text();return t?JSON.parse(t):null}
+function dbEntry(e){return{user_id:cloudSession.user.id,entry_date:e.date,sleep_hours:e.sleep,energy:e.energy,state:e.state||null,win:e.win,next_move:e.nextMove,skill_focus:e.skillFocus,uncomfortable:e.uncomfortable,if_then:e.ifThen,locked:e.locked,day_mode:dayMode(e),proofs:e.proofs,biggest:e.biggest,deviation:e.deviation,failure_type:e.failureType||null,correction:e.correction,skill_evidence:e.skillEvidence,updated_at:e.updatedAt}}
+async function cloudPushEntry(e){cloudBadge("SYNCING","sync");await api("daily_entries?on_conflict=user_id,entry_date","",{method:"POST",headers:{"Prefer":"resolution=merge-duplicates,return=minimal"},body:JSON.stringify([dbEntry(e)])});cloudBadge("SYNCED","ok")}
+async function cloudEvent(e){await api("events?on_conflict=id","",{method:"POST",headers:{"Prefer":"resolution=merge-duplicates,return=minimal"},body:JSON.stringify([{id:e.id,user_id:cloudSession.user.id,occurred_at:e.at,event_type:e.type,source:"ace-loop-os",payload:e.payload||{}}])})}
+async function cloudPushPrediction(p){await api("predictions?on_conflict=id","",{method:"POST",headers:{"Prefer":"resolution=merge-duplicates,return=minimal"},body:JSON.stringify([{id:p.id,user_id:cloudSession.user.id,statement:p.statement,probability:Number(p.probability)/100,due_date:p.dueDate,outcome:p.outcome,resolved_at:p.resolvedAt,metadata:{local:true}}])})}
+async function cloudPushDecision(d){await api("decisions?on_conflict=id","",{method:"POST",headers:{"Prefer":"resolution=merge-duplicates,return=minimal"},body:JSON.stringify([{id:d.id,user_id:cloudSession.user.id,title:d.title,goal:d.goal,problem_class:d.problemClass,stakes:d.stakes,reversibility:d.reversibility,status:d.status,blind_spots:d.blindSpots,expected_outcome:d.expected,metadata:{complexity_budget:d.complexityBudget,route:d.route,counter_lenses:d.counterLenses}}])})}
+function queueFullSync(){clearTimeout(cloudSyncTimer);cloudSyncTimer=setTimeout(()=>fullSync().catch(cloudError),900)}
+async function fullSync(){
+ if(!cloudSession)return;cloudBadge("SYNCING","sync");
+ const user=cloudSession.user.id;
+ const [re,rs,rp,rpred,rdec]=await Promise.all([api("daily_entries?select=*&order=entry_date.desc"),api("skills?select=*&order=name.asc"),api("projects?select=*&order=priority.asc,name.asc"),api("predictions?select=*&order=created_at.desc"),api("decisions?select=*&order=created_at.desc")]);
+ const map=new Map(system.entries.map(e=>[e.date,e]));(re||[]).forEach(r=>{const e={...freshEntry(r.entry_date),id:r.id,date:r.entry_date,sleep:r.sleep_hours,energy:r.energy,state:r.state||"",win:r.win||"",nextMove:r.next_move||"",skillFocus:r.skill_focus||"",uncomfortable:r.uncomfortable||"",ifThen:r.if_then||"",locked:r.locked,proofs:r.proofs||freshEntry(r.entry_date).proofs,biggest:r.biggest||"",deviation:r.deviation||"",failureType:r.failure_type||"",correction:r.correction||"",skillEvidence:r.skill_evidence||"",updatedAt:r.updated_at,createdAt:r.created_at};const l=map.get(e.date);if(!l||new Date(e.updatedAt)>=new Date(l.updatedAt||0))map.set(e.date,e)});system.entries=[...map.values()];
+ if(rs?.length)system.skills=rs.map(normalizeSkill);if(rp?.length)system.projects=rp.map(p=>p.name);if(rpred?.length)system.predictions=rpred.map(p=>({id:p.id,statement:p.statement,probability:Math.round(Number(p.probability)*100),dueDate:p.due_date,outcome:p.outcome,createdAt:p.created_at,resolvedAt:p.resolved_at}));if(rdec?.length)system.decisions=rdec.map(d=>({id:d.id,title:d.title,goal:d.goal||"",problemClass:d.problem_class||"strategy",stakes:d.stakes,reversibility:d.reversibility,status:d.status,blindSpots:d.blind_spots||{},expected:d.expected_outcome||"",complexityBudget:d.metadata?.complexity_budget||1,route:d.metadata?.route||["Reality"],counterLenses:d.metadata?.counter_lenses||[],createdAt:d.created_at}));
+ await api("daily_entries?on_conflict=user_id,entry_date","",{method:"POST",headers:{"Prefer":"resolution=merge-duplicates,return=minimal"},body:JSON.stringify(system.entries.map(dbEntry))});
+ if(system.skills.length)await api("skills?on_conflict=user_id,name","",{method:"POST",headers:{"Prefer":"resolution=merge-duplicates,return=minimal"},body:JSON.stringify(system.skills.map(s=>({user_id:user,name:s.name,domain:s.class,level:s.knowledge,target_level:Math.min(7,s.knowledge+1),evidence_count:s.evidenceCount,metadata:{v4:true},knowledge_level:s.knowledge,capability_level:s.capability,pressure_level:s.pressure,skill_class:s.class,confidence:s.confidence,baseline_verified:s.baselineVerified,last_used_at:s.lastUsedAt,last_tested_at:s.lastTestedAt,next_drill:s.nextDrill,next_field_test:s.nextFieldTest,active_training:s.active})))});
+ if(system.projects.length)await api("projects?on_conflict=user_id,name","",{method:"POST",headers:{"Prefer":"resolution=merge-duplicates,return=minimal"},body:JSON.stringify(system.projects.map((name,i)=>({user_id:user,name,priority:Math.min(5,i+1),status:"active"})))});
+ for(const p of system.predictions)await cloudPushPrediction(p);for(const d of system.decisions)await cloudPushDecision(d);
+ save();current=getEntry($("date").value);renderAll();cloudBadge("SYNCED","ok")
+}
+function cloudError(e){console.error(e);cloudBadge("CLOUD ERROR");$("authStatus").textContent=String(e.message||e)}
+async function sendMagic(email){const redirect=location.origin+location.pathname;const r=await fetch(SUPA_URL+"/auth/v1/otp?redirect_to="+encodeURIComponent(redirect),{method:"POST",headers:{"apikey":SUPA_KEY,"Content-Type":"application/json"},body:JSON.stringify({email,create_user:false})});const x=await r.json().catch(()=>({}));if(!r.ok)throw new Error(x.msg||x.error_description||x.message||"Login-Link konnte nicht gesendet werden")}
+async function acceptMagic(){
+ const p=new URLSearchParams(location.hash.replace(/^#/,"")),a=p.get("access_token"),r=p.get("refresh_token"),ex=Number(p.get("expires_in")||3600);if(!a)return false;
+ const ur=await fetch(SUPA_URL+"/auth/v1/user",{headers:{"apikey":SUPA_KEY,"Authorization":"Bearer "+a}});if(!ur.ok)return false;const user=await ur.json();cloudSession={access_token:a,refresh_token:r||"",expires_at:Date.now()+ex*1000,user};writeAuth(cloudSession);history.replaceState(null,"",location.pathname);await fullSync();return true
+}
+async function initCloud(){if(await acceptMagic()){cloudBadge("SYNCED","ok");return}const saved=readAuth();if(saved){cloudSession=saved;if(await ensureSession()){try{await fullSync();return}catch(e){cloudError(e)}}}cloudBadge("LOCAL")}
+$("cloudBadge").onclick=()=>$("cloudModal").classList.remove("hidden");$("openCloud").onclick=()=>$("cloudModal").classList.remove("hidden");$("closeCloud").onclick=()=>$("cloudModal").classList.add("hidden");$("magicBtn").onclick=async()=>{try{$("authStatus").textContent="Login-Link wird gesendet…";await sendMagic($("authEmail").value.trim());$("authStatus").textContent="Gesendet. Öffne die neueste Mail genau einmal."}catch(e){$("authStatus").textContent=String(e.message||e)}};$("logoutBtn").onclick=()=>{cloudSession=null;writeAuth(null);cloudBadge("LOCAL");$("logoutBtn").classList.add("hidden")};$("syncNow").onclick=()=>fullSync().catch(cloudError);
 
-document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>show(b.dataset.screen));
-$('date').onchange=e=>load(e.target.value);
-const map={sleep:'sleep',energy:'energy',state:'state',win:'win',nextMove:'nextMove',skillFocus:'skillFocus',uncomfortable:'uncomfortable',ifThen:'ifThen',biggest:'biggest',deviation:'deviation',failureType:'failureType',correction:'correction',skillEvidence:'skillEvidence'};
-Object.entries(map).forEach(([id,key])=>{$(id).addEventListener('input',e=>{let v=e.target.value;if(id==='sleep'||id==='energy')v=v===''?null:Number(v);current[key]=v;schedule()})});
-['seasonPrimary','seasonSecondary','seasonMaintain'].forEach(id=>$(id).addEventListener('input',e=>{system.season[id.replace('season','').toLowerCase()]=e.target.value;writeSystem(system);if(cloudSession)queueFullSync()}));
-$('lockDay').onclick=()=>{if(!current.locked){if(!current.win.trim()||!current.nextMove.trim()){alert('Definiere zuerst den heutigen Sieg und den Next Move.');return}current.locked=true;event('day.committed',{date:current.date})}else{const reason=prompt('Warum änderst du den bereits gesetzten Plan?');if(!reason||reason.trim().length<5)return;current.locked=false;event('day.unlocked',{date:current.date,reason:reason.trim()})}persist('commitment')};
-
-function runTimer(seconds){clearInterval(timerHandle);const end=Date.now()+seconds*1000;const draw=()=>{const left=Math.max(0,end-Date.now()),m=Math.floor(left/60000),s=Math.floor((left%60000)/1000);$('timer').textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');if(left<=0){clearInterval(timerHandle);$('timerNote').textContent='Block beendet. Jetzt Evidence festhalten.'}};draw();timerHandle=setInterval(draw,250)}
-$('timerStart').onclick=()=>{if(!current.nextMove.trim()){alert('Definiere zuerst deinen Next Move.');return}event('execution.block.started',{date:current.date,move:current.nextMove});writeSystem(system);$('timerNote').textContent='Keine neue Analyse. Nur der definierte Move.';runTimer(600)};
-$('timerReset').onclick=()=>{clearInterval(timerHandle);$('timer').textContent='10:00';$('timerNote').textContent='Ein klarer Start schlägt weitere Planung.'};
-$('startMove').onclick=()=>{if(!current.nextMove.trim()){show('today');$('nextMove').focus();return}event('execution.next_move',{date:current.date,move:current.nextMove});writeSystem(system);runTimer(600);window.scrollTo({top:document.body.scrollHeight/2,behavior:'smooth'})};
-
-$('projectsText').oninput=e=>{system.projects=e.target.value.split('\n').map(x=>x.trim()).filter(Boolean);writeSystem(system);if(cloudSession)queueFullSync()};
-$('skillsText').oninput=e=>{system.skills=e.target.value.split('\n').map(x=>x.trim()).filter(Boolean).map(line=>{const [name,l]=line.split('|');return{name:(name||'').trim(),level:Math.max(0,Math.min(7,Number(l)||0))}});writeSystem(system);renderGrowth();if(cloudSession)queueFullSync()};
-$('export').onclick=()=>{const payload={product:'ACE Loop OS',version:3,exportedAt:new Date().toISOString(),data:system},blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='ace-loop-os-'+todayISO()+'.json';a.click();URL.revokeObjectURL(a.href)};
-$('import').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const raw=JSON.parse(r.result),data=raw.data||raw;system=normalize(data);writeSystem(system);load($('date').value);alert('Import erfolgreich.')}catch{alert('Ungültige Datei.')}};r.readAsText(f)};
-
-
-function setCloudBadge(text,mode=''){
- const b=$('cloudBadge');b.textContent=text;b.className='cloudBadge'+(mode?' '+mode:'');
-}
-function authHeaders(extra={}){
- return {'apikey':SUPA_KEY,'Authorization':'Bearer '+cloudSession.access_token,'Content-Type':'application/json',...extra};
-}
-async function refreshSession(){
- if(!cloudSession?.refresh_token)return false;
- const r=await fetch(SUPA_URL+'/auth/v1/token?grant_type=refresh_token',{method:'POST',headers:{'apikey':SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({refresh_token:cloudSession.refresh_token})});
- if(!r.ok){writeAuth(null);cloudSession=null;return false}
- const x=await r.json();cloudSession={...x,expires_at:Date.now()+(x.expires_in||3600)*1000};writeAuth(cloudSession);return true;
-}
-async function ensureSession(){
- if(!cloudSession)return false;
- if((cloudSession.expires_at||0)<Date.now()+120000)return await refreshSession();
- return true;
-}
-async function api(table,query='',options={}){
- if(!(await ensureSession()))throw new Error('session_expired');
- const r=await fetch(SUPA_URL+'/rest/v1/'+table+query,{...options,headers:authHeaders(options.headers||{})});
- if(!r.ok)throw new Error(await r.text());
- const text=await r.text();return text?JSON.parse(text):null;
-}
-function dbEntry(e){
- return {user_id:cloudSession.user.id,entry_date:e.date,sleep_hours:e.sleep,energy:e.energy,state:e.state||null,win:e.win,next_move:e.nextMove,skill_focus:e.skillFocus,uncomfortable:e.uncomfortable,if_then:e.ifThen,locked:!!e.locked,day_mode:modeFor(e),proofs:e.proofs,biggest:e.biggest,deviation:e.deviation,failure_type:e.failureType||null,correction:e.correction,skill_evidence:e.skillEvidence,updated_at:e.updatedAt||new Date().toISOString()};
-}
-function localEntry(r){
- const e=freshEntry(r.entry_date);return {...e,id:r.id||e.id,date:r.entry_date,sleep:r.sleep_hours,energy:r.energy,state:r.state||'',win:r.win||'',nextMove:r.next_move||'',skillFocus:r.skill_focus||'',uncomfortable:r.uncomfortable||'',ifThen:r.if_then||'',locked:!!r.locked,proofs:r.proofs||e.proofs,biggest:r.biggest||'',deviation:r.deviation||'',failureType:r.failure_type||'',correction:r.correction||'',skillEvidence:r.skill_evidence||'',createdAt:r.created_at||e.createdAt,updatedAt:r.updated_at||e.updatedAt};
-}
-async function cloudUpsertReviewArtifacts(e){
- const userId=cloudSession.user.id;
- if(e.biggest||e.deviation||e.failureType||e.correction||e.skillEvidence){
-   await api('learning_records?on_conflict=user_id,record_type,record_date','',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify([{
-     user_id:userId,record_type:'review',record_date:e.date,title:'Daily Review '+e.date,
-     observed:e.biggest||null,attribution:e.failureType||null,lesson:e.correction||null,
-     metadata:{deviation:e.deviation||'',skill_focus:e.skillFocus||'',skill_evidence:e.skillEvidence||''}
-   }])});
- }
- if(e.skillFocus&&e.skillEvidence){
-   await api('skill_evidence?on_conflict=user_id,skill_name,evidence_date','',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify([{
-     user_id:userId,skill_name:e.skillFocus,evidence_date:e.date,source_entry_date:e.date,
-     context:'daily_review',evidence:e.skillEvidence,quality:3,metadata:{mode:modeFor(e),score:score(e)}
-   }])});
- }
-}
-async function cloudUpsertEntry(e){
- setCloudBadge('SYNCING','sync');
- await api('daily_entries?on_conflict=user_id,entry_date','',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify([dbEntry(e)])});
- await cloudUpsertReviewArtifacts(e);
- setCloudBadge('SYNCED','ok');
-}
-function queueCloudEntry(){clearTimeout(cloudSyncTimer);cloudSyncTimer=setTimeout(()=>cloudUpsertEntry(current).catch(cloudFail),900)}
-function queueFullSync(){clearTimeout(cloudSyncTimer);cloudSyncTimer=setTimeout(()=>syncAll().catch(cloudFail),1200)}
-async function cloudUpsertEvent(e){
- await api('events?on_conflict=id','',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify([{id:e.id,user_id:cloudSession.user.id,occurred_at:e.at,event_type:e.type,source:'ace-loop-os',payload:e.payload||{}}])});
-}
-async function fetchCurrentUser(accessToken){
- const r=await fetch(SUPA_URL+'/auth/v1/user',{headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+accessToken}});
- if(!r.ok)throw new Error('Session konnte nicht geladen werden');
- return await r.json();
-}
-async function acceptMagicLink(){
- const params=new URLSearchParams(location.hash.replace(/^#/,''));
- const access=params.get('access_token'),refresh=params.get('refresh_token'),expires=Number(params.get('expires_in')||3600);
- if(!access)return false;
- try{
-   const user=await fetchCurrentUser(access);
-   cloudSession={access_token:access,refresh_token:refresh||'',expires_at:Date.now()+expires*1000,user};
-   writeAuth(cloudSession);
-   history.replaceState(null,'',location.pathname);
-   await syncAll();
-   $('authOverlay').classList.add('hidden');
-   setCloudBadge('SYNCED','ok');
-   return true;
- }catch(e){
-   $('authStatus').textContent=String(e.message||e);
-   return false;
- }
-}
-async function sendMagicLink(email){
- const redirect=location.origin+location.pathname;
- const r=await fetch(SUPA_URL+'/auth/v1/otp?redirect_to='+encodeURIComponent(redirect),{
-   method:'POST',
-   headers:{'apikey':SUPA_KEY,'Content-Type':'application/json'},
-   body:JSON.stringify({email,create_user:false})
- });
- const x=await r.json().catch(()=>({}));
- if(!r.ok)throw new Error(x.msg||x.error_description||x.message||'Login-Link konnte nicht gesendet werden');
- return true;
-}
-async function syncAll(){
- if(!cloudSession)return;
- setCloudBadge('SYNCING','sync');
- const userId=cloudSession.user.id;
- const [remoteEntries,remoteSkills,remoteProjects,remoteSeasons,remoteEvents,remoteIntegrations,remoteSkillEvidence]=await Promise.all([
-   api('daily_entries?select=*&order=entry_date.desc'),
-   api('skills?select=*&order=name.asc'),
-   api('projects?select=*&order=priority.asc,name.asc'),
-   api('seasons?select=*&active=eq.true&order=start_date.desc&limit=1'),
-   api('events?select=id,occurred_at,event_type,payload&order=occurred_at.desc&limit=120'),
-   api('integration_status?select=provider,status,last_sync_at&order=provider.asc'),
-   api('skill_evidence?select=skill_name,evidence_date,evidence&order=evidence_date.desc')
- ]);
- const byDate=new Map(system.entries.map(e=>[e.date,e]));
- (remoteEntries||[]).forEach(r=>{const re=localEntry(r),le=byDate.get(re.date);if(!le||new Date(re.updatedAt)>=new Date(le.updatedAt||0))byDate.set(re.date,re)});
- system.entries=[...byDate.values()];
- if(remoteSkills?.length)system.skills=remoteSkills.map(s=>({name:s.name,level:s.level,domain:s.domain,targetLevel:s.target_level,evidenceCount:s.evidence_count}));
- const evCounts={};(remoteSkillEvidence||[]).forEach(x=>evCounts[x.skill_name]=(evCounts[x.skill_name]||0)+1);
- Object.entries(evCounts).forEach(([name,count])=>{let sk=system.skills.find(x=>x.name.toLowerCase()===name.toLowerCase());if(!sk){sk={name,level:1,domain:'Applied',targetLevel:2,evidenceCount:0};system.skills.push(sk)}sk.evidenceCount=count});
- if(remoteProjects?.length)system.projects=remoteProjects.map(p=>p.name);
- if(remoteSeasons?.length)system.season={primary:remoteSeasons[0].primary_focus||'',secondary:remoteSeasons[0].secondary_focus||'',maintain:remoteSeasons[0].maintain_focus||''};
- if(remoteEvents?.length)system.events=remoteEvents.map(e=>({id:e.id,at:e.occurred_at,type:e.event_type,payload:e.payload||{}}));
- integrationStatuses=remoteIntegrations||[];
- await api('daily_entries?on_conflict=user_id,entry_date','',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(system.entries.map(dbEntry))});
- if(system.skills.length)await api('skills?on_conflict=user_id,name','',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(system.skills.map(s=>({user_id:userId,name:s.name,domain:s.domain||null,level:s.level,target_level:s.targetLevel??Math.min(7,s.level+1),evidence_count:s.evidenceCount||0})))});
- if(system.projects.length)await api('projects?on_conflict=user_id,name','',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(system.projects.map((name,i)=>({user_id:userId,name,priority:Math.min(5,i+1),status:'active'})))});
- if(!(remoteSeasons?.length))await api('seasons','',{method:'POST',headers:{'Prefer':'return=minimal'},body:JSON.stringify([{user_id:userId,start_date:todayISO(),primary_focus:system.season.primary,secondary_focus:system.season.secondary,maintain_focus:system.season.maintain,active:true}])});
- if(system.events.length)await api('events?on_conflict=id','',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(system.events.map(e=>({id:e.id,user_id:userId,occurred_at:e.at,event_type:e.type,source:'ace-loop-os',payload:e.payload||{}})))});
- writeSystem(system);current=getEntry($('date').value);renderAll();setCloudBadge('SYNCED','ok');
-}
-function cloudFail(e){console.error(e);setCloudBadge('CLOUD ERROR');}
-async function initCloud(){
- const saved=readAuth();
- if(saved){
-   cloudSession=saved;
-   if(await ensureSession()){
-     try{await syncAll();$('authOverlay').classList.add('hidden');return}catch(e){cloudFail(e)}
-   }
- }
- setCloudBadge('LOCAL');
- $('authOverlay').classList.remove('hidden');
-}
-$('magicBtn').onclick=async()=>{
- try{
-   const email=$('authEmail').value.trim();
-   if(!email.includes('@'))throw new Error('Bitte gültige E-Mail eintragen.');
-   $('authStatus').textContent='Login-Link wird gesendet…';
-   await sendMagicLink(email);
-   $('authStatus').textContent='Login-Link gesendet. Öffne die neueste Mail und tippe einmal auf den Link.';
- }catch(e){$('authStatus').textContent=String(e.message||e)}
-};
-$('localBtn').onclick=()=>{$('authOverlay').classList.add('hidden');setCloudBadge('LOCAL')};
-$('cloudBadge').onclick=()=>{$('authOverlay').classList.remove('hidden')};
-$('logoutBtn').onclick=()=>{cloudSession=null;writeAuth(null);setCloudBadge('LOCAL');$('authOverlay').classList.remove('hidden')};
-$('syncNow').onclick=()=>syncAll().catch(cloudFail);
-
-$('date').value=todayISO();load(todayISO());acceptMagicLink().then(ok=>{if(!ok)initCloud()});
+$("date").value=iso();load(iso());initCloud();
 </script>
-<script>if('serviceWorker'in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js').catch(()=>{}));}</script>
+<script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js").catch(()=>{}))}</script>
 </body>
 </html>
