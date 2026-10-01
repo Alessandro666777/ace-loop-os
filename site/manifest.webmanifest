@@ -1,9 +1,9 @@
 {
-  "name":"ACE Loop OS V3",
-  "short_name":"ACE Loop",
+  "name":"PANTHERA · ACE OS V4",
+  "short_name":"PANTHERA",
   "start_url":"./",
   "display":"standalone",
-  "background_color":"#07080a",
-  "theme_color":"#07080a",
-  "description":"Personal Adaptive Capability Engine for execution, evidence, recovery and learning"
+  "background_color":"#07090c",
+  "theme_color":"#07090c",
+  "description":"Adaptive capability, execution, decision and learning system"
 }
