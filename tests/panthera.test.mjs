@@ -359,3 +359,47 @@ test("80 login form contains no hard-coded personal email",async t=>{
   const x=await boot();t.after(x.close);
   assert.equal(x.d.getElementById("authEmail").value,"");
 });
+
+
+test("77 Readwise controls are exposed in Knowledge Port",async t=>{
+  const x=await boot();t.after(x.close);
+  assert.ok(x.d.getElementById("readwiseToken"));
+  assert.ok(x.d.getElementById("connectReadwise"));
+  assert.ok(x.d.getElementById("syncReadwise"));
+  assert.ok(x.d.getElementById("disconnectReadwise"));
+});
+
+test("78 Readwise connect uses JWT-protected edge adapter and clears token field",async t=>{
+  const auth={access_token:"a",refresh_token:"r",expires_at:Date.now()+3600000,user:{id:"user-1"}};
+  const x=await boot({storage:{[AUTH_KEY]:auth},fetchHandler:async(u,init)=>{
+    if(u.includes("/functions/v1/knowledge-readwise"))return res({ok:true,connected:true});
+    return null;
+  }});
+  t.after(x.close);
+  const raw="rw-test-token-12345678901234567890";
+  setVal(x.w,"readwiseToken",raw);
+  click(x.w,"connectReadwise");
+  await new Promise(r=>setTimeout(r,40));
+  const c=x.calls.find(c=>c.url.includes("/functions/v1/knowledge-readwise")&&c.init.method==="POST");
+  assert.ok(c);
+  assert.equal(JSON.parse(c.init.body).action,"set_token");
+  assert.equal(JSON.parse(c.init.body).token,raw);
+  assert.ok(String(c.init.headers.Authorization||"").startsWith("Bearer "));
+  assert.equal(x.d.getElementById("readwiseToken").value,"");
+  assert.equal(x.w.localStorage.getItem("readwiseToken"),null);
+});
+
+test("79 Readwise sync never requests full HTML content from browser",async t=>{
+  const auth={access_token:"a",refresh_token:"r",expires_at:Date.now()+3600000,user:{id:"user-1"}};
+  const x=await boot({storage:{[AUTH_KEY]:auth},fetchHandler:async(u,init)=>{
+    if(u.includes("/functions/v1/knowledge-readwise"))return res({ok:true,complete:true,items_seen:2,items_created:2,items_updated:0});
+    return null;
+  }});
+  t.after(x.close);
+  click(x.w,"syncReadwise");
+  await new Promise(r=>setTimeout(r,40));
+  const c=x.calls.find(c=>c.url.includes("/functions/v1/knowledge-readwise")&&c.init.method==="POST");
+  assert.ok(c);
+  assert.deepEqual(JSON.parse(c.init.body),{action:"sync"});
+  assert.equal(x.calls.some(c=>c.url.includes("readwise.io/api/v3/list")),false);
+});
