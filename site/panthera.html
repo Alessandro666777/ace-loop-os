@@ -26,8 +26,10 @@ label{display:block;font-size:12px;color:var(--muted);margin:12px 0 6px}input,te
 .item{border-top:1px solid var(--line);padding:11px 0}.item:first-child{border-top:none}.item b{display:block;margin-bottom:3px}.meta{font-size:11px;color:var(--muted)}
 .switch{display:flex;justify-content:space-between;align-items:center;gap:12px}.switch input{width:auto;transform:scale(1.2)}
 .notice{border-left:3px solid var(--blue);padding:10px 12px;background:#0a1018;border-radius:8px;color:#bcc8d8;font-size:12px;line-height:1.45}
-.bottomNav{position:fixed;left:0;right:0;bottom:0;background:rgba(7,9,13,.92);backdrop-filter:blur(18px);border-top:1px solid var(--line);padding:8px max(10px,env(safe-area-inset-left)) calc(8px + env(safe-area-inset-bottom));z-index:20}.bottomNav .inner{max-width:720px;margin:auto;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.bottomNav button{background:transparent;color:var(--muted);border:0;padding:10px;font-weight:700}.bottomNav button.active{color:var(--blue2)}
+.bottomNav{position:fixed;left:0;right:0;bottom:0;background:rgba(7,9,13,.92);backdrop-filter:blur(18px);border-top:1px solid var(--line);padding:8px max(10px,env(safe-area-inset-left)) calc(8px + env(safe-area-inset-bottom));z-index:20}.bottomNav .inner{max-width:720px;margin:auto;display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.bottomNav button{background:transparent;color:var(--muted);border:0;padding:10px;font-weight:700}.bottomNav button.active{color:var(--blue2)}
 code{color:#bcd8ff}
+
+.chat{min-height:220px;max-height:58vh;overflow:auto;padding:3px 0 8px}.msg{max-width:94%;border-radius:16px;padding:12px 13px;margin:8px 0;white-space:pre-wrap;line-height:1.48;font-size:14px}.msg.user{margin-left:auto;background:#163764;border:1px solid #275a97}.msg.assistant{margin-right:auto;background:#0b1017;border:1px solid var(--line)}.msg .who{display:block;font-size:9px;letter-spacing:.12em;color:var(--muted);margin-bottom:5px}.msg .model{display:block;font-size:9px;color:#627187;margin-top:7px}.spin{display:inline-block;width:12px;height:12px;border:2px solid #6c7c91;border-top-color:#fff;border-radius:50%;animation:sp .8s linear infinite;vertical-align:-2px;margin-right:6px}@keyframes sp{to{transform:rotate(360deg)}}.smallInput{font-size:12px}
 </style>
 </head>
 <body>
@@ -52,28 +54,35 @@ code{color:#bcd8ff}
   </section>
 
   <section id="appScreen" class="hidden">
-    <div class="card">
-      <div class="meta" id="memberMeta">MEMBER</div>
-      <h1 id="hello">Was willst du heute lösen?</h1>
-      <textarea id="taskText" placeholder="Zum Beispiel: Morgen treffe ich einen Immobilienunternehmer. Bereite mich auf das Gespräch vor und finde die drei stärksten Hebel."></textarea>
-      <div class="quick">
-        <button class="btn" data-task="company"><b>Unternehmen</b><span>Analyse · Blueprint</span></button>
-        <button class="btn" data-task="event"><b>Event</b><span>Hospitality · Operations</span></button>
-        <button class="btn" data-task="sales"><b>Gespräch</b><span>Pitch · Verhandlung</span></button>
-        <button class="btn" data-task="skill"><b>Skill</b><span>Training · Mastery</span></button>
-        <button class="btn" data-task="decision"><b>Entscheidung</b><span>Red Team · Risiko</span></button>
-        <button class="btn" data-task="review"><b>Review</b><span>Reality · Lernen</span></button>
+    <div class="card" id="chatCard">
+      <div class="row" style="justify-content:space-between;align-items:center">
+        <div><div class="meta" id="memberMeta">MEMBER</div><h2 style="margin-top:5px">PANTHERA</h2></div>
+        <div class="row"><button class="btn ghost" id="newChat">NEUER CHAT</button><span class="badge" id="aiBadge">AI CHECK</span></div>
       </div>
-      <div class="row"><button class="btn primary" id="buildPacket">PANTHERA STARTEN</button></div>
+      <div id="modulePills"></div>
+      <div class="chat" id="chat"></div>
+      <textarea id="taskText" placeholder="Was willst du lösen? Schreib einfach normal."></textarea>
+      <div class="quick">
+        <button class="btn" data-task="company"><b>Unternehmen</b><span>Research · Blueprint</span></button>
+        <button class="btn" data-task="event"><b>Event</b><span>Hospitality · Operations</span></button>
+        <button class="btn" data-task="sales"><b>Gespräch</b><span>Sales · Verhandlung</span></button>
+        <button class="btn" data-task="decision"><b>Entscheidung</b><span>Red Team · Risiko</span></button>
+      </div>
+      <div class="row"><button class="btn primary" id="sendAI">SENDEN</button><button class="btn" id="voiceHint">🎙 DIKTIEREN</button></div>
       <div class="status" id="taskStatus"></div>
     </div>
 
-    <div class="card hidden" id="packetCard">
-      <h2>Dein Task Packet</h2>
-      <div id="modulePills"></div>
-      <div class="packet" id="packet"></div>
-      <div class="row" style="margin-top:12px"><button class="btn primary" id="copyOpen">KOPIEREN + CHATGPT ÖFFNEN</button><button class="btn" id="copyOnly">NUR KOPIEREN</button></div>
-      <p class="meta">PANTHERA speichert die Aufgabe. Deine ChatGPT-Antwort wird erst Teil deines Lernverlaufs, wenn du unten das Ergebnis einträgst.</p>
+    <div class="card hidden" id="providerCard">
+      <div class="meta">FOUNDER ONLY</div><h2>AI Provider verbinden</h2>
+      <p>Einmalig OpenAI API-Key hinterlegen. Er wird verschlüsselt im Supabase Vault gespeichert und niemals an Mitglieder ausgeliefert.</p>
+      <label>OpenAI API Key</label><input id="openaiKey" class="smallInput" type="password" autocomplete="off" placeholder="sk-…">
+      <div class="row" style="margin-top:10px"><button class="btn primary" id="saveAIKey">AI VERBINDEN</button></div>
+      <div class="status" id="providerStatus"></div>
+    </div>
+
+    <div class="card" id="historyCard">
+      <h2>Letzte Chats</h2>
+      <div id="conversationList"></div>
     </div>
 
     <div class="card" id="reviewCard">
@@ -114,7 +123,7 @@ code{color:#bcd8ff}
   </section>
 </div>
 
-<div class="bottomNav hidden" id="bottomNav"><div class="inner"><button data-scroll="appScreen" class="active">START</button><button data-scroll="reviewCard">REVIEW</button><button data-scroll="knowledgeCard">LEARN</button></div></div>
+<div class="bottomNav hidden" id="bottomNav"><div class="inner"><button data-scroll="chatCard" class="active">CHAT</button><button data-scroll="reviewCard">REALITY</button><button data-scroll="memoryCard">MEMORY</button><button data-scroll="knowledgeCard">LEARN</button></div></div>
 
 <script>
 const SUPA_URL="https://gbzoxohtdlujrfljdwfz.supabase.co";
@@ -122,7 +131,7 @@ const SUPA_KEY="sb_publishable_37BENm3_dZtzAhDfu6iDqw_aXtm4Iof";
 const AUTH_KEY="panthera.mobile.auth.v1";
 const INVITE_KEY="panthera.mobile.invite.v1";
 const $=id=>document.getElementById(id);
-let session=null,membership=null,currentTaskId=null,privacyMode="off",cachedMemory=[],cachedShared=[];
+let session=null,membership=null,currentConversationId=null,privacyMode="off",cachedMemory=[],cachedShared=[],aiConfigured=false,busy=false;
 
 function writeAuth(v){if(v)localStorage.setItem(AUTH_KEY,JSON.stringify(v));else localStorage.removeItem(AUTH_KEY)}
 function readAuth(){try{return JSON.parse(localStorage.getItem(AUTH_KEY)||"null")}catch(e){return null}}
@@ -205,70 +214,70 @@ async function loadShared(){
  document.querySelectorAll("[data-withdraw]").forEach(b=>b.onclick=()=>withdrawLearning(b.dataset.withdraw));
 }
 function escapeHtml(s){return String(s||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
-function routeTask(text,hint){
- const t=(text+" "+(hint||"")).toLowerCase(),mods=["PANTHERA CORE","META CONDUCTOR","REALITY ENGINE"];let type="general";
- if(/unternehmen|company|firma|website|blueprint|audit|immobil|automotive|wealth/.test(t)){mods.push("BLUEPRINT FOUNDRY");type="company"}
- if(/event|dinner|vip|service|bar|beverage|hospitality|gast|catering/.test(t)){mods.push("HOSPITALITY OS");type="event"}
- if(/gespräch|call|pitch|verkauf|sales|kunde|verhandlung|abschluss/.test(t)){mods.push("SALES OS","ATHENAEUM");type=type==="general"?"sales":type}
- if(/skill|lernen|training|besser werden|üben/.test(t)){mods.push("MASTERY COMPILER");type="skill"}
- if(/entscheidung|option|risiko|soll ich|red team/.test(t)){mods.push("SEVEN HEADS","RISK LAYER");type="decision"}
- if(/review|lief|passiert|lernen|fehler|ergebnis/.test(t)){mods.push("LEARNING ENGINE");if(type==="general")type="review"}
- if(/marke|präsenz|wirkung|content|ästhetik|aura/.test(t))mods.push("MOON ARCHITECT");
- return{type,mods:[...new Set(mods)]};
+async function loadAIStatus(){
+ try{
+  const x=await api("rpc/panthera_ai_status",{method:"POST",body:"{}"});
+  aiConfigured=!!x?.configured;
+  $("aiBadge").textContent=aiConfigured?"GPT-5.6 SOL":"AI SETUP";
+  $("aiBadge").style.color=aiConfigured?"var(--ok)":"var(--warn)";
+  $("providerCard").classList.toggle("hidden",membership?.role!=="founder"||aiConfigured);
+  if(!aiConfigured&&membership?.role!=="founder")setStatus("taskStatus","Der Founder muss den AI Provider einmalig verbinden.","warn");
+ }catch(e){aiConfigured=false;setStatus("taskStatus","AI-Status konnte nicht geladen werden.","bad")}
 }
-function relevantKnowledge(type){
- const map={company:["business","operations","hospitality","sales"],event:["hospitality","operations","business"],sales:["sales","business","leadership"],skill:["leadership","general","operations"],decision:["business","finance","operations"],review:["general","operations","hospitality"]};
- const cats=map[type]||["general","business"];
- return cachedShared.filter(x=>cats.includes(x.category)).slice(0,6);
+async function setAIKey(){
+ const key=$("openaiKey").value.trim();
+ if(key.length<20)throw new Error("API-Key scheint unvollständig.");
+ setStatus("providerStatus","Wird verschlüsselt gespeichert …");
+ await api("rpc/panthera_set_openai_key",{method:"POST",body:JSON.stringify({p_key:key})});
+ $("openaiKey").value="";
+ setStatus("providerStatus","AI Provider verbunden.","ok");
+ await loadAIStatus();
 }
-function buildPrompt(text,route){
- const mem=cachedMemory.slice(0,8).map(x=>"- ["+x.memory_type+"] "+x.content).join("\n")||"- keine privaten Memory-Einträge";
- const knowledge=relevantKnowledge(route.type).map(x=>"- "+(x.title||x.category)+": "+x.generalized_learning).join("\n")||"- keine relevanten Shared Learnings";
- return [
- "PANTHERA MOBILE TASK PACKET",
- "",
- "USER: "+(membership?.member_code||"member"),
- "COHORT: "+(membership?.cohort||""),
- "ROUTED MODULES: "+route.mods.join(" · "),
- "",
- "CORE RULES:",
- "- Arbeite realitätsnah. Trenne Fakten, Interpretation und Hypothesen.",
- "- Nutze nur die gerouteten Module, wenn sie echten Erkenntnisgewinn erzeugen.",
- "- Private Memory gehört ausschließlich zu diesem Nutzer.",
- "- Shared Knowledge darf als Teamwissen genutzt werden, aber nicht als Beweis für einen Einzelfall.",
- "- Keine unnötige Komplexität. Stoppe Analyse, sobald Realität mehr Informationswert liefert.",
- "- Jede relevante Antwort endet mit einem konkreten Move, Definition of Done und Aktualisierungssignal.",
- "",
- "PRIVATE USER CONTEXT:",
- mem,
- "",
- "SHARED PANTHERA KNOWLEDGE:",
- knowledge,
- "",
- "TASK:",
- text,
- "",
- "OUTPUT:",
- "1. Kernwahrheit",
- "2. Entscheidende Analyse",
- "3. Stärkster blinder Fleck / Gegenangriff",
- "4. Empfehlung",
- "5. Konkreter nächster Move",
- "6. Reality Test / Erfolgskriterium",
- "7. Welche Information soll nach der Ausführung zurück in den Learning Loop?"
- ].join("\n");
+async function loadConversations(){
+ const rows=await api("panthera_conversations?select=id,title,task_type,routed_modules,updated_at&order=updated_at.desc&limit=8")||[];
+ $("conversationList").innerHTML=rows.map(x=>'<div class="item" data-conv="'+x.id+'" style="cursor:pointer"><b>'+escapeHtml(x.title||"Chat")+'</b><div class="meta">'+escapeHtml(x.task_type||"general")+' · '+new Date(x.updated_at).toLocaleString("de-DE")+'</div></div>').join("")||'<div class="meta">Noch keine Chats.</div>';
+ document.querySelectorAll("[data-conv]").forEach(el=>el.onclick=async()=>{currentConversationId=el.dataset.conv;await loadMessages();$("chatCard").scrollIntoView({behavior:"smooth"})});
+ return rows;
 }
-async function createTask(text,route){
- const rows=await api("panthera_task_requests",{method:"POST",headers:{"Prefer":"return=representation"},body:JSON.stringify([{user_id:session.user.id,request_text:text,routed_modules:route.mods,task_type:route.type,status:"created"}])});
- currentTaskId=rows?.[0]?.id||null;
+async function loadMessages(){
+ if(!currentConversationId){$("chat").innerHTML='<div class="notice">Schreib einfach, was du lösen willst. PANTHERA routet automatisch und verbindet private Memory, reale Learnings und gemeinsames Wissen.</div>';return}
+ const rows=await api("panthera_messages?select=role,content,model,created_at&conversation_id=eq."+currentConversationId+"&order=created_at.asc")||[];
+ $("chat").innerHTML=rows.map(m=>'<div class="msg '+m.role+'"><span class="who">'+(m.role==="user"?"DU":"PANTHERA")+'</span>'+escapeHtml(m.content)+(m.model?'<span class="model">'+escapeHtml(m.model)+'</span>':'')+'</div>').join("");
+ $("chat").scrollTop=$("chat").scrollHeight;
+}
+async function openLatestConversation(){
+ const rows=await loadConversations();
+ if(rows.length){currentConversationId=rows[0].id;await loadMessages()}else await loadMessages();
+}
+async function sendAI(){
+ if(busy)return;
+ const message=$("taskText").value.trim();
+ if(message.length<2)throw new Error("Schreib kurz, was du lösen willst.");
+ if(!aiConfigured){await loadAIStatus();if(!aiConfigured)throw new Error(membership?.role==="founder"?"Verbinde zuerst den AI Provider.":"AI Provider ist noch nicht verbunden.")}
+ busy=true;$("sendAI").disabled=true;$("taskText").value="";
+ $("chat").insertAdjacentHTML("beforeend",'<div class="msg user"><span class="who">DU</span>'+escapeHtml(message)+'</div>');
+ $("chat").scrollTop=$("chat").scrollHeight;
+ $("taskStatus").innerHTML='<span class="spin"></span>PANTHERA arbeitet …';
+ try{
+  if(!(await ensure()))throw new Error("Session abgelaufen.");
+  const r=await fetch(SUPA_URL+"/functions/v1/panthera-ai",{method:"POST",headers:authHeaders(),body:JSON.stringify({message,conversation_id:currentConversationId})});
+  const x=await r.json().catch(()=>({}));
+  if(!r.ok)throw new Error(x.detail||x.error||"PANTHERA AI Fehler");
+  currentConversationId=x.conversation_id;
+  $("modulePills").innerHTML=(x.route?.mods||[]).map(m=>'<span class="pill">'+escapeHtml(m)+'</span>').join("");
+  $("chat").insertAdjacentHTML("beforeend",'<div class="msg assistant"><span class="who">PANTHERA</span>'+escapeHtml(x.answer)+'<span class="model">'+escapeHtml(x.model||"gpt-5.6-sol")+(x.web_enabled?" · WEB":"")+'</span></div>');
+  $("chat").scrollTop=$("chat").scrollHeight;
+  setStatus("taskStatus","Runtime "+(x.runtime_version||"active")+" · "+(x.route?.type||"general"),"ok");
+  await loadConversations();
+ }finally{busy=false;$("sendAI").disabled=false}
 }
 async function bootstrap(){
  try{
-  await loadMembership();await loadPrivacy();await Promise.all([loadMemory(),loadShared()]);
+  await loadMembership();await loadPrivacy();await Promise.all([loadMemory(),loadShared(),loadAIStatus()]);
   $("authScreen").classList.add("hidden");$("appScreen").classList.remove("hidden");$("bottomNav").classList.remove("hidden");
   $("memberMeta").textContent=(membership.member_code||"MEMBER")+" · "+(membership.cohort||"");
-  $("hello").textContent=membership.member_code==="TOKIO-001"?"Was willst du heute lösen, Tokio?":"Was willst du heute lösen?";
   $("cloudBadge").textContent="SYNCED";
+  await openLatestConversation();
  }catch(e){setStatus("authStatus",String(e.message||e),"bad");$("authScreen").classList.remove("hidden")}
 }
 async function init(){
@@ -276,22 +285,29 @@ async function init(){
  if(await acceptHash()){await bootstrap();return}
  const saved=readAuth();if(saved){session=saved;if(await ensure()){await bootstrap();return}}
 }
-document.querySelectorAll("[data-task]").forEach(b=>b.onclick=()=>{const examples={company:"Analysiere dieses Unternehmen und finde die stärksten Pain Points und den besten Blueprint-Einstieg.",event:"Bereite dieses Event vollständig vor: Ziel, Gäste, Hospitality, Rollen, Risiken und Ablauf.",sales:"Bereite mich auf dieses Gespräch vor. Ziel, Interessen, Fragen, Einwände und nächster Zug.",skill:"Trainiere mit mir diese Fähigkeit mit Drill, Feldtest und Messung.",decision:"Prüfe diese Entscheidung mit Upside, Downside, Reversibilität und Red Team.",review:"Analysiere, was passiert ist, was ich falsch eingeschätzt habe und welche Regel wir aktualisieren."};$("taskText").value=examples[b.dataset.task]||"";$("taskText").focus()});
+document.querySelectorAll("[data-task]").forEach(b=>b.onclick=()=>{const examples={company:"Analysiere dieses Unternehmen und baue mir den stärksten Blueprint-Einstieg.",event:"Bereite dieses Event vollständig vor: Ziel, Gäste, Hospitality, Rollen, Risiken und Ablauf.",sales:"Bereite mich auf dieses Gespräch vor: Ziel, Interessen, Fragen, Einwände und nächster Zug.",decision:"Prüfe diese Entscheidung adversarial: Upside, Downside, Reversibilität, stärkste Gegenposition und Reality Test."};$("taskText").value=examples[b.dataset.task]||"";$("taskText").focus()});
 $("sendLink").onclick=()=>sendMagic().catch(e=>setStatus("authStatus",String(e.message||e),"bad"));
 $("acceptPaste").onclick=()=>acceptMagicUrl($("magicPaste").value).catch(e=>setStatus("authStatus",String(e.message||e),"bad"));
 $("pasteClipboard").onclick=async()=>{try{$("magicPaste").value=await navigator.clipboard.readText();await acceptMagicUrl($("magicPaste").value)}catch(e){setStatus("authStatus",String(e.message||e),"bad")}};
-$("buildPacket").onclick=async()=>{try{const text=$("taskText").value.trim();if(text.length<8)throw new Error("Beschreibe die Aufgabe etwas genauer.");const route=routeTask(text);await createTask(text,route);const p=buildPrompt(text,route);$("packet").textContent=p;$("modulePills").innerHTML=route.mods.map(m=>'<span class="pill">'+escapeHtml(m)+'</span>').join("");$("packetCard").classList.remove("hidden");setStatus("taskStatus","Task gespeichert · "+route.type+" · "+route.mods.join(" → "),"ok");$("packetCard").scrollIntoView({behavior:"smooth"})}catch(e){setStatus("taskStatus",String(e.message||e),"bad")}};
-async function copyPacket(open){await navigator.clipboard.writeText($("packet").textContent);if(open)window.open("https://chatgpt.com","_blank");}
-$("copyOpen").onclick=()=>copyPacket(true).catch(e=>setStatus("taskStatus",String(e.message||e),"bad"));
-$("copyOnly").onclick=()=>copyPacket(false).catch(e=>setStatus("taskStatus",String(e.message||e),"bad"));
+$("saveAIKey").onclick=()=>setAIKey().catch(e=>setStatus("providerStatus",String(e.message||e),"bad"));
+$("sendAI").onclick=()=>sendAI().catch(e=>setStatus("taskStatus",String(e.message||e),"bad"));
+$("taskText").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendAI().catch(err=>setStatus("taskStatus",String(err.message||err),"bad"))}});
+$("newChat").onclick=()=>{currentConversationId=null;$("modulePills").innerHTML="";loadMessages();$("taskText").focus()};
+$("voiceHint").onclick=()=>setStatus("taskStatus","Nutze auf dem iPhone die Mikrofon-Taste der Tastatur für Spracheingabe.","ok");
 $("addMemory").onclick=async()=>{try{const content=$("memoryText").value.trim();if(!content)throw new Error("Memory ist leer.");await api("panthera_user_memory",{method:"POST",headers:{"Prefer":"return=minimal"},body:JSON.stringify([{user_id:session.user.id,memory_type:$("memoryType").value,content}])});$("memoryText").value="";await loadMemory()}catch(e){alert(e.message||e)}};
 $("shareMode").onchange=async()=>{try{await setPrivacy($("shareMode").checked);setStatus("reviewStatus",$("shareMode").checked?"Shared Learning aktiviert. Trotzdem wird nur über den Freigabe-Button geteilt.":"Shared Learning deaktiviert.","ok")}catch(e){$("shareMode").checked=!$("shareMode").checked;setStatus("reviewStatus",String(e.message||e),"bad")}};
-$("saveReview").onclick=async()=>{try{const outcome=$("outcome").value.trim(),learning=$("learning").value.trim();if(!currentTaskId)throw new Error("Starte zuerst eine Aufgabe, damit das Review zugeordnet werden kann.");if(!outcome)throw new Error("Trage zuerst das reale Ergebnis ein.");await api("panthera_task_requests?id=eq."+currentTaskId,{method:"PATCH",headers:{"Prefer":"return=minimal"},body:JSON.stringify({outcome,status:"reviewed",updated_at:new Date().toISOString()})});if(learning){await api("panthera_learning_candidates",{method:"POST",headers:{"Prefer":"return=minimal"},body:JSON.stringify([{user_id:session.user.id,task_request_id:currentTaskId,category:$("learningCategory").value,title:"Learning aus Reality Loop",generalized_learning:learning,evidence_level:"field_observation",share_status:"private"}])});await loadShared()}setStatus("reviewStatus","Review gespeichert. Privates bleibt privat.","ok")}catch(e){setStatus("reviewStatus",String(e.message||e),"bad")}};
+$("saveReview").onclick=async()=>{try{
+ const outcome=$("outcome").value.trim(),learning=$("learning").value.trim();
+ if(!outcome)throw new Error("Trage zuerst das reale Ergebnis ein.");
+ await api("learning_records",{method:"POST",headers:{"Prefer":"return=minimal"},body:JSON.stringify([{user_id:session.user.id,record_type:"review",title:"PANTHERA Mobile Reality Review",observed:outcome,lesson:learning||null,record_date:new Date().toISOString().slice(0,10),metadata:{conversation_id:currentConversationId}}])});
+ if(learning)await api("panthera_learning_candidates",{method:"POST",headers:{"Prefer":"return=minimal"},body:JSON.stringify([{user_id:session.user.id,category:$("learningCategory").value,title:"Learning aus Reality Loop",generalized_learning:learning,evidence_level:"field_observation",share_status:"private"}])});
+ setStatus("reviewStatus","Reality Review privat gespeichert. Künftige PANTHERA-Antworten können daraus lernen.","ok");await loadShared();
+}catch(e){setStatus("reviewStatus",String(e.message||e),"bad")}};
 $("shareLearning").onclick=async()=>{try{
  if(privacyMode!=="review")throw new Error("Aktiviere zuerst Shared Learning.");
  if(!$("noPrivateConfirm").checked)throw new Error("Bestätige zuerst, dass keine Namen oder privaten Daten enthalten sind.");
  const learning=$("learning").value.trim();if(learning.length<12)throw new Error("Learning ist zu kurz.");
- const rows=await api("panthera_learning_candidates",{method:"POST",headers:{"Prefer":"return=representation"},body:JSON.stringify([{user_id:session.user.id,task_request_id:currentTaskId,category:$("learningCategory").value,title:"Freigegebenes Learning",generalized_learning:learning,evidence_level:"field_observation",share_status:"private"}])});
+ const rows=await api("panthera_learning_candidates",{method:"POST",headers:{"Prefer":"return=representation"},body:JSON.stringify([{user_id:session.user.id,category:$("learningCategory").value,title:"Freigegebenes Learning",generalized_learning:learning,evidence_level:"field_observation",share_status:"private"}])});
  const id=rows?.[0]?.id;if(!id)throw new Error("Learning konnte nicht angelegt werden.");
  await api("rpc/publish_panthera_learning",{method:"POST",body:JSON.stringify({p_candidate:id})});
  setStatus("reviewStatus","Als abstrahiertes Team-Learning freigegeben.","ok");$("noPrivateConfirm").checked=false;await loadShared();
