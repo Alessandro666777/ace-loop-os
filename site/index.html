@@ -176,7 +176,14 @@ function evidenceRate(entries){const done=entries.flatMap(e=>proofKeys.map(k=>e.
 function event(type,payload={}){const e={id:uid(),at:new Date().toISOString(),type,payload};system.events.unshift(e);system.events=system.events.slice(0,120);if(cloudSession)cloudUpsertEvent(e).catch(cloudFail)}
 function persist(reason='autosave'){current.updatedAt=new Date().toISOString();const i=system.entries.findIndex(e=>e.date===current.date);if(i>=0)system.entries[i]=current;writeSystem(system);$('autosave').textContent='SAVED';renderAll();if(cloudSession)queueCloudEntry();if(reason!=='autosave')event('system.'+reason,{date:current.date})}
 function schedule(){clearTimeout(saveTimer);$('autosave').textContent='UNSAVED';saveTimer=setTimeout(()=>persist(),650)}
-function modeFor(e){if((e.sleep!==null&&e.sleep<5.5)||(e.energy!==null&&e.energy<=3)||e.state==='red')return 'RECOVERY DAY';if((e.sleep===null||e.sleep>=7)&&(e.energy===null||e.energy>=8)&&e.state!=='red')return 'ATTACK DAY';return 'STANDARD DAY'}
+function modeFor(e){
+ const hist=[...system.entries].filter(x=>x.date<e.date).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,2);
+ const recentWeak=hist.length===2&&hist.every(x=>score(x)<3);
+ if((e.sleep!==null&&e.sleep<5.5)||(e.energy!==null&&e.energy<=3)||e.state==='red'||recentWeak)return 'RECOVERY DAY';
+ const prevStrong=!hist.length||score(hist[0])>=4;
+ if((e.sleep===null||e.sleep>=7)&&(e.energy===null||e.energy>=8)&&e.state!=='red'&&prevStrong)return 'ATTACK DAY';
+ return 'STANDARD DAY'
+}
 
 function renderEntry(){
  $('sleep').value=current.sleep??'';$('energy').value=current.energy??'';$('state').value=current.state||'';$('win').value=current.win;$('nextMove').value=current.nextMove;$('skillFocus').value=current.skillFocus;$('uncomfortable').value=current.uncomfortable;$('ifThen').value=current.ifThen;
@@ -199,11 +206,11 @@ function esc(v){return String(v||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&l
 function renderGrowth(){
  const entries=[...system.entries].sort((a,b)=>b.date.localeCompare(a.date)),last7=entries.slice(0,7),last30=entries.slice(0,30);
  $('tracked').textContent=entries.length;$('avg7').textContent=last7.length?(last7.reduce((a,e)=>a+score(e),0)/last7.length).toFixed(1):'—';$('evidenceRate').textContent=evidenceRate(last7)+'%';
- let recovery='—';for(let i=0;i<entries.length-1;i++){if(score(entries[i])>=4&&score(entries[i+1])<4){recovery='1d';break}}$('returnSpeed').textContent=recovery;
+ let gaps=[];const asc=[...entries].sort((a,b)=>a.date.localeCompare(b.date));for(let i=0;i<asc.length;i++){if(score(asc[i])>=4)continue;for(let j=i+1;j<asc.length;j++){if(score(asc[j])>=4){gaps.push(Math.max(1,Math.round((new Date(asc[j].date)-new Date(asc[i].date))/86400000)));break}}}$('returnSpeed').textContent=gaps.length?(gaps.reduce((a,b)=>a+b,0)/gaps.length).toFixed(1)+'d':'—';
  const proofStats=proofKeys.map(k=>({k,p7:last7.length?Math.round(last7.filter(e=>e.proofs[k].done).length/last7.length*100):0,p30:last30.length?Math.round(last30.filter(e=>e.proofs[k].done).length/last30.length*100):0}));
  if(last7.length){const weak=[...proofStats].sort((a,b)=>a.p7-b.p7)[0];$('realitySignal').innerHTML='<b>REALITY SIGNAL · '+proofMeta[weak.k][0]+'</b><br>'+weak.p7+'% in 7 Tagen. Nicht dramatisieren – nächsten Test verbessern.'}
  $('pillars').innerHTML=proofStats.map(s=>'<div class="row"><div><strong>'+proofMeta[s.k][0]+'</strong><small>7T '+s.p7+'% · 30T '+s.p30+'%</small><div class="bar"><i style="width:'+s.p7+'%"></i></div></div><span class="pill">'+s.p7+'%</span></div>').join('');
- $('skills').innerHTML=system.skills.map(s=>'<div class="row"><div><strong>'+esc(s.name)+'</strong><small>S'+s.level+' · '+skillLabel(s.level)+'</small><div class="bar"><i style="width:'+Math.round((s.level/7)*100)+'%"></i></div></div><span class="pill">S'+s.level+'</span></div>').join('');
+ $('skills').innerHTML=system.skills.map(s=>'<div class="row"><div><strong>'+esc(s.name)+'</strong><small>S'+s.level+' · '+skillLabel(s.level)+' · '+(s.evidenceCount||0)+' Evidenzen</small><div class="bar"><i style="width:'+Math.round((s.level/7)*100)+'%"></i></div></div><span class="pill">S'+s.level+'</span></div>').join('');
  $('seasonPrimary').value=system.season.primary;$('seasonSecondary').value=system.season.secondary;$('seasonMaintain').value=system.season.maintain
 }
 function skillLabel(l){return ['UNKNOWN','LITERACY','UNDERSTANDING','APPLICATION','PRACTITIONER','EXPERT INTERFACE','CREATION','TRANSCENDENCE'][Math.max(0,Math.min(7,l))]}
@@ -275,9 +282,26 @@ function dbEntry(e){
 function localEntry(r){
  const e=freshEntry(r.entry_date);return {...e,id:r.id||e.id,date:r.entry_date,sleep:r.sleep_hours,energy:r.energy,state:r.state||'',win:r.win||'',nextMove:r.next_move||'',skillFocus:r.skill_focus||'',uncomfortable:r.uncomfortable||'',ifThen:r.if_then||'',locked:!!r.locked,proofs:r.proofs||e.proofs,biggest:r.biggest||'',deviation:r.deviation||'',failureType:r.failure_type||'',correction:r.correction||'',skillEvidence:r.skill_evidence||'',createdAt:r.created_at||e.createdAt,updatedAt:r.updated_at||e.updatedAt};
 }
+async function cloudUpsertReviewArtifacts(e){
+ const userId=cloudSession.user.id;
+ if(e.biggest||e.deviation||e.failureType||e.correction||e.skillEvidence){
+   await api('learning_records?on_conflict=user_id,record_type,record_date','',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify([{
+     user_id:userId,record_type:'review',record_date:e.date,title:'Daily Review '+e.date,
+     observed:e.biggest||null,attribution:e.failureType||null,lesson:e.correction||null,
+     metadata:{deviation:e.deviation||'',skill_focus:e.skillFocus||'',skill_evidence:e.skillEvidence||''}
+   }])});
+ }
+ if(e.skillFocus&&e.skillEvidence){
+   await api('skill_evidence?on_conflict=user_id,skill_name,evidence_date','',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify([{
+     user_id:userId,skill_name:e.skillFocus,evidence_date:e.date,source_entry_date:e.date,
+     context:'daily_review',evidence:e.skillEvidence,quality:3,metadata:{mode:modeFor(e),score:score(e)}
+   }])});
+ }
+}
 async function cloudUpsertEntry(e){
  setCloudBadge('SYNCING','sync');
  await api('daily_entries?on_conflict=user_id,entry_date','',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify([dbEntry(e)])});
+ await cloudUpsertReviewArtifacts(e);
  setCloudBadge('SYNCED','ok');
 }
 function queueCloudEntry(){clearTimeout(cloudSyncTimer);cloudSyncTimer=setTimeout(()=>cloudUpsertEntry(current).catch(cloudFail),900)}
@@ -298,18 +322,21 @@ async function syncAll(){
  if(!cloudSession)return;
  setCloudBadge('SYNCING','sync');
  const userId=cloudSession.user.id;
- const [remoteEntries,remoteSkills,remoteProjects,remoteSeasons,remoteEvents,remoteIntegrations]=await Promise.all([
+ const [remoteEntries,remoteSkills,remoteProjects,remoteSeasons,remoteEvents,remoteIntegrations,remoteSkillEvidence]=await Promise.all([
    api('daily_entries?select=*&order=entry_date.desc'),
    api('skills?select=*&order=name.asc'),
    api('projects?select=*&order=priority.asc,name.asc'),
    api('seasons?select=*&active=eq.true&order=start_date.desc&limit=1'),
    api('events?select=id,occurred_at,event_type,payload&order=occurred_at.desc&limit=120'),
-   api('integration_status?select=provider,status,last_sync_at&order=provider.asc')
+   api('integration_status?select=provider,status,last_sync_at&order=provider.asc'),
+   api('skill_evidence?select=skill_name,evidence_date,evidence&order=evidence_date.desc')
  ]);
  const byDate=new Map(system.entries.map(e=>[e.date,e]));
  (remoteEntries||[]).forEach(r=>{const re=localEntry(r),le=byDate.get(re.date);if(!le||new Date(re.updatedAt)>=new Date(le.updatedAt||0))byDate.set(re.date,re)});
  system.entries=[...byDate.values()];
  if(remoteSkills?.length)system.skills=remoteSkills.map(s=>({name:s.name,level:s.level,domain:s.domain,targetLevel:s.target_level,evidenceCount:s.evidence_count}));
+ const evCounts={};(remoteSkillEvidence||[]).forEach(x=>evCounts[x.skill_name]=(evCounts[x.skill_name]||0)+1);
+ Object.entries(evCounts).forEach(([name,count])=>{let sk=system.skills.find(x=>x.name.toLowerCase()===name.toLowerCase());if(!sk){sk={name,level:1,domain:'Applied',targetLevel:2,evidenceCount:0};system.skills.push(sk)}sk.evidenceCount=count});
  if(remoteProjects?.length)system.projects=remoteProjects.map(p=>p.name);
  if(remoteSeasons?.length)system.season={primary:remoteSeasons[0].primary_focus||'',secondary:remoteSeasons[0].secondary_focus||'',maintain:remoteSeasons[0].maintain_focus||''};
  if(remoteEvents?.length)system.events=remoteEvents.map(e=>({id:e.id,at:e.occurred_at,type:e.event_type,payload:e.payload||{}}));
