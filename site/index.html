@@ -120,7 +120,18 @@
     <div class="card"><div class="section"><span class="n">C1</span><h3>SHARED GOALS</h3><span class="auto">COMPANY LAYER</span></div><div id="companyGoals" class="list"></div></div>
     <div class="card"><div class="section"><span class="n">C2</span><h3>KPIs</h3></div><div id="companyKpis" class="list"></div></div>
     <div class="card"><div class="section"><span class="n">C3</span><h3>DEPENDENCIES</h3></div><div id="companyDependencies" class="list"></div></div>
-    <div class="card"><div class="section"><span class="n">C4</span><h3>MEMBERS</h3></div><div id="companyMembers" class="list"></div><p class="muted">Neue Personen bekommen erst nach eigenem Account und expliziter Freigabe Zugriff. Private Journals, persönliche Reviews und nicht geteilte Goals werden hier nicht sichtbar.</p></div>
+    <div class="card">
+      <div class="section"><span class="n">C4</span><h3>MEMBERS</h3></div>
+      <div id="companyMembers" class="list"></div>
+      <div class="divider"></div>
+      <div class="grid2">
+        <label>Neue Person · E-Mail<input id="companyInviteEmail" type="email" placeholder="name@example.com"></label>
+        <label>Rolle<select id="companyInviteRole"><option value="member">MEMBER</option><option value="operator">OPERATOR</option><option value="viewer">VIEWER</option></select></label>
+      </div>
+      <div class="actions"><button class="btn soft" id="prepareCompanyInvite">INVITE VORBEREITEN</button></div>
+      <div id="companyInvites" class="list" style="margin-top:10px"></div>
+      <p class="muted">Invite-only: Die Person erhält erst Zugriff, wenn sie sich mit exakt dieser E-Mail selbst bei PANTHERA anmeldet. Standardmäßig werden Capabilities + Shared Goals geteilt, tägliche private Execution nicht.</p>
+    </div>
   </section>
 
   <section id="command" class="screen">
@@ -325,7 +336,7 @@ function migrate(){
 function normalize(x){
  const b=base(),o={...b,...x};o.entries=Array.isArray(x.entries)?x.entries.map(e=>({...freshEntry(e.date),...e})):[];o.skills=Array.isArray(x.skills)&&x.skills.length?x.skills.map(normalizeSkill):b.skills;const existingGoals=Array.isArray(x.goals)?x.goals:[];const gm=new Map(existingGoals.map(g=>[g.name,g]));b.goals.forEach(g=>{if(!gm.has(g.name))gm.set(g.name,g)});o.goals=[...gm.values()];o.projects=Array.isArray(x.projects)?x.projects:[];o.events=Array.isArray(x.events)?x.events:[];o.predictions=Array.isArray(x.predictions)?x.predictions:[];o.decisions=Array.isArray(x.decisions)?x.decisions:[];o.assessments=Array.isArray(x.assessments)?x.assessments:[];o.independenceChecks=Array.isArray(x.independenceChecks)?x.independenceChecks:[];o.trainingCycles=Array.isArray(x.trainingCycles)?x.trainingCycles:[];o.evidenceItems=Array.isArray(x.evidenceItems)?x.evidenceItems:[];o.config={...b.config,...(x.config||{})};o.modules=Array.isArray(x.modules)&&x.modules.length?x.modules:b.modules;o.season={...b.season,...(x.season||{})};return o;
 }
-let system=migrate(),current,saveTimer=null,timerHandle=null,cloudSession=null,cloudSyncTimer=null,cloudIntegrations=[],latestIntegrationRun=null,companyContext={org:null,members:[],goals:[],kpis:[],dependencies:[]},assessmentSkillId=null;
+let system=migrate(),current,saveTimer=null,timerHandle=null,cloudSession=null,cloudSyncTimer=null,cloudIntegrations=[],latestIntegrationRun=null,companyContext={org:null,members:[],goals:[],kpis:[],dependencies:[],invites:[]},assessmentSkillId=null;
 function save(){localStorage.setItem(KEY,JSON.stringify(system))}
 function getEntry(date){let e=system.entries.find(x=>x.date===date);if(!e){e=freshEntry(date);system.entries.push(e);save()}return e}
 function score(e){return proofKeys.filter(k=>e.proofs[k]?.done).length}
@@ -412,7 +423,7 @@ function routeDecision(){
  const cls=$("decisionClass").value,stakes=$("decisionStakes").value,rev=$("decisionReversibility").value;let budget=1,mods=["Reality"],lenses=[];if(cls==="skill"){mods.unshift("Mastery Compiler")}else if(cls==="brand"){mods.unshift("Moon Architect")}else if(cls==="social"){mods.unshift("Athenaeum")}else if(cls==="execution"){mods.unshift("ACE Execution")}else{mods.unshift("Athenaeum")};if(stakes==="high"||rev==="low"){budget=4;mods.push("Seven Heads");lenses=["Auren","Machiavelli","Greene"]}else if(stakes==="medium"){budget=2;lenses=["Auren"]}if(cls==="brand")lenses.push("Jobs");if(cls==="execution")lenses.push("Kael");return{budget,mods:[...new Set(mods)],lenses:[...new Set(lenses)]}}
 function renderRoute(){const r=routeDecision();$("routePreview").innerHTML='<b>ROUTE · Complexity '+r.budget+'</b><br>'+r.mods.join(" → ")+(r.lenses.length?" · Counter-Lenses: "+r.lenses.join(", "):"")}
 function renderCompany(){
- const c=companyContext||{org:null,members:[],goals:[],kpis:[],dependencies:[]},org=c.org;
+ const c=companyContext||{org:null,members:[],goals:[],kpis:[],dependencies:[],invites:[]},org=c.org;
  $("companyName").textContent=org?.name||"PANTHERA Company OS";
  const me=c.members.find(m=>m.user_id===cloudSession?.user?.id);
  $("companyRole").textContent="ROLE · "+(me?.role||"—").toUpperCase();
@@ -425,7 +436,8 @@ function renderCompany(){
  $("companyGoals").innerHTML=c.goals.length?c.goals.sort((a,b)=>(b.priority-a.priority)||String(a.deadline||"9999").localeCompare(String(b.deadline||"9999"))).map(g=>'<div class="row"><div><strong>'+escapeHTML(g.name)+'</strong><small>'+escapeHTML(g.domain)+' · '+g.status.toUpperCase()+(g.deadline?' · '+g.deadline:'')+(g.target_value!=null?' · '+(g.current_value==null?'Baseline fehlt':escapeHTML(g.current_value+' / '+g.target_value+' '+(g.unit||''))):'')+(g.current_bottleneck?' · Bottleneck: '+escapeHTML(g.current_bottleneck):'')+'</small></div><span class="pill">P'+g.priority+'</span></div>').join(""):'<div class="muted">'+(cloudSession?'Noch keine Shared Goals.':'Cloud-Login nötig, um Company OS zu laden.')+'</div>';
  $("companyKpis").innerHTML=c.kpis.length?c.kpis.map(k=>'<div class="row"><div><strong>'+escapeHTML(k.name)+'</strong><small>'+(k.current_value==null?'—':escapeHTML(k.current_value))+(k.target_value!=null?' / '+escapeHTML(k.target_value):'')+' '+escapeHTML(k.unit||'')+(k.cadence?' · '+escapeHTML(k.cadence):'')+'</small></div><span class="pill">'+escapeHTML((k.source_system||"MANUAL").toUpperCase())+'</span></div>').join(""):'<div class="muted">Noch keine Company-KPIs mit Baseline.</div>';
  $("companyDependencies").innerHTML=c.dependencies.length?c.dependencies.map(d=>'<div class="row"><div><strong>'+escapeHTML(d.description)+'</strong><small>'+escapeHTML(d.dependency_type)+' · '+escapeHTML(d.status)+(d.due_at?' · '+escapeHTML(d.due_at.slice(0,16).replace("T"," ")):'')+'</small></div><span class="pill">'+escapeHTML(d.status.toUpperCase())+'</span></div>').join(""):'<div class="muted">Keine offenen Abhängigkeiten erfasst.</div>';
- $("companyMembers").innerHTML=c.members.length?c.members.map(m=>'<div class="row"><div><strong>'+escapeHTML(m.metadata?.display_name||m.metadata?.email||"Member")+'</strong><small>'+escapeHTML(m.role)+' · '+escapeHTML(m.status)+' · capabilities '+(m.share_capabilities?'shared':'private')+' · goals '+(m.share_goals?'shared':'private')+'</small></div><span class="pill">'+escapeHTML(m.role.toUpperCase())+'</span></div>').join(""):'<div class="muted">Noch keine weiteren Mitglieder.</div>';
+ $("companyMembers").innerHTML=c.members.length?c.members.map(m=>'<div class="row"><div><strong>'+escapeHTML(m.metadata?.display_name||m.metadata?.email||"Member")+'</strong><small>'+escapeHTML(m.role)+' · '+escapeHTML(m.status)+' · capabilities '+(m.share_capabilities?'shared':'private')+' · goals '+(m.share_goals?'shared':'private')+' · daily '+(m.share_daily_execution?'shared':'private')+'</small></div><span class="pill">'+escapeHTML(m.role.toUpperCase())+'</span></div>').join(""):'<div class="muted">Noch keine weiteren Mitglieder.</div>';
+ $("companyInvites").innerHTML=c.invites?.length?c.invites.map(i=>'<div class="row"><div><strong>'+escapeHTML(i.email)+'</strong><small>'+escapeHTML(i.role)+' · '+escapeHTML(i.status)+(i.expires_at?' · bis '+escapeHTML(i.expires_at.slice(0,10)):'')+'</small></div><span class="pill">'+escapeHTML(i.status.toUpperCase())+'</span></div>').join(""):'<div class="muted">Keine offenen Einladungen.</div>';
 }
 function renderCommand(){
  $("projectsText").value=system.projects.join("\n");$("skillsText").value=system.skills.map(s=>s.name+"|"+s.knowledge+"|"+s.capability+"|"+s.pressure+"|"+s.class).join("\n");$("freezeChip").textContent="FREEZE · "+system.config.freezeUntil;
@@ -454,6 +466,22 @@ $("timerReset").onclick=()=>{clearInterval(timerHandle);$("timer").textContent="
 $("startMove").onclick=()=>{if(!current.nextMove.trim()){$("nextMove").focus();return}event("execution.next_move",{date:current.date,move:current.nextMove});runTimer(600);document.querySelector("#timer").scrollIntoView({behavior:"smooth",block:"center"})};
 $("closeReview").onclick=()=>{const s=skillByName(current.skillFocus);if(current.skillEvidence.trim()&&s){const type=current.pressureEvidence?"pressure":"capability";const ev={id:uid(),skillId:s.id,skillName:s.name,date:current.date,type,quality:Number(current.evidenceQuality||3),independent:Number(current.assistanceLevel||0)===0,evidence:current.skillEvidence,createdAt:new Date().toISOString()};system.evidenceItems.push(ev);s.evidenceCount+=1;s.lastUsedAt=new Date().toISOString();s.confidence=Math.min(.99,s.confidence+.03*(ev.quality/3));if(ev.independent&&ev.quality>=4)s.confidence=Math.min(.99,s.confidence+.04);system.independenceChecks.push({id:uid(),skillId:s.id,date:current.date,assistanceLevel:Number(current.assistanceLevel||0),createdAt:new Date().toISOString()});event("skill.evidence",{skill:s.name,type,quality:ev.quality,independent:ev.independent})}current.reviewClosed=true;event("review.closed",{date:current.date,score:score(current),failure:current.failureType});persist();if(cloudSession)queueFullSync()};
 $("addPrediction").onclick=()=>{const st=$("predictionStatement").value.trim(),pr=Number($("predictionProbability").value),due=$("predictionDue").value;if(!st||!pr){alert("Vorhersage und Wahrscheinlichkeit eintragen.");return}const p={id:uid(),statement:st,probability:pr,dueDate:due||null,outcome:null,createdAt:new Date().toISOString(),resolvedAt:null};system.predictions.push(p);event("prediction.created",{id:p.id,probability:pr});$("predictionStatement").value="";save();renderAll();if(cloudSession)cloudPushPrediction(p).catch(cloudError)};
+$("prepareCompanyInvite").onclick=async()=>{try{
+ if(!cloudSession||!companyContext.org)throw new Error("Company OS braucht zuerst Cloud-Login.");
+ const me=companyContext.members.find(m=>m.user_id===cloudSession.user.id);
+ if(!me||!["owner","operator"].includes(me.role))throw new Error("Nur Owner/Operator dürfen Einladungen vorbereiten.");
+ const email=$("companyInviteEmail").value.trim().toLowerCase(),role=$("companyInviteRole").value;
+ if(!email||!email.includes("@"))throw new Error("Bitte eine gültige E-Mail-Adresse eingeben.");
+ const expires=new Date(Date.now()+14*86400000).toISOString();
+ await api("organization_invites?on_conflict=organization_id,email","",{method:"POST",headers:{"Prefer":"resolution=merge-duplicates,return=minimal"},body:JSON.stringify([{
+   organization_id:companyContext.org.id,email,role,status:"pending",
+   share_capabilities:true,share_goals:true,share_daily_execution:false,
+   invited_by:cloudSession.user.id,expires_at:expires,metadata:{source:"company_os"}
+ }])});
+ $("companyInviteEmail").value="";
+ await fullSync();
+ alert("Invite vorbereitet. Die Person kann sich jetzt mit genau dieser E-Mail bei PANTHERA anmelden.");
+ }catch(e){alert(String(e.message||e))}};
 ["decisionClass","decisionStakes","decisionReversibility"].forEach(id=>$(id).onchange=renderRoute);
 $("saveDecision").onclick=()=>{const title=$("decisionTitle").value.trim();if(!title){alert("Entscheidung benennen.");return}const stakes=$("decisionStakes").value,rev=$("decisionReversibility").value;const bs={missingVariable:$("bsVariable").value.trim(),causal:$("bsCausal").value.trim(),baseRate:$("bsBaseRate").value.trim(),hiddenActor:$("bsActor").value.trim(),correlatedEvidence:$("bsEvidence").value.trim(),secondOrder:$("bsSecond").value.trim(),counter:$("decisionCounter").value.trim(),falsifier:$("decisionFalsifier").value.trim()};if(stakes==="high"||rev==="low"){const missing=Object.entries(bs).filter(([k,v])=>!v).map(([k])=>k);if(missing.length){alert("High-stakes Gate: Blind-Spot Firewall vollständig ausfüllen.");return}}const route=routeDecision(),unresolved=Object.values(bs).filter(v=>!v).length;const d={id:uid(),title,problemClass:$("decisionClass").value,stakes,reversibility:rev,goal:$("decisionGoal").value.trim(),expected:$("decisionExpected").value.trim(),blindSpots:bs,complexityBudget:route.budget,route:route.mods,counterLenses:route.lenses,status:"open",createdAt:new Date().toISOString()};system.decisions.push(d);system.config.complexityBudget=route.budget;event("decision.created",{id:d.id,stakes,complexity:route.budget,unresolved});save();renderAll();if(cloudSession)cloudPushDecision(d).catch(cloudError)};
 $("projectsText").oninput=e=>{system.projects=e.target.value.split("\n").map(x=>x.trim()).filter(Boolean);save();if(cloudSession)queueFullSync()};
@@ -512,20 +540,21 @@ async function cloudPushGoal(g){await api("goals?name=eq."+encodeURIComponent(g.
 async function cloudPushAssessment(a){await api("skill_assessments?on_conflict=id","",{method:"POST",headers:{"Prefer":"resolution=merge-duplicates,return=minimal"},body:JSON.stringify([{id:a.id,user_id:cloudSession.user.id,skill_id:a.skillId,assessment_type:a.type,score:a.score,passed:a.passed,difficulty:a.difficulty,context:"PANTHERA V4",evidence:a.evidence,independent:a.independent,occurred_at:a.occurredAt,metadata:{local:true}}])})}
 async function fullSync(){
  if(!cloudSession)return;cloudBadge("SYNCING","sync");
- const user=cloudSession.user.id;
+ const user=cloudSession.user.id,primaryUser=String(cloudSession.user.email||"").toLowerCase()==="aaamstadt@icloud.com";
  const [re,rs,rp,rpred,rdec,rgoals,rints,rirun,rorgs]=await Promise.all([api("daily_entries?select=*&order=entry_date.desc"),api("skills?select=*&order=name.asc"),api("projects?select=*&order=priority.asc,name.asc"),api("predictions?select=*&order=created_at.desc"),api("decisions?select=*&order=created_at.desc"),api("goals?select=*&order=focus_tier.asc,priority.desc"),api("integration_status?select=provider,status,last_sync_at,metadata&order=provider.asc"),api("integration_test_runs?select=suite,run_ref,cases_total,cases_passed,cases_failed,status,evidence_pointer,created_at&order=created_at.desc&limit=1"),api("organizations?select=id,name,slug,status,metadata&order=created_at.asc&limit=1")]);
- const map=new Map(system.entries.map(e=>[e.date,e]));(re||[]).forEach(r=>{const e={...freshEntry(r.entry_date),id:r.id,date:r.entry_date,sleep:r.sleep_hours,energy:r.energy,state:r.state||"",win:r.win||"",nextMove:r.next_move||"",goalFocus:r.goal_focus_name||"",skillFocus:r.skill_focus||"",uncomfortable:r.uncomfortable||"",ifThen:r.if_then||"",locked:r.locked,proofs:r.proofs||freshEntry(r.entry_date).proofs,biggest:r.biggest||"",deviation:r.deviation||"",failureType:r.failure_type||"",correction:r.correction||"",skillEvidence:r.skill_evidence||"",updatedAt:r.updated_at,createdAt:r.created_at};const l=map.get(e.date);if(!l||new Date(e.updatedAt)>=new Date(l.updatedAt||0))map.set(e.date,e)});system.entries=[...map.values()];
- if(rs?.length)system.skills=rs.map(normalizeSkill);if(rp?.length)system.projects=rp.map(p=>p.name);if(rpred?.length)system.predictions=rpred.map(p=>({id:p.id,statement:p.statement,probability:Math.round(Number(p.probability)*100),dueDate:p.due_date,outcome:p.outcome,createdAt:p.created_at,resolvedAt:p.resolved_at}));if(rdec?.length)system.decisions=rdec.map(d=>({id:d.id,title:d.title,goal:d.goal||"",problemClass:d.problem_class||"strategy",stakes:d.stakes,reversibility:d.reversibility,status:d.status,blindSpots:d.blind_spots||{},expected:d.expected_outcome||"",complexityBudget:d.metadata?.complexity_budget||1,route:d.metadata?.route||["Reality"],counterLenses:d.metadata?.counter_lenses||[],createdAt:d.created_at}));if(rgoals?.length)system.goals=rgoals.map(g=>({id:g.id,domain:g.domain,name:g.name,status:g.status,focusTier:g.focus_tier,priority:g.priority,target:g.target_value==null?null:Number(g.target_value),current:g.current_value==null?null:Number(g.current_value),unit:g.unit,deadline:g.deadline,source:g.source||"cloud"}));cloudIntegrations=Array.isArray(rints)?rints:[];latestIntegrationRun=Array.isArray(rirun)&&rirun.length?rirun[0]:null;
+ const map=new Map((primaryUser?system.entries:[]).map(e=>[e.date,e]));(re||[]).forEach(r=>{const e={...freshEntry(r.entry_date),id:r.id,date:r.entry_date,sleep:r.sleep_hours,energy:r.energy,state:r.state||"",win:r.win||"",nextMove:r.next_move||"",goalFocus:r.goal_focus_name||"",skillFocus:r.skill_focus||"",uncomfortable:r.uncomfortable||"",ifThen:r.if_then||"",locked:r.locked,proofs:r.proofs||freshEntry(r.entry_date).proofs,biggest:r.biggest||"",deviation:r.deviation||"",failureType:r.failure_type||"",correction:r.correction||"",skillEvidence:r.skill_evidence||"",updatedAt:r.updated_at,createdAt:r.created_at};const l=map.get(e.date);if(!l||new Date(e.updatedAt)>=new Date(l.updatedAt||0))map.set(e.date,e)});system.entries=[...map.values()];
+ if(rs?.length)system.skills=rs.map(normalizeSkill);else if(!primaryUser)system.skills=[];if(rp?.length)system.projects=rp.map(p=>p.name);else if(!primaryUser)system.projects=[];if(rpred?.length)system.predictions=rpred.map(p=>({id:p.id,statement:p.statement,probability:Math.round(Number(p.probability)*100),dueDate:p.due_date,outcome:p.outcome,createdAt:p.created_at,resolvedAt:p.resolved_at}));else if(!primaryUser)system.predictions=[];if(rdec?.length)system.decisions=rdec.map(d=>({id:d.id,title:d.title,goal:d.goal||"",problemClass:d.problem_class||"strategy",stakes:d.stakes,reversibility:d.reversibility,status:d.status,blindSpots:d.blind_spots||{},expected:d.expected_outcome||"",complexityBudget:d.metadata?.complexity_budget||1,route:d.metadata?.route||["Reality"],counterLenses:d.metadata?.counter_lenses||[],createdAt:d.created_at}));else if(!primaryUser)system.decisions=[];if(rgoals?.length)system.goals=rgoals.map(g=>({id:g.id,domain:g.domain,name:g.name,status:g.status,focusTier:g.focus_tier,priority:g.priority,target:g.target_value==null?null:Number(g.target_value),current:g.current_value==null?null:Number(g.current_value),unit:g.unit,deadline:g.deadline,source:g.source||"cloud"}));else if(!primaryUser)system.goals=[];cloudIntegrations=Array.isArray(rints)?rints:[];latestIntegrationRun=Array.isArray(rirun)&&rirun.length?rirun[0]:null;
  companyContext={org:null,members:[],goals:[],kpis:[],dependencies:[]};
  if(Array.isArray(rorgs)&&rorgs.length){
    const org=rorgs[0],oid=encodeURIComponent(org.id);
-   const [cm,cg,ck,cd]=await Promise.all([
+   const [cm,cg,ck,cd,ci]=await Promise.all([
      api("organization_members?select=user_id,role,status,share_capabilities,share_goals,share_daily_execution,metadata&organization_id=eq."+oid+"&order=created_at.asc"),
      api("company_goals?select=id,name,domain,description,status,priority,target_value,current_value,unit,deadline,owner_user_id,evidence_required,current_bottleneck,next_action,next_action_due,human_gate_status,metadata&organization_id=eq."+oid+"&order=priority.desc,deadline.asc"),
      api("company_kpis?select=id,goal_id,name,unit,target_value,current_value,cadence,owner_user_id,source_system,evidence_pointer,metadata&organization_id=eq."+oid+"&order=name.asc"),
-     api("company_dependencies?select=id,upstream_goal_id,downstream_goal_id,upstream_owner_user_id,downstream_owner_user_id,dependency_type,status,description,due_at,evidence_pointer&organization_id=eq."+oid+"&order=created_at.desc")
+     api("company_dependencies?select=id,upstream_goal_id,downstream_goal_id,upstream_owner_user_id,downstream_owner_user_id,dependency_type,status,description,due_at,evidence_pointer&organization_id=eq."+oid+"&order=created_at.desc"),
+     api("organization_invites?select=id,email,role,status,share_capabilities,share_goals,share_daily_execution,expires_at,metadata&organization_id=eq."+oid+"&status=eq.pending&order=created_at.desc")
    ]);
-   companyContext={org,members:cm||[],goals:cg||[],kpis:ck||[],dependencies:cd||[]};
+   companyContext={org,members:cm||[],goals:cg||[],kpis:ck||[],dependencies:cd||[],invites:ci||[]};
  }
 
  await api("daily_entries?on_conflict=user_id,entry_date","",{method:"POST",headers:{"Prefer":"resolution=merge-duplicates,return=minimal"},body:JSON.stringify(system.entries.map(dbEntry))});
@@ -535,7 +564,22 @@ async function fullSync(){
  save();current=getEntry($("date").value);renderAll();cloudBadge("SYNCED","ok")
 }
 function cloudError(e){console.error(e);cloudBadge("CLOUD ERROR");$("authStatus").textContent=String(e.message||e)}
-async function sendMagic(email){const redirect=location.origin+location.pathname;const r=await fetch(SUPA_URL+"/auth/v1/otp?redirect_to="+encodeURIComponent(redirect),{method:"POST",headers:{"apikey":SUPA_KEY,"Content-Type":"application/json"},body:JSON.stringify({email,create_user:false})});const x=await r.json().catch(()=>({}));if(!r.ok)throw new Error(x.msg||x.error_description||x.message||"Login-Link konnte nicht gesendet werden")}
+async function publicRpc(name,body){
+ const r=await fetch(SUPA_URL+"/rest/v1/rpc/"+name,{method:"POST",headers:{"apikey":SUPA_KEY,"Content-Type":"application/json"},body:JSON.stringify(body||{})});
+ const text=await r.text();if(!r.ok)throw new Error(text||"RPC fehlgeschlagen");return text?JSON.parse(text):null;
+}
+async function prepareAuthenticatedKernel(){
+ if(!cloudSession)return;
+ try{await api("rpc/bootstrap_personal_kernel","",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});}catch(e){console.warn("kernel bootstrap",e)}
+ try{await api("rpc/claim_organization_invites","",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});}catch(e){console.warn("invite claim",e)}
+}
+async function sendMagic(email){
+ const allowed=await publicRpc("can_access_panthera",{p_email:email});
+ if(allowed!==true)throw new Error("Diese E-Mail ist noch nicht für PANTHERA freigeschaltet.");
+ const redirect=location.origin+location.pathname;
+ const r=await fetch(SUPA_URL+"/auth/v1/otp?redirect_to="+encodeURIComponent(redirect),{method:"POST",headers:{"apikey":SUPA_KEY,"Content-Type":"application/json"},body:JSON.stringify({email,create_user:true})});
+ const x=await r.json().catch(()=>({}));if(!r.ok)throw new Error(x.msg||x.error_description||x.message||"Login-Link konnte nicht gesendet werden")
+}
 async function acceptMagicUrl(raw){
  let u;
  try{u=new URL(String(raw||"").trim())}catch(e){throw new Error("Der eingefügte Link ist ungültig.")}
@@ -574,6 +618,7 @@ async function acceptMagicUrl(raw){
  }
  writeAuth(cloudSession);
  $("magicLinkPaste").value="";
+ await prepareAuthenticatedKernel();
  await fullSync();
  cloudBadge("SYNCED","ok");
  $("logoutBtn").classList.remove("hidden");
@@ -583,9 +628,9 @@ async function acceptMagicUrl(raw){
 }
 async function acceptMagic(){
  const p=new URLSearchParams(location.hash.replace(/^#/,"")),a=p.get("access_token"),r=p.get("refresh_token"),ex=Number(p.get("expires_in")||3600);if(!a)return false;
- const ur=await fetch(SUPA_URL+"/auth/v1/user",{headers:{"apikey":SUPA_KEY,"Authorization":"Bearer "+a}});if(!ur.ok)return false;const user=await ur.json();cloudSession={access_token:a,refresh_token:r||"",expires_at:Date.now()+ex*1000,user};writeAuth(cloudSession);history.replaceState(null,"",location.pathname);await fullSync();return true
+ const ur=await fetch(SUPA_URL+"/auth/v1/user",{headers:{"apikey":SUPA_KEY,"Authorization":"Bearer "+a}});if(!ur.ok)return false;const user=await ur.json();cloudSession={access_token:a,refresh_token:r||"",expires_at:Date.now()+ex*1000,user};writeAuth(cloudSession);history.replaceState(null,"",location.pathname);await prepareAuthenticatedKernel();await fullSync();return true
 }
-async function initCloud(){if(await acceptMagic()){cloudBadge("SYNCED","ok");return}const saved=readAuth();if(saved){cloudSession=saved;if(await ensureSession()){try{await fullSync();return}catch(e){cloudError(e)}}}cloudBadge("LOCAL")}
+async function initCloud(){if(await acceptMagic()){cloudBadge("SYNCED","ok");return}const saved=readAuth();if(saved){cloudSession=saved;if(await ensureSession()){try{await prepareAuthenticatedKernel();await fullSync();return}catch(e){cloudError(e)}}}cloudBadge("LOCAL")}
 $("useMagicLink").onclick=async()=>{try{$("authStatus").textContent="Session wird geprüft…";await acceptMagicUrl($("magicLinkPaste").value)}catch(e){$("authStatus").textContent=String(e.message||e)}};
 $("pasteAndLogin").onclick=async()=>{try{
  $("authStatus").textContent="Zwischenablage wird gelesen…";
