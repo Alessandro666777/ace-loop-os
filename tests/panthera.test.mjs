@@ -26,7 +26,7 @@ async function boot(opts={}){
       const custom=await opts.fetchHandler(u,init);
       if(custom)return custom;
     }
-    if(u.includes("/rest/v1/rpc/bootstrap_personal_kernel"))return res({onboarding_status:"needs_baseline"});
+    if(u.includes("/rest/v1/rpc/bootstrap_personal_kernel"))return res({onboarding_status:"needs_baseline",bootstrap_mode:"legacy"});
     if(u.includes("/rest/v1/rpc/claim_organization_invites"))return res([]);
     if(u.includes("/auth/v1/otp"))return res({});
     if(u.includes("/auth/v1/token"))return res({access_token:"refreshed_access",refresh_token:"refreshed_refresh",expires_in:3600,user:{id:"user-1",email:"aaamstadt@icloud.com"}});
@@ -55,7 +55,11 @@ async function boot(opts={}){
   await new Promise(r=>setTimeout(r,35));
   return {dom,w:dom.window,d:dom.window.document,calls,alerts,res,close:()=>dom.window.close()};
 }
-function state(w){return JSON.parse(w.localStorage.getItem(APP_KEY));}
+function state(w){
+  let key=APP_KEY;
+  try{const a=JSON.parse(w.localStorage.getItem(AUTH_KEY)||"null");if(a?.user?.id)key=APP_KEY+":"+a.user.id}catch{}
+  return JSON.parse(w.localStorage.getItem(key));
+}
 function setVal(w,id,value,event="input"){
   const el=w.document.getElementById(id);el.value=String(value);el.dispatchEvent(new w.Event(event,{bubbles:true}));return el;
 }
@@ -115,7 +119,7 @@ test("43 malformed V4 local storage falls back to base",async t=>{const x=await 
 test("44 V3 migration restores active focus skills",async t=>{const v3={entries:[],skills:[{name:"Sales",level:3},{name:"Leadership",level:2},{name:"Self-Leadership",level:3}]};const x=await boot({storage:{"ace-loop-os.v3":v3}});t.after(x.close);assert.equal(state(x.w).skills.filter(s=>s.active).length,3)});
 test("45 V2 migration carries daily win forward",async t=>{const v2=[{date:todayISO(),win:"Legacy Win",nextMove:"Legacy Move"}];const x=await boot({storage:{"ace-loop-os.entries.v2":v2}});t.after(x.close);assert.equal(state(x.w).entries.find(e=>e.date===todayISO()).win,"Legacy Win")});
 test("46 invalid auth email never calls OTP endpoint",async t=>{const x=await boot();t.after(x.close);setVal(x.w,"authEmail","bad");click(x.w,"magicBtn");await new Promise(r=>setTimeout(r,10));assert.equal(x.calls.some(c=>c.url.includes("/auth/v1/otp")),false);assert.ok(x.d.getElementById("authStatus").textContent.includes("gültige E-Mail"))});
-test("47 magic-link request uses GitHub Pages redirect",async t=>{const x=await boot();t.after(x.close);click(x.w,"magicBtn");await new Promise(r=>setTimeout(r,10));const c=x.calls.find(c=>c.url.includes("/auth/v1/otp"));assert.ok(c);assert.ok(decodeURIComponent(c.url).includes("redirect_to=https://alessandro666777.github.io/ace-loop-os/"))});
+test("47 magic-link request uses GitHub Pages redirect",async t=>{const x=await boot();t.after(x.close);setVal(x.w,"authEmail","owner@example.com");click(x.w,"magicBtn");await new Promise(r=>setTimeout(r,10));const c=x.calls.find(c=>c.url.includes("/auth/v1/otp"));assert.ok(c);assert.ok(decodeURIComponent(c.url).includes("redirect_to=https://alessandro666777.github.io/ace-loop-os/"))});
 test("48 implicit access-token link logs in and syncs",async t=>{const url="https://alessandro666777.github.io/ace-loop-os/#access_token=a&refresh_token=r&expires_in=3600&type=magiclink";const x=await boot({url});t.after(x.close);assert.equal(x.d.getElementById("cloudBadge").textContent,"SYNCED");assert.ok(x.w.localStorage.getItem(AUTH_KEY))});
 test("49 direct verify?token link exchanges into session",async t=>{const x=await boot();t.after(x.close);await x.w.acceptMagicUrl("https://gbzoxohtdlujrfljdwfz.supabase.co/auth/v1/verify?token=abc&type=magiclink");assert.equal(x.d.getElementById("cloudBadge").textContent,"SYNCED");assert.ok(JSON.parse(x.w.localStorage.getItem(AUTH_KEY)).access_token)});
 test("50 clipboard accepts direct Supabase verify link",async t=>{const x=await boot({clipboardText:"https://gbzoxohtdlujrfljdwfz.supabase.co/auth/v1/verify?token=abc&type=magiclink"});t.after(x.close);click(x.w,"pasteAndLogin");await new Promise(r=>setTimeout(r,35));assert.equal(x.d.getElementById("cloudBadge").textContent,"SYNCED")});
@@ -249,7 +253,11 @@ test("72 non-primary user never inherits Alessandro goal portfolio",async t=>{
    {id:"s2",name:"Communication",domain:"core",level:0,target_level:1,evidence_count:0,knowledge_level:0,capability_level:0,pressure_level:0,skill_class:"core",confidence:.5,baseline_verified:false,next_drill:"x",next_field_test:"y",active_training:true},
    {id:"s3",name:"Learning",domain:"meta",level:0,target_level:1,evidence_count:0,knowledge_level:0,capability_level:0,pressure_level:0,skill_class:"meta",confidence:.5,baseline_verified:false,next_drill:"x",next_field_test:"y",active_training:true}
   ];
-  const x=await boot({storage:{[AUTH_KEY]:auth},fetchHandler:async(u,init)=>u.includes("/rest/v1/skills?")&&(!init.method||init.method==="GET")?res(neutralSkills):null});
+  const x=await boot({storage:{[AUTH_KEY]:auth},fetchHandler:async(u,init)=>{
+    if(u.includes("/rest/v1/rpc/bootstrap_personal_kernel"))return res({onboarding_status:"needs_baseline",bootstrap_mode:"neutral_v1"});
+    if(u.includes("/rest/v1/skills?")&&(!init.method||init.method==="GET"))return res(neutralSkills);
+    return null;
+  }});
   t.after(x.close);
   assert.equal(state(x.w).goals.length,0);
   assert.equal(state(x.w).skills.length,3);
@@ -317,3 +325,37 @@ test("76 manual Knowledge capture writes owner-private object",async t=>{
   assert.equal(row.ingestion_status,"normalized");
 });
 // Knowledge Port regression gate: local render state verified.
+
+test("77 join mode ignores legacy owner storage",async t=>{
+  const legacy={version:4,kernelMode:"owner_seed",entries:[],skills:[],goals:[{id:"g",name:"OWNER ONLY",status:"active",focusTier:1,priority:5}],projects:[],events:[],predictions:[],decisions:[],assessments:[],independenceChecks:[],trainingCycles:[],evidenceItems:[]};
+  const x=await boot({url:"https://alessandro666777.github.io/ace-loop-os/?join=1",storage:{[APP_KEY]:legacy}});
+  t.after(x.close);
+  assert.equal(state(x.w).goals.length,0);
+  assert.equal(state(x.w).kernelMode,"neutral");
+});
+test("78 local kernels are namespaced per authenticated user",async t=>{
+  const x=await boot();t.after(x.close);
+  x.w.activateUserStorage({id:"owner-1"},{bootstrap_mode:"legacy"});
+  const owner=JSON.parse(x.w.localStorage.getItem(APP_KEY+":owner-1"));
+  assert.equal(owner.goals.length,37);
+  x.w.activateUserStorage({id:"member-2"},{bootstrap_mode:"neutral_v1"});
+  const member=JSON.parse(x.w.localStorage.getItem(APP_KEY+":member-2"));
+  assert.equal(member.goals.length,0);
+  assert.equal(member.kernelMode,"neutral");
+  assert.equal(JSON.parse(x.w.localStorage.getItem(APP_KEY)).goals.length,0);
+});
+test("79 logout returns browser to neutral guest state",async t=>{
+  const auth={access_token:"a",refresh_token:"r",expires_at:Date.now()+3600000,user:{id:"user-1",email:"owner@example.com"}};
+  const x=await boot({storage:{[AUTH_KEY]:auth}});
+  t.after(x.close);
+  await new Promise(r=>setTimeout(r,25));
+  click(x.w,"logoutBtn");
+  assert.equal(x.w.localStorage.getItem(AUTH_KEY),null);
+  const guest=JSON.parse(x.w.localStorage.getItem(APP_KEY));
+  assert.equal(guest.goals.length,0);
+  assert.equal(guest.kernelMode,"neutral");
+});
+test("80 login form contains no hard-coded personal email",async t=>{
+  const x=await boot();t.after(x.close);
+  assert.equal(x.d.getElementById("authEmail").value,"");
+});
