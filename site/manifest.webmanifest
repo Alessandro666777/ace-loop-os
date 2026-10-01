@@ -1,9 +1,9 @@
 {
-  "name":"ACE Loop OS",
+  "name":"ACE Loop OS V3",
   "short_name":"ACE Loop",
   "start_url":"./",
   "display":"standalone",
   "background_color":"#07080a",
   "theme_color":"#07080a",
-  "description":"Private daily execution and evidence tracker"
+  "description":"Personal Adaptive Capability Engine for execution, evidence, recovery and learning"
 }
