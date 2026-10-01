@@ -189,7 +189,25 @@
     </div>
 
     <div class="card">
-      <div class="section"><span class="n">15</span><h3>DATA + CLOUD</h3></div>
+      <div class="section"><span class="n">15</span><h3>KNOWLEDGE PORT</h3><span class="auto" id="knowledgePortStatus">CLOUD LOGIN REQUIRED</span></div>
+      <div class="grid3">
+        <label>Titel<input id="knowledgeTitle" placeholder="Idee, Artikel, Beobachtung …"></label>
+        <label>Quelle / URL<input id="knowledgeUrl" inputmode="url" placeholder="https://…"></label>
+        <label>Tags<input id="knowledgeTags" placeholder="sales, leadership, ai"></label>
+      </div>
+      <label style="margin-top:10px">Private Notiz<textarea id="knowledgeNote" placeholder="Was ist daran relevant? Rohwissen bleibt privat, bis du es bewusst zum Learning Candidate machst."></textarea></label>
+      <div class="actions"><button class="btn soft" id="captureKnowledge">PRIVATE CAPTURE</button></div>
+      <div class="divider"></div>
+      <div class="grid2">
+        <label>Wissen durchsuchen<input id="knowledgeQuery" placeholder="z. B. Führung, Sales, MJ, Systeme"></label>
+        <div class="actions" style="align-items:flex-end"><button class="btn" id="searchKnowledge">SEARCH</button></div>
+      </div>
+      <div id="knowledgeResults" class="list" style="margin-top:10px"></div>
+      <p class="muted">KnowledgeSourcePort v1: Provider sind austauschbar. MANUAL ist aktiv. READWISE wird als externer Adapter angebunden. Ein gespeicherter Inhalt verbessert den PANTHERA-Canon nie automatisch: RAW → PRIVATE → CANDIDATE → EVIDENCE → SHARED KNOWLEDGE.</p>
+    </div>
+
+    <div class="card">
+      <div class="section"><span class="n">16</span><h3>DATA + CLOUD</h3></div>
       <div class="actions"><button class="btn soft" id="openCloud">CLOUD LOGIN</button><button class="btn" id="syncNow">SYNC NOW</button><button class="btn" id="export">JSON EXPORT</button><label class="btn">JSON IMPORT<input id="import" type="file" accept="application/json" hidden></label></div>
       <p class="muted">Local-first ist die sichere Betriebsbasis. Cloud wird zur geräteübergreifenden Wahrheitsschicht, sobald die Auth-Session steht.</p>
     </div>
@@ -336,7 +354,7 @@ function migrate(){
 function normalize(x){
  const b=base(),o={...b,...x};o.entries=Array.isArray(x.entries)?x.entries.map(e=>({...freshEntry(e.date),...e})):[];o.skills=Array.isArray(x.skills)&&x.skills.length?x.skills.map(normalizeSkill):b.skills;const existingGoals=Array.isArray(x.goals)?x.goals:[];const gm=new Map(existingGoals.map(g=>[g.name,g]));b.goals.forEach(g=>{if(!gm.has(g.name))gm.set(g.name,g)});o.goals=[...gm.values()];o.projects=Array.isArray(x.projects)?x.projects:[];o.events=Array.isArray(x.events)?x.events:[];o.predictions=Array.isArray(x.predictions)?x.predictions:[];o.decisions=Array.isArray(x.decisions)?x.decisions:[];o.assessments=Array.isArray(x.assessments)?x.assessments:[];o.independenceChecks=Array.isArray(x.independenceChecks)?x.independenceChecks:[];o.trainingCycles=Array.isArray(x.trainingCycles)?x.trainingCycles:[];o.evidenceItems=Array.isArray(x.evidenceItems)?x.evidenceItems:[];o.config={...b.config,...(x.config||{})};o.modules=Array.isArray(x.modules)&&x.modules.length?x.modules:b.modules;o.season={...b.season,...(x.season||{})};return o;
 }
-let system=migrate(),current,saveTimer=null,timerHandle=null,cloudSession=null,cloudSyncTimer=null,cloudIntegrations=[],latestIntegrationRun=null,companyContext={org:null,members:[],goals:[],kpis:[],dependencies:[],invites:[]},assessmentSkillId=null;
+let system=migrate(),current,saveTimer=null,timerHandle=null,cloudSession=null,cloudSyncTimer=null,cloudIntegrations=[],latestIntegrationRun=null,companyContext={org:null,members:[],goals:[],kpis:[],dependencies:[],invites:[]},knowledgeSources=[],knowledgeResults=[],assessmentSkillId=null;
 function save(){localStorage.setItem(KEY,JSON.stringify(system))}
 function getEntry(date){let e=system.entries.find(x=>x.date===date);if(!e){e=freshEntry(date);system.entries.push(e);save()}return e}
 function score(e){return proofKeys.filter(k=>e.proofs[k]?.done).length}
@@ -451,6 +469,60 @@ function renderCommand(){
  renderRoute();$("decisions").innerHTML=[...system.decisions].sort((a,b)=>b.createdAt.localeCompare(a.createdAt)).slice(0,8).map(d=>'<div class="row"><div><strong>'+escapeHTML(d.title)+'</strong><small>'+d.problemClass+' · '+d.stakes.toUpperCase()+' · Complexity '+d.complexityBudget+' · '+d.route.join(" → ")+'</small></div><span class="pill">'+d.status.toUpperCase()+'</span></div>').join("")||'<div class="muted">Noch keine dokumentierten Entscheidungen.</div>'
 }
 window.updateGoalProgress=id=>{const g=system.goals.find(x=>x.id===id);if(!g)return;const raw=prompt("Aktueller Stand für "+g.name+(g.unit?" ("+g.unit+")":"")+":",g.current==null?"":String(g.current));if(raw===null)return;const v=Number(String(raw).replace(",", "."));if(!Number.isFinite(v)){alert("Bitte Zahl eingeben.");return}g.current=v;g.updatedAt=new Date().toISOString();event("goal.progress.updated",{goal:g.name,value:v,target:g.target,unit:g.unit});save();renderAll();if(cloudSession)cloudPushGoal(g).catch(cloudError)};
+
+function renderKnowledgePort(){
+ const st=$("knowledgePortStatus"),wrap=$("knowledgeResults");
+ if(!cloudSession){
+  st.textContent="CLOUD LOGIN REQUIRED";
+  wrap.innerHTML='<div class="muted">Cloud-Login nötig. Private Knowledge Objects werden user-isoliert in Supabase gespeichert.</div>';
+  return;
+ }
+ const readwise=knowledgeSources.find(x=>x.provider==="readwise"),manual=knowledgeSources.find(x=>x.provider==="manual");
+ st.textContent="MANUAL "+(manual?.status||"—").toUpperCase()+" · READWISE "+(readwise?.status||"—").toUpperCase().replaceAll("_"," ");
+ wrap.innerHTML=knowledgeResults.length?knowledgeResults.map(k=>'<div class="row"><div><strong>'+escapeHTML(k.title||k.source_url||"Untitled")+'</strong><small>'+escapeHTML((k.provider||"manual").toUpperCase())+' · '+escapeHTML(k.category||"general")+' · '+escapeHTML((k.ingestion_status||"normalized").toUpperCase())+(k.summary?' · '+escapeHTML(k.summary.slice(0,120)):'')+(k.notes?' · '+escapeHTML(k.notes.slice(0,120)):'')+'</small></div><button class="btn" onclick="promoteKnowledge(\''+String(k.id).replace(/'/g,"")+'\')">CANDIDATE</button></div>').join(""):'<div class="muted">Noch kein privates Wissen im Knowledge Port.</div>';
+}
+async function loadKnowledgePort(){
+ if(!cloudSession){knowledgeSources=[];knowledgeResults=[];renderKnowledgePort();return}
+ const [sources,items]=await Promise.all([
+  api("knowledge_sources?select=provider,status,adapter_version,capabilities,last_sync_at,last_error&order=provider.asc"),
+  api("knowledge_items?select=id,provider,title,source_url,summary,notes,tags,category,ingestion_status,source_updated_at,updated_at&order=updated_at.desc&limit=20")
+ ]);
+ knowledgeSources=Array.isArray(sources)?sources:[];
+ knowledgeResults=Array.isArray(items)?items:[];
+ renderKnowledgePort();
+}
+async function searchKnowledgePort(){
+ if(!cloudSession){alert("Knowledge Port braucht Cloud-Login.");return}
+ const q=$("knowledgeQuery").value.trim();
+ knowledgeResults=await api("rpc/knowledge_search","",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({p_query:q,p_limit:20})})||[];
+ renderKnowledgePort();
+}
+async function captureKnowledge(){
+ if(!cloudSession){alert("Knowledge Port braucht Cloud-Login.");return}
+ const title=$("knowledgeTitle").value.trim(),url=$("knowledgeUrl").value.trim(),notes=$("knowledgeNote").value.trim();
+ if(!title&&!url&&!notes){alert("Titel, URL oder Notiz eintragen.");return}
+ const tags=$("knowledgeTags").value.split(",").map(x=>x.trim()).filter(Boolean);
+ const external=uid();
+ await api("knowledge_items","",{method:"POST",headers:{"Prefer":"return=minimal"},body:JSON.stringify([{
+  user_id:cloudSession.user.id,provider:"manual",external_id:external,source_url:url||null,
+  title:title||null,notes:notes||null,tags,category:"note",privacy_scope:"private",
+  ingestion_status:"normalized",metadata:{captured_from:"panthera-ace"}
+ }])});
+ $("knowledgeTitle").value="";$("knowledgeUrl").value="";$("knowledgeTags").value="";$("knowledgeNote").value="";
+ await loadKnowledgePort();
+}
+window.promoteKnowledge=async id=>{try{
+ if(!cloudSession)throw new Error("Cloud-Login nötig.");
+ const item=knowledgeResults.find(x=>x.id===id);
+ const learning=prompt("Welche allgemeine, testbare Erkenntnis soll PANTHERA daraus lernen?","");
+ if(!learning||learning.trim().length<8)return;
+ await api("rpc/promote_knowledge_item_to_candidate","",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({
+  p_item_id:id,p_generalized_learning:learning.trim(),p_title:item?.title||null,p_category:item?.category||"general",p_evidence_level:"hypothesis",p_confidence:null
+ })});
+ await loadKnowledgePort();
+ alert("Als privater Learning Candidate gespeichert. Noch NICHT im Shared Canon.");
+ }catch(e){alert(String(e.message||e))}};
+
 function renderAll(){renderToday();renderGrowth();renderReview();renderCompany();renderCommand();save()}
 function load(date){current=getEntry(date);renderAll();$("autosave").textContent="READY"}
 function show(id){document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("active",s.id===id));document.querySelectorAll(".nav button").forEach(b=>b.classList.toggle("active",b.dataset.screen===id));if(id==="growth")renderGrowth();if(id==="review")renderReview();if(id==="company")renderCompany();if(id==="command")renderCommand()}
@@ -466,6 +538,10 @@ $("timerReset").onclick=()=>{clearInterval(timerHandle);$("timer").textContent="
 $("startMove").onclick=()=>{if(!current.nextMove.trim()){$("nextMove").focus();return}event("execution.next_move",{date:current.date,move:current.nextMove});runTimer(600);document.querySelector("#timer").scrollIntoView({behavior:"smooth",block:"center"})};
 $("closeReview").onclick=()=>{const s=skillByName(current.skillFocus);if(current.skillEvidence.trim()&&s){const type=current.pressureEvidence?"pressure":"capability";const ev={id:uid(),skillId:s.id,skillName:s.name,date:current.date,type,quality:Number(current.evidenceQuality||3),independent:Number(current.assistanceLevel||0)===0,evidence:current.skillEvidence,createdAt:new Date().toISOString()};system.evidenceItems.push(ev);s.evidenceCount+=1;s.lastUsedAt=new Date().toISOString();s.confidence=Math.min(.99,s.confidence+.03*(ev.quality/3));if(ev.independent&&ev.quality>=4)s.confidence=Math.min(.99,s.confidence+.04);system.independenceChecks.push({id:uid(),skillId:s.id,date:current.date,assistanceLevel:Number(current.assistanceLevel||0),createdAt:new Date().toISOString()});event("skill.evidence",{skill:s.name,type,quality:ev.quality,independent:ev.independent})}current.reviewClosed=true;event("review.closed",{date:current.date,score:score(current),failure:current.failureType});persist();if(cloudSession)queueFullSync()};
 $("addPrediction").onclick=()=>{const st=$("predictionStatement").value.trim(),pr=Number($("predictionProbability").value),due=$("predictionDue").value;if(!st||!pr){alert("Vorhersage und Wahrscheinlichkeit eintragen.");return}const p={id:uid(),statement:st,probability:pr,dueDate:due||null,outcome:null,createdAt:new Date().toISOString(),resolvedAt:null};system.predictions.push(p);event("prediction.created",{id:p.id,probability:pr});$("predictionStatement").value="";save();renderAll();if(cloudSession)cloudPushPrediction(p).catch(cloudError)};
+$("captureKnowledge").onclick=()=>captureKnowledge().catch(e=>alert(String(e.message||e)));
+$("searchKnowledge").onclick=()=>searchKnowledgePort().catch(e=>alert(String(e.message||e)));
+$("knowledgeQuery").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();searchKnowledgePort().catch(err=>alert(String(err.message||err)))}});
+
 $("prepareCompanyInvite").onclick=async()=>{try{
  if(!cloudSession||!companyContext.org)throw new Error("Company OS braucht zuerst Cloud-Login.");
  const me=companyContext.members.find(m=>m.user_id===cloudSession.user.id);
@@ -544,7 +620,8 @@ async function fullSync(){
  const [re,rs,rp,rpred,rdec,rgoals,rints,rirun,rorgs]=await Promise.all([api("daily_entries?select=*&order=entry_date.desc"),api("skills?select=*&order=name.asc"),api("projects?select=*&order=priority.asc,name.asc"),api("predictions?select=*&order=created_at.desc"),api("decisions?select=*&order=created_at.desc"),api("goals?select=*&order=focus_tier.asc,priority.desc"),api("integration_status?select=provider,status,last_sync_at,metadata&order=provider.asc"),api("integration_test_runs?select=suite,run_ref,cases_total,cases_passed,cases_failed,status,evidence_pointer,created_at&order=created_at.desc&limit=1"),api("organizations?select=id,name,slug,status,metadata&order=created_at.asc&limit=1")]);
  const map=new Map((primaryUser?system.entries:[]).map(e=>[e.date,e]));(re||[]).forEach(r=>{const e={...freshEntry(r.entry_date),id:r.id,date:r.entry_date,sleep:r.sleep_hours,energy:r.energy,state:r.state||"",win:r.win||"",nextMove:r.next_move||"",goalFocus:r.goal_focus_name||"",skillFocus:r.skill_focus||"",uncomfortable:r.uncomfortable||"",ifThen:r.if_then||"",locked:r.locked,proofs:r.proofs||freshEntry(r.entry_date).proofs,biggest:r.biggest||"",deviation:r.deviation||"",failureType:r.failure_type||"",correction:r.correction||"",skillEvidence:r.skill_evidence||"",updatedAt:r.updated_at,createdAt:r.created_at};const l=map.get(e.date);if(!l||new Date(e.updatedAt)>=new Date(l.updatedAt||0))map.set(e.date,e)});system.entries=[...map.values()];
  if(rs?.length)system.skills=rs.map(normalizeSkill);else if(!primaryUser)system.skills=[];if(rp?.length)system.projects=rp.map(p=>p.name);else if(!primaryUser)system.projects=[];if(rpred?.length)system.predictions=rpred.map(p=>({id:p.id,statement:p.statement,probability:Math.round(Number(p.probability)*100),dueDate:p.due_date,outcome:p.outcome,createdAt:p.created_at,resolvedAt:p.resolved_at}));else if(!primaryUser)system.predictions=[];if(rdec?.length)system.decisions=rdec.map(d=>({id:d.id,title:d.title,goal:d.goal||"",problemClass:d.problem_class||"strategy",stakes:d.stakes,reversibility:d.reversibility,status:d.status,blindSpots:d.blind_spots||{},expected:d.expected_outcome||"",complexityBudget:d.metadata?.complexity_budget||1,route:d.metadata?.route||["Reality"],counterLenses:d.metadata?.counter_lenses||[],createdAt:d.created_at}));else if(!primaryUser)system.decisions=[];if(rgoals?.length)system.goals=rgoals.map(g=>({id:g.id,domain:g.domain,name:g.name,status:g.status,focusTier:g.focus_tier,priority:g.priority,target:g.target_value==null?null:Number(g.target_value),current:g.current_value==null?null:Number(g.current_value),unit:g.unit,deadline:g.deadline,source:g.source||"cloud"}));else if(!primaryUser)system.goals=[];cloudIntegrations=Array.isArray(rints)?rints:[];latestIntegrationRun=Array.isArray(rirun)&&rirun.length?rirun[0]:null;
- companyContext={org:null,members:[],goals:[],kpis:[],dependencies:[]};
+ await loadKnowledgePort();
+  companyContext={org:null,members:[],goals:[],kpis:[],dependencies:[]};
  if(Array.isArray(rorgs)&&rorgs.length){
    const org=rorgs[0],oid=encodeURIComponent(org.id);
    const [cm,cg,ck,cd,ci]=await Promise.all([
