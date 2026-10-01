@@ -523,7 +523,7 @@ window.promoteKnowledge=async id=>{try{
  alert("Als privater Learning Candidate gespeichert. Noch NICHT im Shared Canon.");
  }catch(e){alert(String(e.message||e))}};
 
-function renderAll(){renderToday();renderGrowth();renderReview();renderCompany();renderCommand();save()}
+function renderAll(){renderToday();renderGrowth();renderReview();renderCompany();renderCommand();renderKnowledgePort();save()}
 function load(date){current=getEntry(date);renderAll();$("autosave").textContent="READY"}
 function show(id){document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("active",s.id===id));document.querySelectorAll(".nav button").forEach(b=>b.classList.toggle("active",b.dataset.screen===id));if(id==="growth")renderGrowth();if(id==="review")renderReview();if(id==="company")renderCompany();if(id==="command")renderCommand()}
 document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>show(b.dataset.screen));
