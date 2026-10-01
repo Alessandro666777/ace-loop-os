@@ -25,7 +25,7 @@
       <div class="label">TODAY</div>
       <h2 id="heroWin">Definiere den Sieg.</h2>
       <p id="heroMove">Ein klarer nächster physischer Zug schlägt weitere Architektur.</p>
-      <div class="chips"><span class="chip" id="dayMode">STANDARD DAY</span><span class="chip" id="focusChip">FOCUS · —</span><span class="chip" id="budgetChip">COMPLEXITY · 1</span></div>
+      <div class="chips"><span class="chip" id="dayMode">STANDARD DAY</span><span class="chip" id="goalChip">GOAL · AUTO</span><span class="chip" id="focusChip">SKILL · —</span><span class="chip" id="budgetChip">COMPLEXITY · 1</span></div>
     </div>
 
     <button class="next" id="startMove"><div><b>NEXT MOVE</b><span id="nextMoveText">Noch nicht definiert.</span></div><div class="arrow">→</div></button>
@@ -48,7 +48,8 @@
         <label>Today's Win<textarea id="win" placeholder="Wenn heute nur eine Sache wirklich zählt …"></textarea></label>
         <label>Next Physical Move<textarea id="nextMove" placeholder="Telefonieren, schreiben, bauen, trainieren, sprechen …"></textarea></label>
       </div>
-      <div class="grid3" style="margin-top:10px">
+      <div class="grid4" style="margin-top:10px">
+        <label>Strategic Goal<select id="goalFocus"></select></label>
         <label>Skill Focus<select id="skillFocus"></select></label>
         <label>Unbequeme Pflicht<input id="uncomfortable" placeholder="Was werde ich wahrscheinlich vermeiden?"></label>
         <label>Wenn–Dann<input id="ifThen" placeholder="Wenn ich ausweiche, dann …"></label>
@@ -75,9 +76,10 @@
       <div class="metric"><span>INDEPENDENCE</span><b id="independence">—</b></div>
     </div>
     <div id="bottleneckSignal" class="signal">Noch keine belastbare Bottleneck-Evidenz.</div>
-    <div class="card"><div class="section"><span class="n">03</span><h3>ACTIVE CAPABILITY STACK</h3><span class="auto">MAX 3</span></div><div id="skills" class="skillGrid"></div></div>
-    <div class="card"><div class="section"><span class="n">04</span><h3>PROOF PATTERNS</h3></div><div id="pillars" class="list"></div></div>
-    <div class="card"><div class="section"><span class="n">05</span><h3>SEASON</h3></div><div class="grid3"><label>Primary<input id="seasonPrimary"></label><label>Secondary<input id="seasonSecondary"></label><label>Maintain<input id="seasonMaintain"></label></div></div>
+    <div class="card"><div class="section"><span class="n">03</span><h3>STRATEGIC FRONT</h3><span class="auto">TIER 1 + 2</span></div><div id="strategicGoals" class="list"></div></div>
+    <div class="card"><div class="section"><span class="n">04</span><h3>ACTIVE CAPABILITY STACK</h3><span class="auto">MAX 3</span></div><div id="skills" class="skillGrid"></div></div>
+    <div class="card"><div class="section"><span class="n">05</span><h3>PROOF PATTERNS</h3></div><div id="pillars" class="list"></div></div>
+    <div class="card"><div class="section"><span class="n">06</span><h3>SEASON</h3></div><div class="grid3"><label>Primary<input id="seasonPrimary"></label><label>Secondary<input id="seasonSecondary"></label><label>Maintain<input id="seasonMaintain"></label></div></div>
   </section>
 
   <section id="review" class="screen">
@@ -113,8 +115,18 @@
       <div class="card"><div class="section"><span class="n">10</span><h3>SKILL CONTROL</h3></div><label>Alle Skills · Name|K|C|P|class<textarea id="skillsText" placeholder="Sales|3|2|1|core"></textarea></label><p class="muted">K = Knowledge · C = Capability · P = Pressure. Änderungen sind vorläufig, bis Evidence sie bestätigt.</p></div>
     </div>
 
+    <div class="card">
+      <div class="section"><span class="n">11</span><h3>GOAL PORTFOLIO</h3><span class="auto" id="goalCounts">—</span></div>
+      <div class="grid3">
+        <div class="metric"><span>FRONTLINE</span><b id="frontlineCount">0</b></div>
+        <div class="metric"><span>ACTIVE</span><b id="activeGoalCount">0</b></div>
+        <div class="metric"><span>ALL GOALS</span><b id="allGoalCount">0</b></div>
+      </div>
+      <div id="goalPortfolio" class="list" style="margin-top:10px"></div>
+    </div>
+
     <div class="card decisionCard">
-      <div class="section"><span class="n">11</span><h3>DECISION LAB + BLIND-SPOT FIREWALL</h3></div>
+      <div class="section"><span class="n">12</span><h3>DECISION LAB + BLIND-SPOT FIREWALL</h3></div>
       <div class="grid3"><label>Entscheidung<input id="decisionTitle" placeholder="Was muss entschieden werden?"></label><label>Klasse<select id="decisionClass"><option>strategy</option><option>social</option><option>business</option><option>skill</option><option>brand</option><option>execution</option><option>risk</option></select></label><label>Stakes<select id="decisionStakes"><option value="low">LOW</option><option value="medium" selected>MEDIUM</option><option value="high">HIGH</option></select></label></div>
       <div class="grid3" style="margin-top:10px"><label>Reversibilität<select id="decisionReversibility"><option value="high">HOCH</option><option value="medium" selected>MITTEL</option><option value="low">NIEDRIG</option></select></label><label>Ziel<input id="decisionGoal"></label><label>Erwartetes Ergebnis<input id="decisionExpected"></label></div>
       <div class="blindgrid" style="margin-top:10px">
@@ -132,14 +144,14 @@
     </div>
 
     <div class="card">
-      <div class="section"><span class="n">12</span><h3>SYSTEM GOVERNANCE</h3></div>
+      <div class="section"><span class="n">13</span><h3>SYSTEM GOVERNANCE</h3></div>
       <div id="modules" class="moduleGrid"></div>
       <div class="divider"></div>
       <p class="muted"><b>Delete Test:</b> Ein Modul bleibt nur aktiv, wenn sein Entfernen ein reales Ergebnis messbar verschlechtern würde. Neue Major-Module sind während des Architecture Freeze gesperrt.</p>
     </div>
 
     <div class="card">
-      <div class="section"><span class="n">13</span><h3>DATA + CLOUD</h3></div>
+      <div class="section"><span class="n">14</span><h3>DATA + CLOUD</h3></div>
       <div class="actions"><button class="btn soft" id="openCloud">CLOUD LOGIN</button><button class="btn" id="syncNow">SYNC NOW</button><button class="btn" id="export">JSON EXPORT</button><label class="btn">JSON IMPORT<input id="import" type="file" accept="application/json" hidden></label></div>
       <p class="muted">Local-first ist die sichere Betriebsbasis. Cloud wird zur geräteübergreifenden Wahrheitsschicht, sobald die Auth-Session steht.</p>
     </div>
@@ -213,10 +225,53 @@ function baseSkills(){
  ];
  return rows.map(r=>({id:uid(),name:r[0],knowledge:r[1],capability:r[2],pressure:r[3],class:r[4],nextDrill:r[5],nextFieldTest:r[6],active:r[7],evidenceCount:0,confidence:.5,baselineVerified:false,lastUsedAt:null,lastTestedAt:null}));
 }
-function base(){
- return {version:4,entries:[],skills:baseSkills(),projects:[],season:{primary:"Revenue Execution",secondary:"Leadership",maintain:"Body"},events:[],predictions:[],decisions:[],assessments:[],independenceChecks:[],trainingCycles:[],evidenceItems:[],config:{activeVersion:"3.0",freezeUntil:"2026-10-31",maxActiveSkills:3,complexityBudget:1,independenceTarget:.8,objective:"Real Capability × Judgment × Execution × Transfer × Sustainability"},modules:MODULES};
+
+function baseGoals(){
+ const rows=[
+ ["NORTH_STAR","Highest Version / Durchbruch 2026–2027","active",1,5,null,null,null],
+ ["PROINVEST","PROINVEST S4","active",1,5,4000000,"BWS","2026-12-31"],
+ ["PROINVEST","PROINVEST S5","active",3,5,15000000,"BWS","2027-04-07"],
+ ["PROINVEST","PROINVEST S6","active",3,5,35000000,"BWS","2027-06-27"],
+ ["PROINVEST","PROINVEST 100 Partner 2026","active",2,5,100,"Partner","2026-12-31"],
+ ["PROINVEST","PROINVEST 300 Partner bis S6","active",3,4,300,"Partner","2027-06-27"],
+ ["PROINVEST","800k BWS Wochenstandard","active",2,5,800000,"BWS/week",null],
+ ["NULLPUNKT","Nullpunkt 5 Kunden + 5 Partner je Person","active",1,5,10,"Outcomes/person","2026-11-01"],
+ ["NULLPUNKT","Nullpunkt Score ≥75","active",2,4,75,"Score","2026-11-01"],
+ ["NULLPUNKT","PANTHERA Loop real beweisen","active",1,5,1,"complete loop",null],
+ ["NULLPUNKT","Weekly Council","active",3,3,1,"Council/week",null],
+ ["TEAM","Jede Woche kennenlernen, verkaufen, einstellen","active",2,5,3,"weekly behaviors",null],
+ ["TEAM","100 Menschen aufgebaut","active",3,4,100,"people","2027-12-31"],
+ ["TEAM","Teamkultur Meeting/Essen/Stadt","active",3,3,null,null,null],
+ ["SALON_QUEEN","Salon Queen 5 Termine / 2 Wochen","incubating",4,3,5,"appointments",null],
+ ["SALON_QUEEN","Salon Queen 10k €/Monat Fix-Einkommen","incubating",4,3,10000,"EUR/month",null],
+ ["PERSONAL_BRAND","100k Follower","incubating",4,3,100000,"followers",null],
+ ["PERSONAL_BRAND","Cinematic Personal Brand","active",2,3,null,null,null],
+ ["CREATOR","5 Kurzfilme","incubating",4,3,5,"short films","2027-12-31"],
+ ["CREATOR","Eigene kreative Sprache","incubating",4,3,null,null,null],
+ ["INCOME","50k €/Monat Alessandro","active",3,5,50000,"EUR/month","2027-12-31"],
+ ["AI_SOFTWARE","200 Menschen × 2.500 € geholfen","incubating",4,3,200,"clients helped",null],
+ ["AI_SOFTWARE","PANTHERA Lite als Software","incubating",4,3,1,"product",null],
+ ["BODY","Gym 5× pro Woche","active",2,4,5,"sessions/week",null],
+ ["BODY","1 neue Sportart pro Monat","active",3,2,1,"new sport/month",null],
+ ["BODY","Schlaf & Regeneration stabilisieren","active",2,4,null,null,null],
+ ["SELF_LEADERSHIP","Tagesroutine stabilisieren","active",1,5,null,null,null],
+ ["SELF_LEADERSHIP","Arbeitsortabhängigkeit reduzieren","incubating",4,2,null,null,null],
+ ["TRAVEL","Reisen + Arbeiten kombinieren","incubating",4,2,null,null,null],
+ ["TRAVEL","Burning Man nach S6","incubating",4,2,1,"trip",null],
+ ["TRAVEL","4 Wochen gemeinsamer Urlaub","option",4,1,4,"weeks",null],
+ ["MUSIC","FALLIN1","incubating",4,2,null,null,null],
+ ["INFRASTRUCTURE","Coworking / Creator Space München–Augsburg","option",4,2,1,"space",null],
+ ["VENTURE","Tokyo with a Bar","option",4,1,1,"venue",null],
+ ["EVENT","Techno × Fashion × Tattoo × Hair × Runway Event","incubating",4,2,1,"event",null],
+ ["SIDE_CASH","Umzug/Handwerk Cash-Projekt","option",4,1,null,"EUR",null],
+ ["ENERGY_SALES","Strom & Gas Geschäftsfeld","incubating",4,3,null,null,null]
+ ];
+ return rows.map(r=>({id:uid(),domain:r[0],name:r[1],status:r[2],focusTier:r[3],priority:r[4],target:r[5],unit:r[6],deadline:r[7],current:null,source:"memory+current-plan"}));
 }
-function freshEntry(date){return{id:uid(),date,sleep:null,energy:null,state:"",win:"",nextMove:"",skillFocus:"",uncomfortable:"",ifThen:"",locked:false,proofs:Object.fromEntries(proofKeys.map(k=>[k,{target:"",done:false,evidence:""}])),biggest:"",deviation:"",failureType:"",correction:"",skillEvidence:"",evidenceQuality:3,pressureEvidence:false,assistanceLevel:0,reviewClosed:false,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()}}
+function base(){
+ return {version:4,entries:[],skills:baseSkills(),goals:baseGoals(),projects:[],season:{primary:"Revenue Execution",secondary:"Leadership",maintain:"Body"},events:[],predictions:[],decisions:[],assessments:[],independenceChecks:[],trainingCycles:[],evidenceItems:[],config:{activeVersion:"3.0",freezeUntil:"2026-10-31",maxActiveSkills:3,complexityBudget:1,independenceTarget:.8,objective:"Real Capability × Judgment × Execution × Transfer × Sustainability"},modules:MODULES};
+}
+function freshEntry(date){return{id:uid(),date,sleep:null,energy:null,state:"",win:"",nextMove:"",goalFocus:"",skillFocus:"",uncomfortable:"",ifThen:"",locked:false,proofs:Object.fromEntries(proofKeys.map(k=>[k,{target:"",done:false,evidence:""}])),biggest:"",deviation:"",failureType:"",correction:"",skillEvidence:"",evidenceQuality:3,pressureEvidence:false,assistanceLevel:0,reviewClosed:false,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()}}
 function normalizeSkill(s){
  const lvl=Number(s.level??s.knowledge??0);
  return {id:s.id||uid(),name:s.name||"Skill",knowledge:Number(s.knowledge??s.knowledge_level??lvl),capability:Number(s.capability??s.capability_level??Math.max(0,lvl-1)),pressure:Number(s.pressure??s.pressure_level??Math.max(0,lvl-2)),class:s.class||s.skill_class||"adjacent",nextDrill:s.nextDrill||s.next_drill||"",nextFieldTest:s.nextFieldTest||s.next_field_test||"",active:(s.active!==undefined?!!s.active:(s.active_training!==undefined?!!s.active_training:["Sales","Leadership","Self-Leadership"].includes(s.name))),evidenceCount:Number(s.evidenceCount??s.evidence_count??0),confidence:Number(s.confidence??.5),baselineVerified:!!(s.baselineVerified??s.baseline_verified),lastUsedAt:s.lastUsedAt||s.last_used_at||null,lastTestedAt:s.lastTestedAt||s.last_tested_at||null};
@@ -236,7 +291,7 @@ function migrate(){
  return base();
 }
 function normalize(x){
- const b=base(),o={...b,...x};o.entries=Array.isArray(x.entries)?x.entries.map(e=>({...freshEntry(e.date),...e})):[];o.skills=Array.isArray(x.skills)&&x.skills.length?x.skills.map(normalizeSkill):b.skills;o.projects=Array.isArray(x.projects)?x.projects:[];o.events=Array.isArray(x.events)?x.events:[];o.predictions=Array.isArray(x.predictions)?x.predictions:[];o.decisions=Array.isArray(x.decisions)?x.decisions:[];o.assessments=Array.isArray(x.assessments)?x.assessments:[];o.independenceChecks=Array.isArray(x.independenceChecks)?x.independenceChecks:[];o.trainingCycles=Array.isArray(x.trainingCycles)?x.trainingCycles:[];o.evidenceItems=Array.isArray(x.evidenceItems)?x.evidenceItems:[];o.config={...b.config,...(x.config||{})};o.modules=Array.isArray(x.modules)&&x.modules.length?x.modules:b.modules;o.season={...b.season,...(x.season||{})};return o;
+ const b=base(),o={...b,...x};o.entries=Array.isArray(x.entries)?x.entries.map(e=>({...freshEntry(e.date),...e})):[];o.skills=Array.isArray(x.skills)&&x.skills.length?x.skills.map(normalizeSkill):b.skills;const existingGoals=Array.isArray(x.goals)?x.goals:[];const gm=new Map(existingGoals.map(g=>[g.name,g]));b.goals.forEach(g=>{if(!gm.has(g.name))gm.set(g.name,g)});o.goals=[...gm.values()];o.projects=Array.isArray(x.projects)?x.projects:[];o.events=Array.isArray(x.events)?x.events:[];o.predictions=Array.isArray(x.predictions)?x.predictions:[];o.decisions=Array.isArray(x.decisions)?x.decisions:[];o.assessments=Array.isArray(x.assessments)?x.assessments:[];o.independenceChecks=Array.isArray(x.independenceChecks)?x.independenceChecks:[];o.trainingCycles=Array.isArray(x.trainingCycles)?x.trainingCycles:[];o.evidenceItems=Array.isArray(x.evidenceItems)?x.evidenceItems:[];o.config={...b.config,...(x.config||{})};o.modules=Array.isArray(x.modules)&&x.modules.length?x.modules:b.modules;o.season={...b.season,...(x.season||{})};return o;
 }
 let system=migrate(),current,saveTimer=null,timerHandle=null,cloudSession=null,cloudSyncTimer=null,cloudIntegrations=[],assessmentSkillId=null;
 function save(){localStorage.setItem(KEY,JSON.stringify(system))}
@@ -251,14 +306,21 @@ function activeSkills(){return system.skills.filter(s=>s.active).slice(0,system.
 function skillScore(s){return s.knowledge*.2+s.capability*.5+s.pressure*.3}
 function bottleneck(){const a=activeSkills();return a.length?[...a].sort((x,y)=>skillScore(x)-skillScore(y))[0]:null}
 function skillByName(n){return system.skills.find(s=>s.name===n)||bottleneck()||system.skills[0]}
+
+function activeGoals(){return system.goals.filter(g=>g.status==="active")}
+function frontlineGoals(){return activeGoals().filter(g=>Number(g.focusTier||4)<=2).sort((a,b)=>(a.focusTier-b.focusTier)||(b.priority-a.priority)||String(a.deadline||"9999").localeCompare(String(b.deadline||"9999")))}
+function strategicGoal(name){if(name)return system.goals.find(g=>g.name===name)||null;const f=frontlineGoals();return f.find(g=>g.deadline)||f[0]||null}
+function goalLabel(g){if(!g)return"—";const left=g.deadline?days(iso(),g.deadline):null;return g.name+(left!==null?" · "+left+"d":"")}
 function retestDue(s){if(!s.baselineVerified)return true;if(!s.lastTestedAt)return true;return days(s.lastTestedAt.slice(0,10),iso())>=30}
 function escapeHTML(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
 
 function renderToday(){
  $("sleep").value=current.sleep??"";$("energy").value=current.energy??"";$("state").value=current.state||"";$("win").value=current.win;$("nextMove").value=current.nextMove;$("uncomfortable").value=current.uncomfortable;$("ifThen").value=current.ifThen;
  $("heroWin").textContent=current.win.trim()||"Definiere den Sieg.";$("heroMove").textContent=current.nextMove.trim()||"Ein klarer nächster physischer Zug schlägt weitere Architektur.";$("nextMoveText").textContent=current.nextMove.trim()||"Noch nicht definiert.";$("dayMode").textContent=dayMode(current);$("budgetChip").textContent="COMPLEXITY · "+system.config.complexityBudget;
+ const gs=$("goalFocus");gs.innerHTML='<option value="">AUTO · STRATEGIC FRONT</option>'+frontlineGoals().map(g=>'<option value="'+escapeHTML(g.name)+'">'+escapeHTML(g.name)+'</option>').join("");gs.value=current.goalFocus||"";
+ const g=strategicGoal(current.goalFocus);$("goalChip").textContent="GOAL · "+(g?g.name.toUpperCase():"—");
  const select=$("skillFocus");select.innerHTML='<option value="">AUTO · BOTTLENECK</option>'+activeSkills().map(s=>'<option value="'+escapeHTML(s.name)+'">'+escapeHTML(s.name)+'</option>').join("");select.value=current.skillFocus||"";
- const s=skillByName(current.skillFocus);$("focusChip").textContent="FOCUS · "+(s?s.name.toUpperCase():"—");$("missionTitle").textContent=s?s.name:"Noch keine aktive Mission.";$("missionDrill").textContent=s&&s.nextDrill?"DRILL · "+s.nextDrill:"Noch kein Drill definiert.";$("missionField").textContent=s&&s.nextFieldTest?"FIELD TEST · "+s.nextFieldTest:"";
+ const s=skillByName(current.skillFocus);$("focusChip").textContent="SKILL · "+(s?s.name.toUpperCase():"—");$("missionTitle").textContent=s?s.name:"Noch keine aktive Mission.";$("missionDrill").textContent=s&&s.nextDrill?"DRILL · "+s.nextDrill:"Noch kein Drill definiert.";$("missionField").textContent=s&&s.nextFieldTest?"FIELD TEST · "+s.nextFieldTest:"";
  $("lockState").textContent=current.locked?"Commitments gesetzt.":"Plan ist offen.";$("lockDay").textContent=current.locked?"DAY UNLOCK":"DAY COMMIT";
  renderProofs();renderRecovery()
 }
@@ -281,6 +343,7 @@ function calcIndependence(){
 function renderGrowth(){
  const entries=[...system.entries].sort((a,b)=>b.date.localeCompare(a.date)),l7=entries.slice(0,7),l30=entries.slice(0,30);$("avg7").textContent=l7.length?(l7.reduce((a,e)=>a+score(e),0)/l7.length).toFixed(1):"—";$("evidenceRate").textContent=evRate(l7)+"%";$("returnSpeed").textContent=calcReturnSpeed();$("calibration").textContent=calcCalibration();$("independence").textContent=calcIndependence();
  const b=bottleneck();$("bottleneckSignal").innerHTML=b?'<b>BOTTLENECK · '+escapeHTML(b.name)+'</b><br>Knowledge '+b.knowledge+' · Capability '+b.capability+' · Pressure '+b.pressure+(retestDue(b)?' · RETEST DUE':'')+'. Fokus bleibt auf dem schwächsten belegbaren Glied, nicht auf dem attraktivsten Thema.':"Noch keine aktiven Skills.";
+ $("strategicGoals").innerHTML=frontlineGoals().map(g=>'<div class="row"><div><strong>'+escapeHTML(g.name)+'</strong><small>'+escapeHTML(g.domain)+' · TIER '+g.focusTier+(g.deadline?' · '+Math.max(0,days(iso(),g.deadline))+' Tage':'')+'</small></div><span class="pill">'+(g.target!=null?escapeHTML(g.target+' '+(g.unit||'')):'ACTIVE')+'</span></div>').join("")||'<div class="muted">Keine strategischen Frontziele.</div>';
  $("skills").innerHTML=activeSkills().map(s=>'<div class="skill active"><div class="skillHead"><h4>'+escapeHTML(s.name)+'</h4><span class="pill">'+(s.baselineVerified?"VERIFIED":"PROVISIONAL")+'</span></div><div class="triad"><div><span>KNOWLEDGE</span><b>S'+s.knowledge+'</b></div><div><span>CAPABILITY</span><b>S'+s.capability+'</b></div><div><span>PRESSURE</span><b>S'+s.pressure+'</b></div></div><div class="bar"><i style="width:'+Math.round(skillScore(s)/7*100)+'%"></i></div><div class="tiny" style="margin-top:8px">'+s.evidenceCount+' Evidenzen · Confidence '+Math.round(s.confidence*100)+'%'+(retestDue(s)?" · Retest fällig":"")+'</div><div class="actions"><button class="btn" onclick="openAssessment(\''+s.id+'\')">'+(s.baselineVerified?"RETEST":"BASELINE")+'</button></div></div>').join("");
  const ps=proofKeys.map(k=>({k,p7:l7.length?Math.round(l7.filter(e=>e.proofs[k]?.done).length/l7.length*100):0,p30:l30.length?Math.round(l30.filter(e=>e.proofs[k]?.done).length/l30.length*100):0}));$("pillars").innerHTML=ps.map(x=>'<div class="row"><div><strong>'+proofMeta[x.k][0]+'</strong><small>7T '+x.p7+'% · 30T '+x.p30+'%</small><div class="bar"><i style="width:'+x.p7+'%"></i></div></div><span class="pill">'+x.p7+'%</span></div>').join("");
  $("seasonPrimary").value=system.season.primary;$("seasonSecondary").value=system.season.secondary;$("seasonMaintain").value=system.season.maintain
@@ -302,6 +365,8 @@ function routeDecision(){
 function renderRoute(){const r=routeDecision();$("routePreview").innerHTML='<b>ROUTE · Complexity '+r.budget+'</b><br>'+r.mods.join(" → ")+(r.lenses.length?" · Counter-Lenses: "+r.lenses.join(", "):"")}
 function renderCommand(){
  $("projectsText").value=system.projects.join("\n");$("skillsText").value=system.skills.map(s=>s.name+"|"+s.knowledge+"|"+s.capability+"|"+s.pressure+"|"+s.class).join("\n");$("freezeChip").textContent="FREEZE · "+system.config.freezeUntil;
+ const ag=activeGoals(),fg=frontlineGoals();$("frontlineCount").textContent=fg.length;$("activeGoalCount").textContent=ag.length;$("allGoalCount").textContent=system.goals.length;$("goalCounts").textContent=ag.length+" ACTIVE · "+system.goals.filter(g=>g.status==="incubating").length+" INCUBATING · "+system.goals.filter(g=>g.status==="option").length+" OPTION";
+ $("goalPortfolio").innerHTML=[...system.goals].sort((a,b)=>({active:0,incubating:1,option:2,completed:3,archived:4,superseded:5}[a.status]-({active:0,incubating:1,option:2,completed:3,archived:4,superseded:5}[b.status]))||(a.focusTier-b.focusTier)||(b.priority-a.priority)||a.name.localeCompare(b.name)).map(g=>'<div class="row"><div><strong>'+escapeHTML(g.name)+'</strong><small>'+escapeHTML(g.domain)+' · TIER '+g.focusTier+(g.deadline?' · '+g.deadline:'')+(g.target!=null?' · Ziel '+escapeHTML(g.target+' '+(g.unit||'')):'')+'</small></div><span class="pill">'+g.status.toUpperCase()+'</span></div>').join("");
  $("modules").innerHTML=system.modules.map(m=>'<div class="module"><b>'+escapeHTML(m.name)+'</b><small>'+m.type+' · '+m.status+'</small><small>'+escapeHTML(m.fn)+'</small></div>').join("");
  renderRoute();$("decisions").innerHTML=[...system.decisions].sort((a,b)=>b.createdAt.localeCompare(a.createdAt)).slice(0,8).map(d=>'<div class="row"><div><strong>'+escapeHTML(d.title)+'</strong><small>'+d.problemClass+' · '+d.stakes.toUpperCase()+' · Complexity '+d.complexityBudget+' · '+d.route.join(" → ")+'</small></div><span class="pill">'+d.status.toUpperCase()+'</span></div>').join("")||'<div class="muted">Noch keine dokumentierten Entscheidungen.</div>'
 }
@@ -310,10 +375,10 @@ function load(date){current=getEntry(date);renderAll();$("autosave").textContent
 function show(id){document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("active",s.id===id));document.querySelectorAll(".nav button").forEach(b=>b.classList.toggle("active",b.dataset.screen===id));if(id==="growth")renderGrowth();if(id==="review")renderReview();if(id==="command")renderCommand()}
 document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>show(b.dataset.screen));
 $("date").onchange=e=>load(e.target.value);
-const entryMap={sleep:"sleep",energy:"energy",state:"state",win:"win",nextMove:"nextMove",skillFocus:"skillFocus",uncomfortable:"uncomfortable",ifThen:"ifThen",biggest:"biggest",deviation:"deviation",failureType:"failureType",correction:"correction",skillEvidence:"skillEvidence",evidenceQuality:"evidenceQuality",pressureEvidence:"pressureEvidence",assistanceLevel:"assistanceLevel"};
+const entryMap={sleep:"sleep",energy:"energy",state:"state",win:"win",nextMove:"nextMove",goalFocus:"goalFocus",skillFocus:"skillFocus",uncomfortable:"uncomfortable",ifThen:"ifThen",biggest:"biggest",deviation:"deviation",failureType:"failureType",correction:"correction",skillEvidence:"skillEvidence",evidenceQuality:"evidenceQuality",pressureEvidence:"pressureEvidence",assistanceLevel:"assistanceLevel"};
 Object.entries(entryMap).forEach(([id,key])=>$(id).addEventListener("input",e=>{let v=e.target.value;if(id==="sleep"||id==="energy"||id==="evidenceQuality"||id==="assistanceLevel")v=v===""?null:Number(v);if(id==="pressureEvidence")v=v==="yes";current[key]=v;schedule()}));
 ["seasonPrimary","seasonSecondary","seasonMaintain"].forEach(id=>$(id).oninput=e=>{system.season[id.replace("season","").toLowerCase()]=e.target.value;save();if(cloudSession)queueFullSync()});
-$("lockDay").onclick=()=>{if(!current.locked){if(!current.win.trim()||!current.nextMove.trim()){alert("Definiere zuerst Sieg und Next Move.");return}const empty=proofKeys.filter(k=>!String(current.proofs[k]?.target||"").trim());if(empty.length){alert("Setze zuerst alle fünf Proof-Commitments.");return}current.locked=true;event("day.committed",{date:current.date,mode:dayMode(current)})}else{const r=prompt("Warum änderst du ein gesetztes Commitment?");if(!r||r.trim().length<5)return;current.locked=false;event("day.unlocked",{date:current.date,reason:r.trim()})}persist()};
+$("lockDay").onclick=()=>{if(!current.locked){if(!current.win.trim()||!current.nextMove.trim()){alert("Definiere zuerst Sieg und Next Move.");return}const empty=proofKeys.filter(k=>!String(current.proofs[k]?.target||"").trim());if(empty.length){alert("Setze zuerst alle fünf Proof-Commitments.");return}current.locked=true;event("day.committed",{date:current.date,mode:dayMode(current),goal:strategicGoal(current.goalFocus)?.name||null})}else{const r=prompt("Warum änderst du ein gesetztes Commitment?");if(!r||r.trim().length<5)return;current.locked=false;event("day.unlocked",{date:current.date,reason:r.trim()})}persist()};
 function runTimer(sec){clearInterval(timerHandle);const end=Date.now()+sec*1000;const draw=()=>{const left=Math.max(0,end-Date.now()),m=Math.floor(left/60000),s=Math.floor((left%60000)/1000);$("timer").textContent=String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");if(left<=0){clearInterval(timerHandle);$("timerNote").textContent="Block beendet. Jetzt Resultat festhalten."}};draw();timerHandle=setInterval(draw,250)}
 $("timerStart").onclick=()=>{if(!current.nextMove.trim()){alert("Definiere zuerst den Next Move.");return}event("execution.block.started",{date:current.date,move:current.nextMove});$("timerNote").textContent="Nur der definierte Move. Keine neue Architektur.";runTimer(600)};
 $("timerReset").onclick=()=>{clearInterval(timerHandle);$("timer").textContent="10:00";$("timerNote").textContent="Keine neue Analyse, sobald ausreichende Klarheit da ist."};
@@ -340,7 +405,7 @@ function authHeaders(extra={}){return{"apikey":SUPA_KEY,"Authorization":"Bearer 
 async function refreshSession(){if(!cloudSession?.refresh_token)return false;const r=await fetch(SUPA_URL+"/auth/v1/token?grant_type=refresh_token",{method:"POST",headers:{"apikey":SUPA_KEY,"Content-Type":"application/json"},body:JSON.stringify({refresh_token:cloudSession.refresh_token})});if(!r.ok){cloudSession=null;writeAuth(null);return false}const x=await r.json();cloudSession={...x,expires_at:Date.now()+(x.expires_in||3600)*1000};writeAuth(cloudSession);return true}
 async function ensureSession(){if(!cloudSession)return false;if((cloudSession.expires_at||0)<Date.now()+120000)return refreshSession();return true}
 async function api(table,query="",options={}){if(!(await ensureSession()))throw new Error("session_expired");const r=await fetch(SUPA_URL+"/rest/v1/"+table+query,{...options,headers:authHeaders(options.headers||{})});if(!r.ok)throw new Error(await r.text());const t=await r.text();return t?JSON.parse(t):null}
-function dbEntry(e){return{user_id:cloudSession.user.id,entry_date:e.date,sleep_hours:e.sleep,energy:e.energy,state:e.state||null,win:e.win,next_move:e.nextMove,skill_focus:e.skillFocus,uncomfortable:e.uncomfortable,if_then:e.ifThen,locked:e.locked,day_mode:dayMode(e),proofs:e.proofs,biggest:e.biggest,deviation:e.deviation,failure_type:e.failureType||null,correction:e.correction,skill_evidence:e.skillEvidence,updated_at:e.updatedAt}}
+function dbEntry(e){return{user_id:cloudSession.user.id,entry_date:e.date,sleep_hours:e.sleep,energy:e.energy,state:e.state||null,win:e.win,next_move:e.nextMove,skill_focus:e.skillFocus,goal_focus_name:e.goalFocus||null,uncomfortable:e.uncomfortable,if_then:e.ifThen,locked:e.locked,day_mode:dayMode(e),proofs:e.proofs,biggest:e.biggest,deviation:e.deviation,failure_type:e.failureType||null,correction:e.correction,skill_evidence:e.skillEvidence,updated_at:e.updatedAt}}
 async function cloudPushEntry(e){cloudBadge("SYNCING","sync");await api("daily_entries?on_conflict=user_id,entry_date","",{method:"POST",headers:{"Prefer":"resolution=merge-duplicates,return=minimal"},body:JSON.stringify([dbEntry(e)])});cloudBadge("SYNCED","ok")}
 async function cloudEvent(e){await api("events?on_conflict=id","",{method:"POST",headers:{"Prefer":"resolution=merge-duplicates,return=minimal"},body:JSON.stringify([{id:e.id,user_id:cloudSession.user.id,occurred_at:e.at,event_type:e.type,source:"ace-loop-os",payload:e.payload||{}}])})}
 async function cloudPushPrediction(p){await api("predictions?on_conflict=id","",{method:"POST",headers:{"Prefer":"resolution=merge-duplicates,return=minimal"},body:JSON.stringify([{id:p.id,user_id:cloudSession.user.id,statement:p.statement,probability:Number(p.probability)/100,due_date:p.dueDate,outcome:p.outcome,resolved_at:p.resolvedAt,metadata:{local:true}}])})}
@@ -350,9 +415,9 @@ async function cloudPushAssessment(a){await api("skill_assessments?on_conflict=i
 async function fullSync(){
  if(!cloudSession)return;cloudBadge("SYNCING","sync");
  const user=cloudSession.user.id;
- const [re,rs,rp,rpred,rdec]=await Promise.all([api("daily_entries?select=*&order=entry_date.desc"),api("skills?select=*&order=name.asc"),api("projects?select=*&order=priority.asc,name.asc"),api("predictions?select=*&order=created_at.desc"),api("decisions?select=*&order=created_at.desc")]);
- const map=new Map(system.entries.map(e=>[e.date,e]));(re||[]).forEach(r=>{const e={...freshEntry(r.entry_date),id:r.id,date:r.entry_date,sleep:r.sleep_hours,energy:r.energy,state:r.state||"",win:r.win||"",nextMove:r.next_move||"",skillFocus:r.skill_focus||"",uncomfortable:r.uncomfortable||"",ifThen:r.if_then||"",locked:r.locked,proofs:r.proofs||freshEntry(r.entry_date).proofs,biggest:r.biggest||"",deviation:r.deviation||"",failureType:r.failure_type||"",correction:r.correction||"",skillEvidence:r.skill_evidence||"",updatedAt:r.updated_at,createdAt:r.created_at};const l=map.get(e.date);if(!l||new Date(e.updatedAt)>=new Date(l.updatedAt||0))map.set(e.date,e)});system.entries=[...map.values()];
- if(rs?.length)system.skills=rs.map(normalizeSkill);if(rp?.length)system.projects=rp.map(p=>p.name);if(rpred?.length)system.predictions=rpred.map(p=>({id:p.id,statement:p.statement,probability:Math.round(Number(p.probability)*100),dueDate:p.due_date,outcome:p.outcome,createdAt:p.created_at,resolvedAt:p.resolved_at}));if(rdec?.length)system.decisions=rdec.map(d=>({id:d.id,title:d.title,goal:d.goal||"",problemClass:d.problem_class||"strategy",stakes:d.stakes,reversibility:d.reversibility,status:d.status,blindSpots:d.blind_spots||{},expected:d.expected_outcome||"",complexityBudget:d.metadata?.complexity_budget||1,route:d.metadata?.route||["Reality"],counterLenses:d.metadata?.counter_lenses||[],createdAt:d.created_at}));
+ const [re,rs,rp,rpred,rdec,rgoals]=await Promise.all([api("daily_entries?select=*&order=entry_date.desc"),api("skills?select=*&order=name.asc"),api("projects?select=*&order=priority.asc,name.asc"),api("predictions?select=*&order=created_at.desc"),api("decisions?select=*&order=created_at.desc"),api("goals?select=*&order=focus_tier.asc,priority.desc")]);
+ const map=new Map(system.entries.map(e=>[e.date,e]));(re||[]).forEach(r=>{const e={...freshEntry(r.entry_date),id:r.id,date:r.entry_date,sleep:r.sleep_hours,energy:r.energy,state:r.state||"",win:r.win||"",nextMove:r.next_move||"",goalFocus:r.goal_focus_name||"",skillFocus:r.skill_focus||"",uncomfortable:r.uncomfortable||"",ifThen:r.if_then||"",locked:r.locked,proofs:r.proofs||freshEntry(r.entry_date).proofs,biggest:r.biggest||"",deviation:r.deviation||"",failureType:r.failure_type||"",correction:r.correction||"",skillEvidence:r.skill_evidence||"",updatedAt:r.updated_at,createdAt:r.created_at};const l=map.get(e.date);if(!l||new Date(e.updatedAt)>=new Date(l.updatedAt||0))map.set(e.date,e)});system.entries=[...map.values()];
+ if(rs?.length)system.skills=rs.map(normalizeSkill);if(rp?.length)system.projects=rp.map(p=>p.name);if(rpred?.length)system.predictions=rpred.map(p=>({id:p.id,statement:p.statement,probability:Math.round(Number(p.probability)*100),dueDate:p.due_date,outcome:p.outcome,createdAt:p.created_at,resolvedAt:p.resolved_at}));if(rdec?.length)system.decisions=rdec.map(d=>({id:d.id,title:d.title,goal:d.goal||"",problemClass:d.problem_class||"strategy",stakes:d.stakes,reversibility:d.reversibility,status:d.status,blindSpots:d.blind_spots||{},expected:d.expected_outcome||"",complexityBudget:d.metadata?.complexity_budget||1,route:d.metadata?.route||["Reality"],counterLenses:d.metadata?.counter_lenses||[],createdAt:d.created_at}));if(rgoals?.length)system.goals=rgoals.map(g=>({id:g.id,domain:g.domain,name:g.name,status:g.status,focusTier:g.focus_tier,priority:g.priority,target:g.target_value==null?null:Number(g.target_value),current:g.current_value==null?null:Number(g.current_value),unit:g.unit,deadline:g.deadline,source:g.source||"cloud"}));
  await api("daily_entries?on_conflict=user_id,entry_date","",{method:"POST",headers:{"Prefer":"resolution=merge-duplicates,return=minimal"},body:JSON.stringify(system.entries.map(dbEntry))});
  if(system.skills.length)await api("skills?on_conflict=user_id,name","",{method:"POST",headers:{"Prefer":"resolution=merge-duplicates,return=minimal"},body:JSON.stringify(system.skills.map(s=>({user_id:user,name:s.name,domain:s.class,level:s.knowledge,target_level:Math.min(7,s.knowledge+1),evidence_count:s.evidenceCount,metadata:{v4:true},knowledge_level:s.knowledge,capability_level:s.capability,pressure_level:s.pressure,skill_class:s.class,confidence:s.confidence,baseline_verified:s.baselineVerified,last_used_at:s.lastUsedAt,last_tested_at:s.lastTestedAt,next_drill:s.nextDrill,next_field_test:s.nextFieldTest,active_training:s.active})))});
  if(system.projects.length)await api("projects?on_conflict=user_id,name","",{method:"POST",headers:{"Prefer":"resolution=merge-duplicates,return=minimal"},body:JSON.stringify(system.projects.map((name,i)=>({user_id:user,name,priority:Math.min(5,i+1),status:"active"})))});
