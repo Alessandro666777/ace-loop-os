@@ -23,7 +23,7 @@ jobs:
           node-version: 22
       - name: Install test runtime
         run: npm install --no-audit --no-fund
-      - name: Run 60 user-scenario regression suite
+      - name: Run PANTHERA regression suite
         run: npm test
 
   deploy:
