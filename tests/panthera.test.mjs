@@ -316,3 +316,4 @@ test("76 manual Knowledge capture writes owner-private object",async t=>{
   assert.equal(row.privacy_scope,"private");
   assert.equal(row.ingestion_status,"normalized");
 });
+// Knowledge Port regression gate: local render state verified.
