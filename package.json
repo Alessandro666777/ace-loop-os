@@ -1,0 +1,11 @@
+{
+  "name": "panthera-ace-regression",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test --test-reporter=spec tests/panthera.test.mjs"
+  },
+  "devDependencies": {
+    "jsdom": "^26.1.0"
+  }
+}
