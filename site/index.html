@@ -228,7 +228,7 @@ function baseSkills(){
 
 function baseGoals(){
  const rows=[
- ["NORTH_STAR","Highest Version / Durchbruch 2026–2027","active",1,5,null,null,null],
+ ["NORTH_STAR","Highest Version / Durchbruch 2026–2027","active",4,5,null,null,null],
  ["PROINVEST","PROINVEST S4","active",1,5,4000000,"BWS","2026-12-31"],
  ["PROINVEST","PROINVEST S5","active",3,5,15000000,"BWS","2027-04-07"],
  ["PROINVEST","PROINVEST S6","active",3,5,35000000,"BWS","2027-06-27"],
@@ -305,11 +305,27 @@ function dayMode(e){const hist=[...system.entries].filter(x=>x.date<e.date).sort
 function activeSkills(){return system.skills.filter(s=>s.active).slice(0,system.config.maxActiveSkills||3)}
 function skillScore(s){return s.knowledge*.2+s.capability*.5+s.pressure*.3}
 function bottleneck(){const a=activeSkills();return a.length?[...a].sort((x,y)=>skillScore(x)-skillScore(y))[0]:null}
-function skillByName(n){return system.skills.find(s=>s.name===n)||bottleneck()||system.skills[0]}
+function skillByName(n){return system.skills.find(s=>s.name===n)||goalBottleneck(strategicGoal(current?.goalFocus)?.name)||bottleneck()||system.skills[0]}
 
 function activeGoals(){return system.goals.filter(g=>g.status==="active")}
 function frontlineGoals(){return activeGoals().filter(g=>Number(g.focusTier||4)<=2).sort((a,b)=>(a.focusTier-b.focusTier)||(b.priority-a.priority)||String(a.deadline||"9999").localeCompare(String(b.deadline||"9999")))}
-function strategicGoal(name){if(name)return system.goals.find(g=>g.name===name)||null;const f=frontlineGoals();return f.find(g=>g.deadline)||f[0]||null}
+function todayGoals(){return frontlineGoals().filter(g=>Number(g.focusTier||4)===1)}
+function strategicGoal(name){if(name)return system.goals.find(g=>g.name===name)||null;const f=todayGoals();return f.find(g=>g.deadline)||f[0]||null}
+const GOAL_SKILLS={
+ "PROINVEST S4":["Sales","Leadership"],
+ "Nullpunkt 5 Kunden + 5 Partner je Person":["Sales","Leadership"],
+ "PANTHERA Loop real beweisen":["Leadership","Learning"],
+ "Tagesroutine stabilisieren":["Self-Leadership"],
+ "800k BWS Wochenstandard":["Sales"],
+ "PROINVEST 100 Partner 2026":["Leadership","Communication"],
+ "Nullpunkt Score ≥75":["Self-Leadership","Sales","Leadership"],
+ "Jede Woche kennenlernen, verkaufen, einstellen":["Sales","Leadership","Communication"],
+ "Gym 5× pro Woche":["Body"],
+ "Schlaf & Regeneration stabilisieren":["Body"],
+ "Cinematic Personal Brand":["Brand / Creation"]
+};
+function goalRelevantSkills(goalName){const names=GOAL_SKILLS[goalName]||[];const active=activeSkills();const hit=active.filter(s=>names.includes(s.name));return hit.length?hit:active}
+function goalBottleneck(goalName){const a=goalRelevantSkills(goalName);return a.length?[...a].sort((x,y)=>skillScore(x)-skillScore(y))[0]:null}
 function goalLabel(g){if(!g)return"—";const left=g.deadline?days(iso(),g.deadline):null;return g.name+(left!==null?" · "+left+"d":"")}
 function retestDue(s){if(!s.baselineVerified)return true;if(!s.lastTestedAt)return true;return days(s.lastTestedAt.slice(0,10),iso())>=30}
 function escapeHTML(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
@@ -317,7 +333,7 @@ function escapeHTML(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;",
 function renderToday(){
  $("sleep").value=current.sleep??"";$("energy").value=current.energy??"";$("state").value=current.state||"";$("win").value=current.win;$("nextMove").value=current.nextMove;$("uncomfortable").value=current.uncomfortable;$("ifThen").value=current.ifThen;
  $("heroWin").textContent=current.win.trim()||"Definiere den Sieg.";$("heroMove").textContent=current.nextMove.trim()||"Ein klarer nächster physischer Zug schlägt weitere Architektur.";$("nextMoveText").textContent=current.nextMove.trim()||"Noch nicht definiert.";$("dayMode").textContent=dayMode(current);$("budgetChip").textContent="COMPLEXITY · "+system.config.complexityBudget;
- const gs=$("goalFocus");gs.innerHTML='<option value="">AUTO · STRATEGIC FRONT</option>'+frontlineGoals().map(g=>'<option value="'+escapeHTML(g.name)+'">'+escapeHTML(g.name)+'</option>').join("");gs.value=current.goalFocus||"";
+ const gs=$("goalFocus");gs.innerHTML='<option value="">AUTO · STRATEGIC FRONT</option>'+todayGoals().map(g=>'<option value="'+escapeHTML(g.name)+'">'+escapeHTML(g.name)+'</option>').join("");gs.value=current.goalFocus||"";
  const g=strategicGoal(current.goalFocus);$("goalChip").textContent="GOAL · "+(g?g.name.toUpperCase():"—");
  const select=$("skillFocus");select.innerHTML='<option value="">AUTO · BOTTLENECK</option>'+activeSkills().map(s=>'<option value="'+escapeHTML(s.name)+'">'+escapeHTML(s.name)+'</option>').join("");select.value=current.skillFocus||"";
  const s=skillByName(current.skillFocus);$("focusChip").textContent="SKILL · "+(s?s.name.toUpperCase():"—");$("missionTitle").textContent=s?s.name:"Noch keine aktive Mission.";$("missionDrill").textContent=s&&s.nextDrill?"DRILL · "+s.nextDrill:"Noch kein Drill definiert.";$("missionField").textContent=s&&s.nextFieldTest?"FIELD TEST · "+s.nextFieldTest:"";
@@ -366,10 +382,11 @@ function renderRoute(){const r=routeDecision();$("routePreview").innerHTML='<b>R
 function renderCommand(){
  $("projectsText").value=system.projects.join("\n");$("skillsText").value=system.skills.map(s=>s.name+"|"+s.knowledge+"|"+s.capability+"|"+s.pressure+"|"+s.class).join("\n");$("freezeChip").textContent="FREEZE · "+system.config.freezeUntil;
  const ag=activeGoals(),fg=frontlineGoals();$("frontlineCount").textContent=fg.length;$("activeGoalCount").textContent=ag.length;$("allGoalCount").textContent=system.goals.length;$("goalCounts").textContent=ag.length+" ACTIVE · "+system.goals.filter(g=>g.status==="incubating").length+" INCUBATING · "+system.goals.filter(g=>g.status==="option").length+" OPTION";
- $("goalPortfolio").innerHTML=[...system.goals].sort((a,b)=>({active:0,incubating:1,option:2,completed:3,archived:4,superseded:5}[a.status]-({active:0,incubating:1,option:2,completed:3,archived:4,superseded:5}[b.status]))||(a.focusTier-b.focusTier)||(b.priority-a.priority)||a.name.localeCompare(b.name)).map(g=>'<div class="row"><div><strong>'+escapeHTML(g.name)+'</strong><small>'+escapeHTML(g.domain)+' · TIER '+g.focusTier+(g.deadline?' · '+g.deadline:'')+(g.target!=null?' · Ziel '+escapeHTML(g.target+' '+(g.unit||'')):'')+'</small></div><span class="pill">'+g.status.toUpperCase()+'</span></div>').join("");
+ $("goalPortfolio").innerHTML=[...system.goals].sort((a,b)=>({active:0,incubating:1,option:2,completed:3,archived:4,superseded:5}[a.status]-({active:0,incubating:1,option:2,completed:3,archived:4,superseded:5}[b.status]))||(a.focusTier-b.focusTier)||(b.priority-a.priority)||a.name.localeCompare(b.name)).map(g=>'<div class="row"><div><strong>'+escapeHTML(g.name)+'</strong><small>'+escapeHTML(g.domain)+' · TIER '+g.focusTier+(g.deadline?' · '+g.deadline:'')+(g.target!=null?' · '+(g.current==null?'Baseline fehlt':escapeHTML(g.current+' / '+g.target+' '+(g.unit||''))):'')+'</small></div><span>'+(g.target!=null?'<button class="btn" onclick="updateGoalProgress(\''+String(g.id).replace(/'/g,"")+'\')">UPDATE</button> ':'')+'<span class="pill">'+g.status.toUpperCase()+'</span></span></div>').join("");
  $("modules").innerHTML=system.modules.map(m=>'<div class="module"><b>'+escapeHTML(m.name)+'</b><small>'+m.type+' · '+m.status+'</small><small>'+escapeHTML(m.fn)+'</small></div>').join("");
  renderRoute();$("decisions").innerHTML=[...system.decisions].sort((a,b)=>b.createdAt.localeCompare(a.createdAt)).slice(0,8).map(d=>'<div class="row"><div><strong>'+escapeHTML(d.title)+'</strong><small>'+d.problemClass+' · '+d.stakes.toUpperCase()+' · Complexity '+d.complexityBudget+' · '+d.route.join(" → ")+'</small></div><span class="pill">'+d.status.toUpperCase()+'</span></div>').join("")||'<div class="muted">Noch keine dokumentierten Entscheidungen.</div>'
 }
+window.updateGoalProgress=id=>{const g=system.goals.find(x=>x.id===id);if(!g)return;const raw=prompt("Aktueller Stand für "+g.name+(g.unit?" ("+g.unit+")":"")+":",g.current==null?"":String(g.current));if(raw===null)return;const v=Number(String(raw).replace(",", "."));if(!Number.isFinite(v)){alert("Bitte Zahl eingeben.");return}g.current=v;g.updatedAt=new Date().toISOString();event("goal.progress.updated",{goal:g.name,value:v,target:g.target,unit:g.unit});save();renderAll();if(cloudSession)cloudPushGoal(g).catch(cloudError)};
 function renderAll(){renderToday();renderGrowth();renderReview();renderCommand();save()}
 function load(date){current=getEntry(date);renderAll();$("autosave").textContent="READY"}
 function show(id){document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("active",s.id===id));document.querySelectorAll(".nav button").forEach(b=>b.classList.toggle("active",b.dataset.screen===id));if(id==="growth")renderGrowth();if(id==="review")renderReview();if(id==="command")renderCommand()}
@@ -411,6 +428,7 @@ async function cloudEvent(e){await api("events?on_conflict=id","",{method:"POST"
 async function cloudPushPrediction(p){await api("predictions?on_conflict=id","",{method:"POST",headers:{"Prefer":"resolution=merge-duplicates,return=minimal"},body:JSON.stringify([{id:p.id,user_id:cloudSession.user.id,statement:p.statement,probability:Number(p.probability)/100,due_date:p.dueDate,outcome:p.outcome,resolved_at:p.resolvedAt,metadata:{local:true}}])})}
 async function cloudPushDecision(d){await api("decisions?on_conflict=id","",{method:"POST",headers:{"Prefer":"resolution=merge-duplicates,return=minimal"},body:JSON.stringify([{id:d.id,user_id:cloudSession.user.id,title:d.title,goal:d.goal,problem_class:d.problemClass,stakes:d.stakes,reversibility:d.reversibility,status:d.status,blind_spots:d.blindSpots,expected_outcome:d.expected,metadata:{complexity_budget:d.complexityBudget,route:d.route,counter_lenses:d.counterLenses}}])})}
 function queueFullSync(){clearTimeout(cloudSyncTimer);cloudSyncTimer=setTimeout(()=>fullSync().catch(cloudError),900)}
+async function cloudPushGoal(g){await api("goals?name=eq."+encodeURIComponent(g.name),"",{method:"PATCH",headers:{"Prefer":"return=minimal"},body:JSON.stringify({current_value:g.current,updated_at:new Date().toISOString()})})}
 async function cloudPushAssessment(a){await api("skill_assessments?on_conflict=id","",{method:"POST",headers:{"Prefer":"resolution=merge-duplicates,return=minimal"},body:JSON.stringify([{id:a.id,user_id:cloudSession.user.id,skill_id:a.skillId,assessment_type:a.type,score:a.score,passed:a.passed,difficulty:a.difficulty,context:"PANTHERA V4",evidence:a.evidence,independent:a.independent,occurred_at:a.occurredAt,metadata:{local:true}}])})}
 async function fullSync(){
  if(!cloudSession)return;cloudBadge("SYNCING","sync");
