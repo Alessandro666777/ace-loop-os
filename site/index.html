@@ -151,7 +151,18 @@
     </div>
 
     <div class="card">
-      <div class="section"><span class="n">14</span><h3>DATA + CLOUD</h3></div>
+      <div class="section"><span class="n">14</span><h3>INTEGRATION STATUS</h3><span class="auto" id="integrationSuite">CLOUD LOGIN REQUIRED</span></div>
+      <div class="grid3">
+        <div class="metric"><span>VERIFIED</span><b id="integrationVerified">0</b></div>
+        <div class="metric"><span>DRY-RUN</span><b id="integrationDry">0</b></div>
+        <div class="metric"><span>REQUIRED</span><b id="integrationRequired">0</b></div>
+      </div>
+      <div id="integrationStatus" class="list" style="margin-top:10px"></div>
+      <p class="muted">VERIFIED = Quelle/Contract getestet. DRY-RUN = Adapter vorhanden, aber keine Live-Automation. CONNECTION REQUIRED = externer Zugriff fehlt. Kein Status wird automatisch zu „connected“ hochgestuft.</p>
+    </div>
+
+    <div class="card">
+      <div class="section"><span class="n">15</span><h3>DATA + CLOUD</h3></div>
       <div class="actions"><button class="btn soft" id="openCloud">CLOUD LOGIN</button><button class="btn" id="syncNow">SYNC NOW</button><button class="btn" id="export">JSON EXPORT</button><label class="btn">JSON IMPORT<input id="import" type="file" accept="application/json" hidden></label></div>
       <p class="muted">Local-first ist die sichere Betriebsbasis. Cloud wird zur geräteübergreifenden Wahrheitsschicht, sobald die Auth-Session steht.</p>
     </div>
@@ -298,7 +309,7 @@ function migrate(){
 function normalize(x){
  const b=base(),o={...b,...x};o.entries=Array.isArray(x.entries)?x.entries.map(e=>({...freshEntry(e.date),...e})):[];o.skills=Array.isArray(x.skills)&&x.skills.length?x.skills.map(normalizeSkill):b.skills;const existingGoals=Array.isArray(x.goals)?x.goals:[];const gm=new Map(existingGoals.map(g=>[g.name,g]));b.goals.forEach(g=>{if(!gm.has(g.name))gm.set(g.name,g)});o.goals=[...gm.values()];o.projects=Array.isArray(x.projects)?x.projects:[];o.events=Array.isArray(x.events)?x.events:[];o.predictions=Array.isArray(x.predictions)?x.predictions:[];o.decisions=Array.isArray(x.decisions)?x.decisions:[];o.assessments=Array.isArray(x.assessments)?x.assessments:[];o.independenceChecks=Array.isArray(x.independenceChecks)?x.independenceChecks:[];o.trainingCycles=Array.isArray(x.trainingCycles)?x.trainingCycles:[];o.evidenceItems=Array.isArray(x.evidenceItems)?x.evidenceItems:[];o.config={...b.config,...(x.config||{})};o.modules=Array.isArray(x.modules)&&x.modules.length?x.modules:b.modules;o.season={...b.season,...(x.season||{})};return o;
 }
-let system=migrate(),current,saveTimer=null,timerHandle=null,cloudSession=null,cloudSyncTimer=null,cloudIntegrations=[],assessmentSkillId=null;
+let system=migrate(),current,saveTimer=null,timerHandle=null,cloudSession=null,cloudSyncTimer=null,cloudIntegrations=[],latestIntegrationRun=null,assessmentSkillId=null;
 function save(){localStorage.setItem(KEY,JSON.stringify(system))}
 function getEntry(date){let e=system.entries.find(x=>x.date===date);if(!e){e=freshEntry(date);system.entries.push(e);save()}return e}
 function score(e){return proofKeys.filter(k=>e.proofs[k]?.done).length}
@@ -389,6 +400,10 @@ function renderCommand(){
  const ag=activeGoals(),fg=frontlineGoals();$("frontlineCount").textContent=fg.length;$("activeGoalCount").textContent=ag.length;$("allGoalCount").textContent=system.goals.length;$("goalCounts").textContent=ag.length+" ACTIVE · "+system.goals.filter(g=>g.status==="incubating").length+" INCUBATING · "+system.goals.filter(g=>g.status==="option").length+" OPTION";
  $("goalPortfolio").innerHTML=[...system.goals].sort((a,b)=>({active:0,incubating:1,option:2,completed:3,archived:4,superseded:5}[a.status]-({active:0,incubating:1,option:2,completed:3,archived:4,superseded:5}[b.status]))||(a.focusTier-b.focusTier)||(b.priority-a.priority)||a.name.localeCompare(b.name)).map(g=>'<div class="row"><div><strong>'+escapeHTML(g.name)+'</strong><small>'+escapeHTML(g.domain)+' · TIER '+g.focusTier+(g.deadline?' · '+g.deadline:'')+(g.target!=null?' · '+(g.current==null?'Baseline fehlt':escapeHTML(g.current+' / '+g.target+' '+(g.unit||''))):'')+'</small></div><span>'+(g.target!=null?'<button class="btn" onclick="updateGoalProgress(\''+String(g.id).replace(/'/g,"")+'\')">UPDATE</button> ':'')+'<span class="pill">'+g.status.toUpperCase()+'</span></span></div>').join("");
  $("modules").innerHTML=system.modules.map(m=>'<div class="module"><b>'+escapeHTML(m.name)+'</b><small>'+m.type+' · '+m.status+'</small><small>'+escapeHTML(m.fn)+'</small></div>').join("");
+ const verified=cloudIntegrations.filter(i=>i.status==="verified").length,dry=cloudIntegrations.filter(i=>i.status==="dry_run_ready").length,required=cloudIntegrations.filter(i=>["connection_required","disconnected"].includes(i.status)).length;
+ $("integrationVerified").textContent=verified;$("integrationDry").textContent=dry;$("integrationRequired").textContent=required;
+ $("integrationSuite").textContent=latestIntegrationRun?(latestIntegrationRun.suite+" · "+latestIntegrationRun.cases_passed+"/"+latestIntegrationRun.cases_total+" "+latestIntegrationRun.status.toUpperCase()):(cloudSession?"NO TEST RUN":"CLOUD LOGIN REQUIRED");
+ $("integrationStatus").innerHTML=cloudIntegrations.length?cloudIntegrations.map(i=>'<div class="row"><div><strong>'+escapeHTML(i.provider)+'</strong><small>'+escapeHTML(i.metadata?.mode||"—")+(i.last_sync_at?' · '+escapeHTML(i.last_sync_at.slice(0,16).replace("T"," ")):"")+'</small></div><span class="pill">'+escapeHTML(i.status.toUpperCase().replaceAll("_"," "))+'</span></div>').join(""):'<div class="muted">'+(cloudSession?'Noch kein Integrationsregister geladen.':'Nach Cloud-Login erscheint hier der verifizierte Systemstatus.')+'</div>';
  renderRoute();$("decisions").innerHTML=[...system.decisions].sort((a,b)=>b.createdAt.localeCompare(a.createdAt)).slice(0,8).map(d=>'<div class="row"><div><strong>'+escapeHTML(d.title)+'</strong><small>'+d.problemClass+' · '+d.stakes.toUpperCase()+' · Complexity '+d.complexityBudget+' · '+d.route.join(" → ")+'</small></div><span class="pill">'+d.status.toUpperCase()+'</span></div>').join("")||'<div class="muted">Noch keine dokumentierten Entscheidungen.</div>'
 }
 window.updateGoalProgress=id=>{const g=system.goals.find(x=>x.id===id);if(!g)return;const raw=prompt("Aktueller Stand für "+g.name+(g.unit?" ("+g.unit+")":"")+":",g.current==null?"":String(g.current));if(raw===null)return;const v=Number(String(raw).replace(",", "."));if(!Number.isFinite(v)){alert("Bitte Zahl eingeben.");return}g.current=v;g.updatedAt=new Date().toISOString();event("goal.progress.updated",{goal:g.name,value:v,target:g.target,unit:g.unit});save();renderAll();if(cloudSession)cloudPushGoal(g).catch(cloudError)};
@@ -429,7 +444,35 @@ async function ensureSession(){if(!cloudSession)return false;if((cloudSession.ex
 async function api(table,query="",options={}){if(!(await ensureSession()))throw new Error("session_expired");const r=await fetch(SUPA_URL+"/rest/v1/"+table+query,{...options,headers:authHeaders(options.headers||{})});if(!r.ok)throw new Error(await r.text());const t=await r.text();return t?JSON.parse(t):null}
 function dbEntry(e){return{user_id:cloudSession.user.id,entry_date:e.date,sleep_hours:e.sleep,energy:e.energy,state:e.state||null,win:e.win,next_move:e.nextMove,skill_focus:e.skillFocus,goal_focus_name:e.goalFocus||null,uncomfortable:e.uncomfortable,if_then:e.ifThen,locked:e.locked,day_mode:dayMode(e),proofs:e.proofs,biggest:e.biggest,deviation:e.deviation,failure_type:e.failureType||null,correction:e.correction,skill_evidence:e.skillEvidence,updated_at:e.updatedAt}}
 async function cloudPushEntry(e){cloudBadge("SYNCING","sync");await api("daily_entries?on_conflict=user_id,entry_date","",{method:"POST",headers:{"Prefer":"resolution=merge-duplicates,return=minimal"},body:JSON.stringify([dbEntry(e)])});cloudBadge("SYNCED","ok")}
-async function cloudEvent(e){await api("events?on_conflict=id","",{method:"POST",headers:{"Prefer":"resolution=merge-duplicates,return=minimal"},body:JSON.stringify([{id:e.id,user_id:cloudSession.user.id,occurred_at:e.at,event_type:e.type,source:"ace-loop-os",payload:e.payload||{}}])})}
+const ACE_INTEGRATION_TYPES={
+ "proof.completed":"ace.proof.completed",
+ "skill.evidence":"ace.skill.evidence",
+ "skill.assessment":"ace.skill.assessment",
+ "goal.progress.updated":"ace.goal.progress.updated",
+ "decision.created":"ace.decision.created",
+ "prediction.created":"ace.prediction.created",
+ "prediction.resolved":"ace.prediction.resolved",
+ "review.closed":"ace.review.closed"
+};
+function aceIntegrationEntity(e){
+ if(e.type==="skill.evidence"||e.type==="skill.assessment")return{type:"skill",id:String(e.payload?.skill||e.id)};
+ if(e.type==="goal.progress.updated")return{type:"goal",id:String(e.payload?.goal||e.id)};
+ return{type:"person",id:String(cloudSession?.user?.id||"unknown")};
+}
+async function stageAceIntegrationEvent(e){
+ const canonical=ACE_INTEGRATION_TYPES[e.type];if(!canonical||!cloudSession)return;
+ const ent=aceIntegrationEntity(e),row={
+  user_id:cloudSession.user.id,source_system:"ace",source_event_id:e.id,source_event_type:e.type,
+  canonical_event_type:canonical,entity_type:ent.type,entity_id:ent.id,owner_id:String(cloudSession.user.id),
+  occurred_at:e.at,evidence_pointer:"ace://event/"+e.id,human_gate_status:"not_required",
+  idempotency_key:"ace-"+e.id,attribution:{},payload:e.payload||{},validation_status:"validated",mode:"shadow"
+ };
+ await api("integration_events_staging?on_conflict=user_id,source_system,source_event_id","",{method:"POST",headers:{"Prefer":"resolution=merge-duplicates,return=minimal"},body:JSON.stringify([row])});
+}
+async function cloudEvent(e){
+ await api("events?on_conflict=id","",{method:"POST",headers:{"Prefer":"resolution=merge-duplicates,return=minimal"},body:JSON.stringify([{id:e.id,user_id:cloudSession.user.id,occurred_at:e.at,event_type:e.type,source:"ace-loop-os",payload:e.payload||{}}])});
+ await stageAceIntegrationEvent(e);
+}
 async function cloudPushPrediction(p){await api("predictions?on_conflict=id","",{method:"POST",headers:{"Prefer":"resolution=merge-duplicates,return=minimal"},body:JSON.stringify([{id:p.id,user_id:cloudSession.user.id,statement:p.statement,probability:Number(p.probability)/100,due_date:p.dueDate,outcome:p.outcome,resolved_at:p.resolvedAt,metadata:{local:true}}])})}
 async function cloudPushDecision(d){await api("decisions?on_conflict=id","",{method:"POST",headers:{"Prefer":"resolution=merge-duplicates,return=minimal"},body:JSON.stringify([{id:d.id,user_id:cloudSession.user.id,title:d.title,goal:d.goal,problem_class:d.problemClass,stakes:d.stakes,reversibility:d.reversibility,status:d.status,blind_spots:d.blindSpots,expected_outcome:d.expected,metadata:{complexity_budget:d.complexityBudget,route:d.route,counter_lenses:d.counterLenses}}])})}
 function queueFullSync(){clearTimeout(cloudSyncTimer);cloudSyncTimer=setTimeout(()=>fullSync().catch(cloudError),900)}
@@ -438,9 +481,9 @@ async function cloudPushAssessment(a){await api("skill_assessments?on_conflict=i
 async function fullSync(){
  if(!cloudSession)return;cloudBadge("SYNCING","sync");
  const user=cloudSession.user.id;
- const [re,rs,rp,rpred,rdec,rgoals]=await Promise.all([api("daily_entries?select=*&order=entry_date.desc"),api("skills?select=*&order=name.asc"),api("projects?select=*&order=priority.asc,name.asc"),api("predictions?select=*&order=created_at.desc"),api("decisions?select=*&order=created_at.desc"),api("goals?select=*&order=focus_tier.asc,priority.desc")]);
+ const [re,rs,rp,rpred,rdec,rgoals,rints,rirun]=await Promise.all([api("daily_entries?select=*&order=entry_date.desc"),api("skills?select=*&order=name.asc"),api("projects?select=*&order=priority.asc,name.asc"),api("predictions?select=*&order=created_at.desc"),api("decisions?select=*&order=created_at.desc"),api("goals?select=*&order=focus_tier.asc,priority.desc"),api("integration_status?select=provider,status,last_sync_at,metadata&order=provider.asc"),api("integration_test_runs?select=suite,run_ref,cases_total,cases_passed,cases_failed,status,evidence_pointer,created_at&order=created_at.desc&limit=1")]);
  const map=new Map(system.entries.map(e=>[e.date,e]));(re||[]).forEach(r=>{const e={...freshEntry(r.entry_date),id:r.id,date:r.entry_date,sleep:r.sleep_hours,energy:r.energy,state:r.state||"",win:r.win||"",nextMove:r.next_move||"",goalFocus:r.goal_focus_name||"",skillFocus:r.skill_focus||"",uncomfortable:r.uncomfortable||"",ifThen:r.if_then||"",locked:r.locked,proofs:r.proofs||freshEntry(r.entry_date).proofs,biggest:r.biggest||"",deviation:r.deviation||"",failureType:r.failure_type||"",correction:r.correction||"",skillEvidence:r.skill_evidence||"",updatedAt:r.updated_at,createdAt:r.created_at};const l=map.get(e.date);if(!l||new Date(e.updatedAt)>=new Date(l.updatedAt||0))map.set(e.date,e)});system.entries=[...map.values()];
- if(rs?.length)system.skills=rs.map(normalizeSkill);if(rp?.length)system.projects=rp.map(p=>p.name);if(rpred?.length)system.predictions=rpred.map(p=>({id:p.id,statement:p.statement,probability:Math.round(Number(p.probability)*100),dueDate:p.due_date,outcome:p.outcome,createdAt:p.created_at,resolvedAt:p.resolved_at}));if(rdec?.length)system.decisions=rdec.map(d=>({id:d.id,title:d.title,goal:d.goal||"",problemClass:d.problem_class||"strategy",stakes:d.stakes,reversibility:d.reversibility,status:d.status,blindSpots:d.blind_spots||{},expected:d.expected_outcome||"",complexityBudget:d.metadata?.complexity_budget||1,route:d.metadata?.route||["Reality"],counterLenses:d.metadata?.counter_lenses||[],createdAt:d.created_at}));if(rgoals?.length)system.goals=rgoals.map(g=>({id:g.id,domain:g.domain,name:g.name,status:g.status,focusTier:g.focus_tier,priority:g.priority,target:g.target_value==null?null:Number(g.target_value),current:g.current_value==null?null:Number(g.current_value),unit:g.unit,deadline:g.deadline,source:g.source||"cloud"}));
+ if(rs?.length)system.skills=rs.map(normalizeSkill);if(rp?.length)system.projects=rp.map(p=>p.name);if(rpred?.length)system.predictions=rpred.map(p=>({id:p.id,statement:p.statement,probability:Math.round(Number(p.probability)*100),dueDate:p.due_date,outcome:p.outcome,createdAt:p.created_at,resolvedAt:p.resolved_at}));if(rdec?.length)system.decisions=rdec.map(d=>({id:d.id,title:d.title,goal:d.goal||"",problemClass:d.problem_class||"strategy",stakes:d.stakes,reversibility:d.reversibility,status:d.status,blindSpots:d.blind_spots||{},expected:d.expected_outcome||"",complexityBudget:d.metadata?.complexity_budget||1,route:d.metadata?.route||["Reality"],counterLenses:d.metadata?.counter_lenses||[],createdAt:d.created_at}));if(rgoals?.length)system.goals=rgoals.map(g=>({id:g.id,domain:g.domain,name:g.name,status:g.status,focusTier:g.focus_tier,priority:g.priority,target:g.target_value==null?null:Number(g.target_value),current:g.current_value==null?null:Number(g.current_value),unit:g.unit,deadline:g.deadline,source:g.source||"cloud"}));cloudIntegrations=Array.isArray(rints)?rints:[];latestIntegrationRun=Array.isArray(rirun)&&rirun.length?rirun[0]:null;
  await api("daily_entries?on_conflict=user_id,entry_date","",{method:"POST",headers:{"Prefer":"resolution=merge-duplicates,return=minimal"},body:JSON.stringify(system.entries.map(dbEntry))});
  if(system.skills.length)await api("skills?on_conflict=user_id,name","",{method:"POST",headers:{"Prefer":"resolution=merge-duplicates,return=minimal"},body:JSON.stringify(system.skills.map(s=>({user_id:user,name:s.name,domain:s.class,level:s.knowledge,target_level:Math.min(7,s.knowledge+1),evidence_count:s.evidenceCount,metadata:{v4:true},knowledge_level:s.knowledge,capability_level:s.capability,pressure_level:s.pressure,skill_class:s.class,confidence:s.confidence,baseline_verified:s.baselineVerified,last_used_at:s.lastUsedAt,last_tested_at:s.lastTestedAt,next_drill:s.nextDrill,next_field_test:s.nextFieldTest,active_training:s.active})))});
  if(system.projects.length)await api("projects?on_conflict=user_id,name","",{method:"POST",headers:{"Prefer":"resolution=merge-duplicates,return=minimal"},body:JSON.stringify(system.projects.map((name,i)=>({user_id:user,name,priority:Math.min(5,i+1),status:"active"})))});
