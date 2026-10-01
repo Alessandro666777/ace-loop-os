@@ -105,6 +105,11 @@ code{color:#bcd8ff}
       <div id="memoryList"></div>
     </div>
 
+    <div class="card" id="knowledgeIntegrityCard">
+      <h2>Knowledge Integrity</h2>
+      <div id="knowledgeIntegrity"><div class="meta">Wissensabdeckung wird geladen …</div></div>
+    </div>
+
     <div class="card" id="knowledgeCard">
       <h2>Shared PANTHERA Knowledge</h2>
       <div class="switch"><div><b>Shared Learning</b><div class="meta">Nur manuell freigegebene, abstrahierte Learnings.</div></div><input id="shareMode" type="checkbox"></div>
@@ -194,6 +199,24 @@ async function loadMembership(){
   membership=JSON.parse(txt);localStorage.removeItem(INVITE_KEY);
  }
 }
+async function loadKnowledgeStatus(){
+ try{
+  const x=await api("rpc/panthera_knowledge_status",{method:"POST",body:"{}"});
+  const repos=(x.repositories||[]).map(r=>'<div class="item"><b>'+escapeHtml(r.repository)+'</b><div class="meta">'+r.documents+' Dokumente · '+r.chunks+' Chunks</div></div>').join("");
+  $("knowledgeIntegrity").innerHTML=
+    '<div class="row" style="margin-bottom:10px">'
+    +'<span class="pill">CANONICAL '+Number(x.canonical_documents||0)+'/10</span>'
+    +'<span class="pill">DOCS '+Number(x.active_documents||0)+'</span>'
+    +'<span class="pill">CHUNKS '+Number(x.active_chunks||0)+'</span>'
+    +'<span class="pill">PRIVATE LIB '+Number(x.private_external_items||0)+'</span>'
+    +'<span class="pill">SHARED '+Number(x.shared_learnings||0)+'</span>'
+    +'</div>'
+    +'<div class="meta">Runtime · '+escapeHtml(x.runtime_version||"unknown")+' · Scopes: '+escapeHtml((x.scopes||[]).join(", "))+'</div>'
+    +repos;
+ }catch(e){
+  $("knowledgeIntegrity").innerHTML='<div class="status bad">Knowledge Status konnte nicht geladen werden: '+escapeHtml(String(e.message||e))+'</div>';
+ }
+}
 async function loadPrivacy(){
  const rows=await api("panthera_privacy_settings?select=shared_learning_mode,consent_at&user_id=eq."+session.user.id);
  privacyMode=rows?.[0]?.shared_learning_mode||"off";$("shareMode").checked=privacyMode==="review";
@@ -273,7 +296,7 @@ async function sendAI(){
 }
 async function bootstrap(){
  try{
-  await loadMembership();await loadPrivacy();await Promise.all([loadMemory(),loadShared(),loadAIStatus()]);
+  await loadMembership();await loadPrivacy();await Promise.all([loadMemory(),loadShared(),loadAIStatus(),loadKnowledgeStatus()]);
   $("authScreen").classList.add("hidden");$("appScreen").classList.remove("hidden");$("bottomNav").classList.remove("hidden");
   $("memberMeta").textContent=(membership.member_code||"MEMBER")+" · "+(membership.cohort||"");
   $("cloudBadge").textContent="SYNCED";
