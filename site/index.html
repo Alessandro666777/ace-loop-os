@@ -164,6 +164,11 @@
     <p class="muted">Die App funktioniert vollständig lokal. Für Sync: Login-Link an deine E-Mail senden und den neuesten Link genau einmal öffnen.</p>
     <label>E-Mail<input id="authEmail" type="email" value="aaamstadt@icloud.com"></label>
     <div class="actions"><button class="btn primary" id="magicBtn">LOGIN-LINK SENDEN</button><button class="btn" id="closeCloud">SCHLIESSEN</button><button class="btn danger hidden" id="logoutBtn">LOGOUT</button></div>
+    <div class="divider"></div>
+    <div class="eyebrow">FALLBACK · WENN DIE MAIL AUF LOCALHOST ZEIGT</div>
+    <label>Kompletten Link aus der E-Mail hier einfügen<input id="magicLinkPaste" type="text" inputmode="url" autocomplete="off" placeholder="http://localhost:3000/#access_token=…"></label>
+    <div class="actions"><button class="btn soft" id="useMagicLink">LINK VERWENDEN & ANMELDEN</button></div>
+    <p class="muted">Der Link wird nur lokal im Browser verarbeitet. Er wird nicht als Text in deinen PANTHERA-Daten gespeichert.</p>
     <div id="authStatus" class="tagline">LOCAL MODE ACTIVE</div>
   </div>
 </div>
@@ -444,12 +449,32 @@ async function fullSync(){
 }
 function cloudError(e){console.error(e);cloudBadge("CLOUD ERROR");$("authStatus").textContent=String(e.message||e)}
 async function sendMagic(email){const redirect=location.origin+location.pathname;const r=await fetch(SUPA_URL+"/auth/v1/otp?redirect_to="+encodeURIComponent(redirect),{method:"POST",headers:{"apikey":SUPA_KEY,"Content-Type":"application/json"},body:JSON.stringify({email,create_user:false})});const x=await r.json().catch(()=>({}));if(!r.ok)throw new Error(x.msg||x.error_description||x.message||"Login-Link konnte nicht gesendet werden")}
+async function acceptMagicUrl(raw){
+ let u;
+ try{u=new URL(String(raw||"").trim())}catch(e){throw new Error("Der eingefügte Link ist ungültig.")}
+ const p=new URLSearchParams((u.hash||"").replace(/^#/,""));
+ const access=p.get("access_token"),refresh=p.get("refresh_token"),expires=Number(p.get("expires_in")||3600),type=p.get("type");
+ if(!access)throw new Error("Im Link wurde kein Login-Token gefunden.");
+ const ur=await fetch(SUPA_URL+"/auth/v1/user",{headers:{"apikey":SUPA_KEY,"Authorization":"Bearer "+access}});
+ if(!ur.ok)throw new Error("Der Login-Link ist abgelaufen oder bereits verwendet. Bitte einen neuen Link senden.");
+ const user=await ur.json();
+ cloudSession={access_token:access,refresh_token:refresh||"",expires_at:Date.now()+expires*1000,user};
+ writeAuth(cloudSession);
+ $("magicLinkPaste").value="";
+ await fullSync();
+ cloudBadge("SYNCED","ok");
+ $("logoutBtn").classList.remove("hidden");
+ $("authStatus").textContent="Angemeldet und synchronisiert.";
+ $("cloudModal").classList.add("hidden");
+ return true;
+}
 async function acceptMagic(){
  const p=new URLSearchParams(location.hash.replace(/^#/,"")),a=p.get("access_token"),r=p.get("refresh_token"),ex=Number(p.get("expires_in")||3600);if(!a)return false;
  const ur=await fetch(SUPA_URL+"/auth/v1/user",{headers:{"apikey":SUPA_KEY,"Authorization":"Bearer "+a}});if(!ur.ok)return false;const user=await ur.json();cloudSession={access_token:a,refresh_token:r||"",expires_at:Date.now()+ex*1000,user};writeAuth(cloudSession);history.replaceState(null,"",location.pathname);await fullSync();return true
 }
 async function initCloud(){if(await acceptMagic()){cloudBadge("SYNCED","ok");return}const saved=readAuth();if(saved){cloudSession=saved;if(await ensureSession()){try{await fullSync();return}catch(e){cloudError(e)}}}cloudBadge("LOCAL")}
-$("cloudBadge").onclick=()=>$("cloudModal").classList.remove("hidden");$("openCloud").onclick=()=>$("cloudModal").classList.remove("hidden");$("closeCloud").onclick=()=>$("cloudModal").classList.add("hidden");$("magicBtn").onclick=async()=>{try{$("authStatus").textContent="Login-Link wird gesendet…";await sendMagic($("authEmail").value.trim());$("authStatus").textContent="Gesendet. Öffne die neueste Mail genau einmal."}catch(e){$("authStatus").textContent=String(e.message||e)}};$("logoutBtn").onclick=()=>{cloudSession=null;writeAuth(null);cloudBadge("LOCAL");$("logoutBtn").classList.add("hidden")};$("syncNow").onclick=()=>fullSync().catch(cloudError);
+$("useMagicLink").onclick=async()=>{try{$("authStatus").textContent="Session wird geprüft…";await acceptMagicUrl($("magicLinkPaste").value)}catch(e){$("authStatus").textContent=String(e.message||e)}};
+$("cloudBadge").onclick=()=>$("cloudModal").classList.remove("hidden");$("openCloud").onclick=()=>$("cloudModal").classList.remove("hidden");$("closeCloud").onclick=()=>$("cloudModal").classList.add("hidden");$("magicBtn").onclick=async()=>{try{$("authStatus").textContent="Login-Link wird gesendet…";await sendMagic($("authEmail").value.trim());$("authStatus").textContent="Gesendet. Wenn der Link auf localhost zeigt: Link kopieren, hier einfügen und LINK VERWENDEN & ANMELDEN drücken."}catch(e){$("authStatus").textContent=String(e.message||e)}};$("logoutBtn").onclick=()=>{cloudSession=null;writeAuth(null);cloudBadge("LOCAL");$("logoutBtn").classList.add("hidden")};$("syncNow").onclick=()=>fullSync().catch(cloudError);
 
 $("date").value=iso();load(iso());initCloud();
 </script>
