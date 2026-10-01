@@ -276,3 +276,43 @@ test("73 owner can prepare privacy-safe company invite",async t=>{
   assert.equal(row.share_goals,true);
   assert.equal(row.share_daily_execution,false);
 });
+
+
+test("74 Knowledge Port UI is present and private-first",async t=>{
+  const x=await boot();t.after(x.close);
+  assert.ok(x.d.getElementById("knowledgePortStatus"));
+  assert.ok(x.d.getElementById("captureKnowledge"));
+  assert.ok(x.d.getElementById("knowledgeResults").textContent.includes("Cloud-Login"));
+});
+test("75 authenticated sync loads KnowledgeSourcePort adapters",async t=>{
+  const auth={access_token:"a",refresh_token:"r",expires_at:Date.now()+3600000,user:{id:"user-1"}};
+  const sources=[
+    {provider:"manual",status:"ready",adapter_version:"1.0",capabilities:{ingest:true}},
+    {provider:"readwise",status:"connection_required",adapter_version:"1.0",capabilities:{sync:true}}
+  ];
+  const x=await boot({storage:{[AUTH_KEY]:auth},fetchHandler:async(u,init)=>{
+    if(u.includes("/rest/v1/knowledge_sources?"))return res(sources);
+    if(u.includes("/rest/v1/knowledge_items?"))return res([]);
+    return null;
+  }});
+  t.after(x.close);
+  await new Promise(r=>setTimeout(r,20));
+  assert.ok(x.d.getElementById("knowledgePortStatus").textContent.includes("MANUAL READY"));
+  assert.ok(x.d.getElementById("knowledgePortStatus").textContent.includes("READWISE CONNECTION REQUIRED"));
+});
+test("76 manual Knowledge capture writes owner-private object",async t=>{
+  const auth={access_token:"a",refresh_token:"r",expires_at:Date.now()+3600000,user:{id:"user-1"}};
+  const x=await boot({storage:{[AUTH_KEY]:auth}});
+  t.after(x.close);
+  setVal(x.w,"knowledgeTitle","Testwissen");
+  setVal(x.w,"knowledgeNote","Nur privat speichern");
+  click(x.w,"captureKnowledge");
+  await new Promise(r=>setTimeout(r,30));
+  const c=x.calls.find(c=>c.url.endsWith("/rest/v1/knowledge_items")&&c.init.method==="POST");
+  assert.ok(c);
+  const row=JSON.parse(c.init.body)[0];
+  assert.equal(row.user_id,"user-1");
+  assert.equal(row.provider,"manual");
+  assert.equal(row.privacy_scope,"private");
+  assert.equal(row.ingestion_status,"normalized");
+});
