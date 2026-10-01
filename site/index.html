@@ -156,6 +156,24 @@
   </div>
 </div>
 
+<div id="assessmentModal" class="modal hidden">
+  <div class="modalBox">
+    <div class="eyebrow">MASTERY GATE</div><h2 id="assessmentSkill">Skill Assessment</h2>
+    <p class="muted">Ein Level ist nur dann belastbar, wenn du eine reale Leistung mit Schwierigkeit, Evidenz und Grad der Unabhängigkeit dokumentierst.</p>
+    <div class="grid3">
+      <label>Testtyp<select id="assessmentType"><option value="explain">EXPLAIN</option><option value="solve">SOLVE</option><option value="predict">PREDICT</option><option value="apply">APPLY</option><option value="create">CREATE</option><option value="pressure">PRESSURE</option><option value="transfer">TRANSFER</option><option value="retest">RETEST</option></select></label>
+      <label>Score 0–100<input id="assessmentScore" type="number" min="0" max="100" value="70"></label>
+      <label>Difficulty 1–5<select id="assessmentDifficulty"><option>1</option><option selected>2</option><option>3</option><option>4</option><option>5</option></select></label>
+    </div>
+    <div class="grid2" style="margin-top:10px">
+      <label>Unabhängigkeit<select id="assessmentIndependent"><option value="yes">ohne Hilfe</option><option value="no">mit Hilfe</option></select></label>
+      <label>Evidence<textarea id="assessmentEvidence" placeholder="Was hast du konkret erklärt, gelöst, angewandt oder unter Druck gezeigt?"></textarea></label>
+    </div>
+    <div class="actions"><button class="btn primary" id="saveAssessment">ASSESSMENT SPEICHERN</button><button class="btn" id="closeAssessment">SCHLIESSEN</button></div>
+    <div class="tagline" id="assessmentGate">Explain/Solve/Predict stärken Knowledge; Apply/Transfer Capability; Pressure stärkt Druckstabilität.</div>
+  </div>
+</div>
+
 <div class="bottom"><div class="nav"><button data-screen="today" class="active">TODAY</button><button data-screen="growth">GROWTH</button><button data-screen="review">REVIEW</button><button data-screen="command">COMMAND</button></div></div>
 
 <script>
@@ -220,7 +238,7 @@ function migrate(){
 function normalize(x){
  const b=base(),o={...b,...x};o.entries=Array.isArray(x.entries)?x.entries.map(e=>({...freshEntry(e.date),...e})):[];o.skills=Array.isArray(x.skills)&&x.skills.length?x.skills.map(normalizeSkill):b.skills;o.projects=Array.isArray(x.projects)?x.projects:[];o.events=Array.isArray(x.events)?x.events:[];o.predictions=Array.isArray(x.predictions)?x.predictions:[];o.decisions=Array.isArray(x.decisions)?x.decisions:[];o.assessments=Array.isArray(x.assessments)?x.assessments:[];o.independenceChecks=Array.isArray(x.independenceChecks)?x.independenceChecks:[];o.trainingCycles=Array.isArray(x.trainingCycles)?x.trainingCycles:[];o.evidenceItems=Array.isArray(x.evidenceItems)?x.evidenceItems:[];o.config={...b.config,...(x.config||{})};o.modules=Array.isArray(x.modules)&&x.modules.length?x.modules:b.modules;o.season={...b.season,...(x.season||{})};return o;
 }
-let system=migrate(),current,saveTimer=null,timerHandle=null,cloudSession=null,cloudSyncTimer=null,cloudIntegrations=[];
+let system=migrate(),current,saveTimer=null,timerHandle=null,cloudSession=null,cloudSyncTimer=null,cloudIntegrations=[],assessmentSkillId=null;
 function save(){localStorage.setItem(KEY,JSON.stringify(system))}
 function getEntry(date){let e=system.entries.find(x=>x.date===date);if(!e){e=freshEntry(date);system.entries.push(e);save()}return e}
 function score(e){return proofKeys.filter(k=>e.proofs[k]?.done).length}
@@ -263,7 +281,7 @@ function calcIndependence(){
 function renderGrowth(){
  const entries=[...system.entries].sort((a,b)=>b.date.localeCompare(a.date)),l7=entries.slice(0,7),l30=entries.slice(0,30);$("avg7").textContent=l7.length?(l7.reduce((a,e)=>a+score(e),0)/l7.length).toFixed(1):"—";$("evidenceRate").textContent=evRate(l7)+"%";$("returnSpeed").textContent=calcReturnSpeed();$("calibration").textContent=calcCalibration();$("independence").textContent=calcIndependence();
  const b=bottleneck();$("bottleneckSignal").innerHTML=b?'<b>BOTTLENECK · '+escapeHTML(b.name)+'</b><br>Knowledge '+b.knowledge+' · Capability '+b.capability+' · Pressure '+b.pressure+(retestDue(b)?' · RETEST DUE':'')+'. Fokus bleibt auf dem schwächsten belegbaren Glied, nicht auf dem attraktivsten Thema.':"Noch keine aktiven Skills.";
- $("skills").innerHTML=activeSkills().map(s=>'<div class="skill active"><div class="skillHead"><h4>'+escapeHTML(s.name)+'</h4><span class="pill">'+(s.baselineVerified?"VERIFIED":"PROVISIONAL")+'</span></div><div class="triad"><div><span>KNOWLEDGE</span><b>S'+s.knowledge+'</b></div><div><span>CAPABILITY</span><b>S'+s.capability+'</b></div><div><span>PRESSURE</span><b>S'+s.pressure+'</b></div></div><div class="bar"><i style="width:'+Math.round(skillScore(s)/7*100)+'%"></i></div><div class="tiny" style="margin-top:8px">'+s.evidenceCount+' Evidenzen · Confidence '+Math.round(s.confidence*100)+'%'+(retestDue(s)?" · Retest fällig":"")+'</div></div>').join("");
+ $("skills").innerHTML=activeSkills().map(s=>'<div class="skill active"><div class="skillHead"><h4>'+escapeHTML(s.name)+'</h4><span class="pill">'+(s.baselineVerified?"VERIFIED":"PROVISIONAL")+'</span></div><div class="triad"><div><span>KNOWLEDGE</span><b>S'+s.knowledge+'</b></div><div><span>CAPABILITY</span><b>S'+s.capability+'</b></div><div><span>PRESSURE</span><b>S'+s.pressure+'</b></div></div><div class="bar"><i style="width:'+Math.round(skillScore(s)/7*100)+'%"></i></div><div class="tiny" style="margin-top:8px">'+s.evidenceCount+' Evidenzen · Confidence '+Math.round(s.confidence*100)+'%'+(retestDue(s)?" · Retest fällig":"")+'</div><div class="actions"><button class="btn" onclick="openAssessment(\''+s.id+'\')">'+(s.baselineVerified?"RETEST":"BASELINE")+'</button></div></div>').join("");
  const ps=proofKeys.map(k=>({k,p7:l7.length?Math.round(l7.filter(e=>e.proofs[k]?.done).length/l7.length*100):0,p30:l30.length?Math.round(l30.filter(e=>e.proofs[k]?.done).length/l30.length*100):0}));$("pillars").innerHTML=ps.map(x=>'<div class="row"><div><strong>'+proofMeta[x.k][0]+'</strong><small>7T '+x.p7+'% · 30T '+x.p30+'%</small><div class="bar"><i style="width:'+x.p7+'%"></i></div></div><span class="pill">'+x.p7+'%</span></div>').join("");
  $("seasonPrimary").value=system.season.primary;$("seasonSecondary").value=system.season.secondary;$("seasonMaintain").value=system.season.maintain
 }
@@ -309,6 +327,11 @@ $("skillsText").onchange=e=>{const rows=e.target.value.split("\n").map(x=>x.trim
 $("export").onclick=()=>{const blob=new Blob([JSON.stringify({product:"PANTHERA ACE OS",version:4,exportedAt:new Date().toISOString(),data:system},null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="panthera-ace-"+iso()+".json";a.click();URL.revokeObjectURL(a.href)};
 $("import").onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const x=JSON.parse(r.result);system=normalize(x.data||x);save();load($("date").value);alert("Import erfolgreich.")}catch(e){alert("Ungültige Datei.")}};r.readAsText(f)};
 
+
+window.openAssessment=id=>{const sk=system.skills.find(x=>x.id===id);if(!sk)return;assessmentSkillId=id;$("assessmentSkill").textContent=sk.name+" · "+(sk.baselineVerified?"RETEST":"BASELINE");$("assessmentEvidence").value="";$("assessmentScore").value="70";$("assessmentModal").classList.remove("hidden")};
+$("closeAssessment").onclick=()=>$("assessmentModal").classList.add("hidden");
+$("saveAssessment").onclick=()=>{const sk=system.skills.find(x=>x.id===assessmentSkillId);if(!sk)return;const type=$("assessmentType").value,score=Number($("assessmentScore").value),difficulty=Number($("assessmentDifficulty").value),independent=$("assessmentIndependent").value==="yes",evidence=$("assessmentEvidence").value.trim();if(!evidence){alert("Evidence eintragen.");return}const passed=score>=70;const a={id:uid(),skillId:sk.id,skillName:sk.name,type,score,difficulty,independent,evidence,passed,occurredAt:new Date().toISOString()};system.assessments.push(a);sk.lastTestedAt=a.occurredAt;if(independent&&difficulty>=2&&passed){sk.baselineVerified=true;sk.confidence=Math.min(.99,sk.confidence+.08);if(["explain","solve","predict","retest"].includes(type))sk.knowledge=Math.min(7,Math.max(sk.knowledge,Math.min(7,Math.floor(score/15))));if(["apply","transfer","create"].includes(type))sk.capability=Math.min(7,Math.max(sk.capability,Math.min(7,Math.floor(score/15))));if(type==="pressure")sk.pressure=Math.min(7,Math.max(sk.pressure,Math.min(7,Math.floor(score/15))))}else if(!passed){sk.confidence=Math.max(.1,sk.confidence-.08)}event("skill.assessment",{skill:sk.name,type,score,difficulty,independent,passed});save();$("assessmentModal").classList.add("hidden");renderAll();if(cloudSession)cloudPushAssessment(a).catch(cloudError)};
+
 // CLOUD: optional and non-blocking
 function readAuth(){try{return JSON.parse(localStorage.getItem(AUTH_KEY)||"null")}catch(e){return null}}
 function writeAuth(v){if(v)localStorage.setItem(AUTH_KEY,JSON.stringify(v));else localStorage.removeItem(AUTH_KEY)}
@@ -323,6 +346,7 @@ async function cloudEvent(e){await api("events?on_conflict=id","",{method:"POST"
 async function cloudPushPrediction(p){await api("predictions?on_conflict=id","",{method:"POST",headers:{"Prefer":"resolution=merge-duplicates,return=minimal"},body:JSON.stringify([{id:p.id,user_id:cloudSession.user.id,statement:p.statement,probability:Number(p.probability)/100,due_date:p.dueDate,outcome:p.outcome,resolved_at:p.resolvedAt,metadata:{local:true}}])})}
 async function cloudPushDecision(d){await api("decisions?on_conflict=id","",{method:"POST",headers:{"Prefer":"resolution=merge-duplicates,return=minimal"},body:JSON.stringify([{id:d.id,user_id:cloudSession.user.id,title:d.title,goal:d.goal,problem_class:d.problemClass,stakes:d.stakes,reversibility:d.reversibility,status:d.status,blind_spots:d.blindSpots,expected_outcome:d.expected,metadata:{complexity_budget:d.complexityBudget,route:d.route,counter_lenses:d.counterLenses}}])})}
 function queueFullSync(){clearTimeout(cloudSyncTimer);cloudSyncTimer=setTimeout(()=>fullSync().catch(cloudError),900)}
+async function cloudPushAssessment(a){await api("skill_assessments?on_conflict=id","",{method:"POST",headers:{"Prefer":"resolution=merge-duplicates,return=minimal"},body:JSON.stringify([{id:a.id,user_id:cloudSession.user.id,skill_id:a.skillId,assessment_type:a.type,score:a.score,passed:a.passed,difficulty:a.difficulty,context:"PANTHERA V4",evidence:a.evidence,independent:a.independent,occurred_at:a.occurredAt,metadata:{local:true}}])})}
 async function fullSync(){
  if(!cloudSession)return;cloudBadge("SYNCING","sync");
  const user=cloudSession.user.id;
