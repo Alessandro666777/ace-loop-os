@@ -473,7 +473,7 @@ $("prepareCompanyInvite").onclick=async()=>{try{
  const email=$("companyInviteEmail").value.trim().toLowerCase(),role=$("companyInviteRole").value;
  if(!email||!email.includes("@"))throw new Error("Bitte eine gültige E-Mail-Adresse eingeben.");
  const expires=new Date(Date.now()+14*86400000).toISOString();
- await api("organization_invites?on_conflict=organization_id,email","",{method:"POST",headers:{"Prefer":"resolution=merge-duplicates,return=minimal"},body:JSON.stringify([{
+ await api("organization_invites","",{method:"POST",headers:{"Prefer":"return=minimal"},body:JSON.stringify([{
    organization_id:companyContext.org.id,email,role,status:"pending",
    share_capabilities:true,share_goals:true,share_daily_execution:false,
    invited_by:cloudSession.user.id,expires_at:expires,metadata:{source:"company_os"}
