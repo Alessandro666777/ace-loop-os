@@ -564,18 +564,18 @@ async function fullSync(){
  save();current=getEntry($("date").value);renderAll();cloudBadge("SYNCED","ok")
 }
 function cloudError(e){console.error(e);cloudBadge("CLOUD ERROR");$("authStatus").textContent=String(e.message||e)}
-async function publicRpc(name,body){
- const r=await fetch(SUPA_URL+"/rest/v1/rpc/"+name,{method:"POST",headers:{"apikey":SUPA_KEY,"Content-Type":"application/json"},body:JSON.stringify(body||{})});
- const text=await r.text();if(!r.ok)throw new Error(text||"RPC fehlgeschlagen");return text?JSON.parse(text):null;
-}
 async function prepareAuthenticatedKernel(){
  if(!cloudSession)return;
- try{await api("rpc/bootstrap_personal_kernel","",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});}catch(e){console.warn("kernel bootstrap",e)}
- try{await api("rpc/claim_organization_invites","",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});}catch(e){console.warn("invite claim",e)}
+ try{
+   await api("rpc/bootstrap_personal_kernel","",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});
+ }catch(e){
+   const message=String(e.message||e);
+   cloudSession=null;writeAuth(null);cloudBadge("LOCAL");
+   throw new Error(message.includes("panthera invite required")?"Diese E-Mail ist noch nicht für PANTHERA freigeschaltet.":message);
+ }
+ await api("rpc/claim_organization_invites","",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});
 }
 async function sendMagic(email){
- const allowed=await publicRpc("can_access_panthera",{p_email:email});
- if(allowed!==true)throw new Error("Diese E-Mail ist noch nicht für PANTHERA freigeschaltet.");
  const redirect=location.origin+location.pathname;
  const r=await fetch(SUPA_URL+"/auth/v1/otp?redirect_to="+encodeURIComponent(redirect),{method:"POST",headers:{"apikey":SUPA_KEY,"Content-Type":"application/json"},body:JSON.stringify({email,create_user:true})});
  const x=await r.json().catch(()=>({}));if(!r.ok)throw new Error(x.msg||x.error_description||x.message||"Login-Link konnte nicht gesendet werden")
