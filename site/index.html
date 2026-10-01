@@ -113,9 +113,14 @@
     <div class="actions">
       <button class="btn primary" id="loginBtn">ANMELDEN</button>
       <button class="btn soft" id="bootstrapBtn">ERSTMALIG EINRICHTEN</button>
+      <button class="btn" id="resetBtn">PASSWORT VERGESSEN</button>
       <button class="btn" id="localBtn">LOCAL WEITER</button>
     </div>
-    <p class="cloudMeta" id="authStatus">Beim ersten Setup einmal Bootstrap-Code + E-Mail + eigenes Passwort setzen. Danach reicht Login.</p>
+    <div id="newPasswordBox" class="hidden">
+      <label>Neues Passwort<input id="newPassword" type="password" autocomplete="new-password" placeholder="mindestens 12 Zeichen"></label>
+      <button class="btn primary" id="saveNewPassword" style="margin-top:10px;width:100%">NEUES PASSWORT SPEICHERN</button>
+    </div>
+    <p class="cloudMeta" id="authStatus">Login oder Passwort-Reset direkt über ACE.</p>
   </div>
 </div>
 
@@ -350,6 +355,60 @@ async function syncAll(){
  writeSystem(system);current=getEntry($('date').value);renderAll();setCloudBadge('SYNCED','ok');
 }
 function cloudFail(e){console.error(e);setCloudBadge('CLOUD ERROR');}
+
+function parseRecoveryFromUrl(){
+ const hash=new URLSearchParams(location.hash.replace(/^#/,''));
+ const access=hash.get('access_token'),refresh=hash.get('refresh_token'),type=hash.get('type');
+ if(access&&type==='recovery'){
+   cloudSession={access_token:access,refresh_token:refresh||'',expires_at:Date.now()+3600*1000,user:null,recovery:true};
+   $('authOverlay').classList.remove('hidden');
+   $('newPasswordBox').classList.remove('hidden');
+   $('authStatus').textContent='Recovery-Link erkannt. Setze jetzt dein neues Passwort.';
+   return true;
+ }
+ return false;
+}
+async function requestPasswordReset(email){
+ const redirect=location.origin+location.pathname;
+ const r=await fetch(SUPA_URL+'/auth/v1/recover',{
+   method:'POST',
+   headers:{'apikey':SUPA_KEY,'Content-Type':'application/json'},
+   body:JSON.stringify({email,redirect_to:redirect})
+ });
+ const x=await r.json().catch(()=>({}));
+ if(!r.ok)throw new Error(x.msg||x.error_description||x.message||'Reset-Mail konnte nicht gesendet werden');
+ return true;
+}
+async function saveRecoveredPassword(password){
+ if(password.length<12)throw new Error('Passwort mindestens 12 Zeichen.');
+ const r=await fetch(SUPA_URL+'/auth/v1/user',{
+   method:'PUT',
+   headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+cloudSession.access_token,'Content-Type':'application/json'},
+   body:JSON.stringify({password})
+ });
+ const x=await r.json().catch(()=>({}));
+ if(!r.ok)throw new Error(x.msg||x.error_description||x.message||'Passwort konnte nicht geändert werden');
+ return x;
+}
+$('resetBtn').onclick=async()=>{
+ try{
+   const email=$('authEmail').value.trim();
+   if(!email.includes('@'))throw new Error('Trage zuerst deine E-Mail ein.');
+   $('authStatus').textContent='Reset-Mail wird gesendet…';
+   await requestPasswordReset(email);
+   $('authStatus').textContent='Reset-Mail gesendet. Öffne die E-Mail und tippe auf den Link. Danach kommst du zurück zu ACE.';
+ }catch(e){$('authStatus').textContent=String(e.message||e)}
+};
+$('saveNewPassword').onclick=async()=>{
+ try{
+   $('authStatus').textContent='Passwort wird gespeichert…';
+   await saveRecoveredPassword($('newPassword').value);
+   $('authStatus').textContent='Passwort geändert. Du kannst dich jetzt anmelden.';
+   $('newPasswordBox').classList.add('hidden');
+   history.replaceState(null,'',location.pathname);
+   cloudSession=null;writeAuth(null);
+ }catch(e){$('authStatus').textContent=String(e.message||e)}
+};
 async function initCloud(){
  const saved=readAuth();if(saved){cloudSession=saved;if(await ensureSession()){try{await syncAll();$('authOverlay').classList.add('hidden');return}catch(e){cloudFail(e)}}}
  setCloudBadge('LOCAL');$('authOverlay').classList.remove('hidden');
@@ -361,7 +420,7 @@ $('cloudBadge').onclick=()=>{$('authOverlay').classList.remove('hidden')};
 $('logoutBtn').onclick=()=>{cloudSession=null;writeAuth(null);setCloudBadge('LOCAL');$('authOverlay').classList.remove('hidden')};
 $('syncNow').onclick=()=>syncAll().catch(cloudFail);
 
-$('date').value=todayISO();load(todayISO());initCloud();
+$('date').value=todayISO();load(todayISO());if(!parseRecoveryFromUrl())initCloud();
 </script>
 <script>if('serviceWorker'in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js').catch(()=>{}));}</script>
 </body>
