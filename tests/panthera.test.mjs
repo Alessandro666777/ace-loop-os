@@ -127,3 +127,42 @@ test("57 expired saved session refreshes successfully",async t=>{const auth={acc
 test("58 failed refresh safely falls back to LOCAL",async t=>{const auth={access_token:"old",refresh_token:"rr",expires_at:0,user:{id:"user-1"}};const x=await boot({storage:{[AUTH_KEY]:auth},fetchHandler:async(u)=>u.includes("/auth/v1/token")?res({message:"invalid refresh"},401):null});t.after(x.close);assert.equal(x.d.getElementById("cloudBadge").textContent,"LOCAL");assert.equal(x.w.localStorage.getItem(AUTH_KEY),null)});
 test("59 cloud sync can replace local goals with server truth",async t=>{const auth={access_token:"a",refresh_token:"r",expires_at:Date.now()+3600000,user:{id:"user-1"}};const remote=[{id:"g1",domain:"TEST",name:"Server Goal",status:"active",focus_tier:1,priority:5,target_value:10,current_value:2,unit:"x",deadline:null,source:"cloud"}];const x=await boot({storage:{[AUTH_KEY]:auth},fetchHandler:async(u,init)=>u.includes("/rest/v1/goals?")&&(!init.method||init.method==="GET")?res(remote):null});t.after(x.close);assert.equal(state(x.w).goals.length,1);assert.equal(state(x.w).goals[0].name,"Server Goal")});
 test("60 goal progress update changes current value locally",async t=>{const x=await boot({prompts:["123"]});t.after(x.close);const g=state(x.w).goals.find(g=>g.name==="PROINVEST S4");x.w.updateGoalProgress(g.id);assert.equal(state(x.w).goals.find(g=>g.name==="PROINVEST S4").current,123)});
+
+test("61 cloud sync loads verified integration registry",async t=>{
+  const auth={access_token:"a",refresh_token:"r",expires_at:Date.now()+3600000,user:{id:"user-1"}};
+  const ints=[{provider:"GitHub 777",status:"verified",last_sync_at:null,metadata:{mode:"reference_only"}},{provider:"n8n",status:"dry_run_ready",last_sync_at:null,metadata:{mode:"dry_run"}},{provider:"monday.com",status:"connection_required",last_sync_at:null,metadata:{mode:"disabled"}}];
+  const x=await boot({storage:{[AUTH_KEY]:auth},fetchHandler:async(u,init)=>u.includes("/rest/v1/integration_status?")&&(!init.method||init.method==="GET")?res(ints):null});
+  t.after(x.close);
+  assert.equal(x.d.getElementById("integrationVerified").textContent,"1");
+  assert.equal(x.d.getElementById("integrationDry").textContent,"1");
+  assert.equal(x.d.getElementById("integrationRequired").textContent,"1");
+});
+test("62 latest integration suite is rendered in COMMAND",async t=>{
+  const auth={access_token:"a",refresh_token:"r",expires_at:Date.now()+3600000,user:{id:"user-1"}};
+  const run=[{suite:"PANTHERA Integration Lab",run_ref:"r1",cases_total:60,cases_passed:60,cases_failed:0,status:"pass",evidence_pointer:"github://run",created_at:new Date().toISOString()}];
+  const x=await boot({storage:{[AUTH_KEY]:auth},fetchHandler:async(u,init)=>u.includes("/rest/v1/integration_test_runs?")&&(!init.method||init.method==="GET")?res(run):null});
+  t.after(x.close);
+  assert.ok(x.d.getElementById("integrationSuite").textContent.includes("60/60 PASS"));
+});
+test("63 mapped ACE event is shadow-staged in integration bus",async t=>{
+  const auth={access_token:"a",refresh_token:"r",expires_at:Date.now()+3600000,user:{id:"user-1"}};
+  const x=await boot({storage:{[AUTH_KEY]:auth}});
+  t.after(x.close);
+  await x.w.cloudEvent({id:"evt-skill-1",at:new Date().toISOString(),type:"skill.evidence",payload:{skill:"Sales",quality:4}});
+  const c=x.calls.find(c=>c.url.includes("/rest/v1/integration_events_staging?")&&c.init.method==="POST");
+  assert.ok(c);
+  const row=JSON.parse(c.init.body)[0];
+  assert.equal(row.source_event_type,"skill.evidence");
+  assert.equal(row.canonical_event_type,"ace.skill.evidence");
+  assert.equal(row.mode,"shadow");
+  assert.equal(row.validation_status,"validated");
+});
+test("64 unmapped ACE event does not enter integration staging",async t=>{
+  const auth={access_token:"a",refresh_token:"r",expires_at:Date.now()+3600000,user:{id:"user-1"}};
+  const x=await boot({storage:{[AUTH_KEY]:auth}});
+  t.after(x.close);
+  const before=x.calls.filter(c=>c.url.includes("/rest/v1/integration_events_staging?")).length;
+  await x.w.cloudEvent({id:"evt-no-map",at:new Date().toISOString(),type:"execution.next_move",payload:{move:"x"}});
+  const after=x.calls.filter(c=>c.url.includes("/rest/v1/integration_events_staging?")).length;
+  assert.equal(after,before);
+});
