@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#07090d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="PANTHERA">
+<link rel="manifest" href="./panthera-manifest.webmanifest">
+<link rel="apple-touch-icon" href="./panthera-icon.svg">
+<title>PANTHERA Mobile</title>
+<style>
+:root{--bg:#07090d;--panel:#10141b;--panel2:#151b24;--line:#273242;--text:#f5f7fb;--muted:#93a0b1;--blue:#5aa7ff;--blue2:#8fc6ff;--ok:#6be0a5;--warn:#ffcc66;--danger:#ff7474}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top,#121b2a 0,#07090d 48%);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh}
+.wrap{max-width:720px;margin:auto;padding:calc(18px + env(safe-area-inset-top)) 16px calc(100px + env(safe-area-inset-bottom))}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}.brand{font-size:20px;font-weight:800;letter-spacing:.12em}.brand small{display:block;font-size:10px;color:var(--muted);letter-spacing:.22em;margin-top:4px}.badge{font-size:11px;padding:7px 10px;border:1px solid var(--line);border-radius:999px;color:var(--muted)}
+.card{background:linear-gradient(180deg,rgba(20,27,38,.96),rgba(13,18,25,.96));border:1px solid var(--line);border-radius:20px;padding:18px;margin:12px 0;box-shadow:0 20px 60px rgba(0,0,0,.22)}
+h1{font-size:28px;line-height:1.05;margin:8px 0 10px}h2{font-size:19px;margin:0 0 12px}p{color:var(--muted);line-height:1.48;margin:8px 0 14px}
+label{display:block;font-size:12px;color:var(--muted);margin:12px 0 6px}input,textarea,select{width:100%;background:#080b10;border:1px solid var(--line);color:var(--text);border-radius:14px;padding:13px 14px;font:inherit;outline:none}textarea{min-height:110px;resize:vertical}input:focus,textarea:focus{border-color:var(--blue)}
+.row{display:flex;gap:9px;flex-wrap:wrap}.btn{appearance:none;border:none;background:#1b2430;color:var(--text);border:1px solid var(--line);border-radius:14px;padding:12px 14px;font-weight:700;cursor:pointer}.btn.primary{background:linear-gradient(135deg,#2e7fe7,#5aa7ff);border-color:#5aa7ff;color:#fff}.btn.ok{background:#163426;border-color:#286a49;color:#bdf8d5}.btn.danger{background:#351b20;border-color:#71313d;color:#ffb7c0}.btn.ghost{background:transparent}.btn:disabled{opacity:.45;cursor:not-allowed}
+.quick{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin:12px 0}.quick button{min-height:54px;text-align:left}.quick b{display:block}.quick span{font-size:11px;color:var(--muted)}
+.sep{height:1px;background:var(--line);margin:16px 0}.hidden{display:none!important}.status{font-size:12px;color:var(--muted);margin-top:10px;white-space:pre-wrap}.status.ok{color:var(--ok)}.status.warn{color:var(--warn)}.status.bad{color:var(--danger)}
+.pill{display:inline-block;font-size:11px;padding:6px 9px;border-radius:999px;background:#0b1119;border:1px solid var(--line);color:var(--blue2);margin:3px 4px 3px 0}
+.packet{white-space:pre-wrap;background:#080b10;border:1px solid var(--line);border-radius:14px;padding:14px;color:#dfe8f7;font-size:12px;line-height:1.5;max-height:380px;overflow:auto}
+.item{border-top:1px solid var(--line);padding:11px 0}.item:first-child{border-top:none}.item b{display:block;margin-bottom:3px}.meta{font-size:11px;color:var(--muted)}
+.switch{display:flex;justify-content:space-between;align-items:center;gap:12px}.switch input{width:auto;transform:scale(1.2)}
+.notice{border-left:3px solid var(--blue);padding:10px 12px;background:#0a1018;border-radius:8px;color:#bcc8d8;font-size:12px;line-height:1.45}
+.bottomNav{position:fixed;left:0;right:0;bottom:0;background:rgba(7,9,13,.92);backdrop-filter:blur(18px);border-top:1px solid var(--line);padding:8px max(10px,env(safe-area-inset-left)) calc(8px + env(safe-area-inset-bottom));z-index:20}.bottomNav .inner{max-width:720px;margin:auto;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.bottomNav button{background:transparent;color:var(--muted);border:0;padding:10px;font-weight:700}.bottomNav button.active{color:var(--blue2)}
+code{color:#bcd8ff}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><div class="brand">PANTHERA<small>MOBILE CORE</small></div><div class="badge" id="cloudBadge">OFFLINE READY</div></div>
+
+  <section id="authScreen">
+    <div class="card">
+      <div class="meta">PRIVATE · MULTI-USER · MOBILE</div>
+      <h1>Ein Link.<br>Dein PANTHERA.</h1>
+      <p>Deine persönlichen Daten bleiben getrennt. Allgemeine Learnings werden nur geteilt, wenn du sie ausdrücklich freigibst.</p>
+      <label>E-Mail</label><input id="email" type="email" autocomplete="email" placeholder="deine@email.de">
+      <label>Einladungscode</label><input id="invite" type="text" autocomplete="off" placeholder="wird bei Einladungslink automatisch gesetzt">
+      <div class="row" style="margin-top:14px"><button class="btn primary" id="sendLink">LOGIN-LINK SENDEN</button></div>
+      <div class="status" id="authStatus"></div>
+      <div class="sep"></div>
+      <div class="meta">FALLBACK, FALLS DER MAIL-LINK AUF LOCALHOST ZEIGT</div>
+      <p>Kopiere dann den kompletten Link aus Safari und füge ihn hier ein.</p>
+      <input id="magicPaste" type="text" inputmode="url" placeholder="http://localhost:3000/#access_token=…">
+      <div class="row" style="margin-top:10px"><button class="btn" id="acceptPaste">LINK VERWENDEN</button><button class="btn ghost" id="pasteClipboard">AUS ZWISCHENABLAGE</button></div>
+    </div>
+  </section>
+
+  <section id="appScreen" class="hidden">
+    <div class="card">
+      <div class="meta" id="memberMeta">MEMBER</div>
+      <h1 id="hello">Was willst du heute lösen?</h1>
+      <textarea id="taskText" placeholder="Zum Beispiel: Morgen treffe ich einen Immobilienunternehmer. Bereite mich auf das Gespräch vor und finde die drei stärksten Hebel."></textarea>
+      <div class="quick">
+        <button class="btn" data-task="company"><b>Unternehmen</b><span>Analyse · Blueprint</span></button>
+        <button class="btn" data-task="event"><b>Event</b><span>Hospitality · Operations</span></button>
+        <button class="btn" data-task="sales"><b>Gespräch</b><span>Pitch · Verhandlung</span></button>
+        <button class="btn" data-task="skill"><b>Skill</b><span>Training · Mastery</span></button>
+        <button class="btn" data-task="decision"><b>Entscheidung</b><span>Red Team · Risiko</span></button>
+        <button class="btn" data-task="review"><b>Review</b><span>Reality · Lernen</span></button>
+      </div>
+      <div class="row"><button class="btn primary" id="buildPacket">PANTHERA STARTEN</button></div>
+      <div class="status" id="taskStatus"></div>
+    </div>
+
+    <div class="card hidden" id="packetCard">
+      <h2>Dein Task Packet</h2>
+      <div id="modulePills"></div>
+      <div class="packet" id="packet"></div>
+      <div class="row" style="margin-top:12px"><button class="btn primary" id="copyOpen">KOPIEREN + CHATGPT ÖFFNEN</button><button class="btn" id="copyOnly">NUR KOPIEREN</button></div>
+      <p class="meta">PANTHERA speichert die Aufgabe. Deine ChatGPT-Antwort wird erst Teil deines Lernverlaufs, wenn du unten das Ergebnis einträgst.</p>
+    </div>
+
+    <div class="card" id="reviewCard">
+      <h2>Reality Loop</h2>
+      <p>Nach dem Gespräch, Event oder Test: Was ist wirklich passiert?</p>
+      <label>Ergebnis / Beobachtung</label><textarea id="outcome" placeholder="Was ist tatsächlich passiert? Was war anders als erwartet?"></textarea>
+      <label>Generalisierbares Learning</label><textarea id="learning" placeholder="Formuliere eine Regel ohne Namen, Firmen oder private Details. Beispiel: Bei VIP-Dinnern reduziert ein klarer Guest Owner Übergabefehler."></textarea>
+      <label>Kategorie</label>
+      <select id="learningCategory"><option value="hospitality">Hospitality</option><option value="sales">Sales</option><option value="operations">Operations</option><option value="business">Business</option><option value="leadership">Leadership</option><option value="finance">Finance</option><option value="general">General</option></select>
+      <label style="display:flex;gap:9px;align-items:flex-start"><input id="noPrivateConfirm" type="checkbox" style="width:auto;margin-top:3px"> Ich bestätige: Das Learning enthält keine Namen, Kundendaten, privaten oder sensiblen Informationen.</label>
+      <div class="row"><button class="btn ok" id="saveReview">REVIEW SPEICHERN</button><button class="btn primary" id="shareLearning">ALS TEAM-LEARNING FREIGEBEN</button></div>
+      <div class="status" id="reviewStatus"></div>
+    </div>
+
+    <div class="card" id="memoryCard">
+      <h2>Private Memory</h2>
+      <p>Nur für deine Instanz. Wird nicht automatisch geteilt.</p>
+      <label>Was soll PANTHERA über dich berücksichtigen?</label><input id="memoryText" placeholder="z. B. Mein 30-Tage-Ziel ist …">
+      <div class="row" style="margin-top:10px"><select id="memoryType" style="max-width:180px"><option value="goal">Ziel</option><option value="context">Kontext</option><option value="preference">Präferenz</option><option value="skill">Skill</option><option value="private_note">Private Notiz</option></select><button class="btn" id="addMemory">SPEICHERN</button></div>
+      <div id="memoryList"></div>
+    </div>
+
+    <div class="card" id="knowledgeCard">
+      <h2>Shared PANTHERA Knowledge</h2>
+      <div class="switch"><div><b>Shared Learning</b><div class="meta">Nur manuell freigegebene, abstrahierte Learnings.</div></div><input id="shareMode" type="checkbox"></div>
+      <div class="notice" style="margin-top:12px">Privates bleibt privat. Shared Learning ist standardmäßig AUS. Auch bei aktiviertem Modus wird nichts automatisch veröffentlicht; jedes Learning braucht deinen separaten Freigabe-Button.</div>
+      <div id="sharedList" style="margin-top:8px"></div>
+      <div class="sep"></div>
+      <h2 style="font-size:16px">Meine freigegebenen Learnings</h2>
+      <div id="ownLearnings"></div>
+    </div>
+
+    <div class="card">
+      <h2>App</h2>
+      <p>Auf iPhone dauerhaft nutzen: Safari → Teilen → <b>Zum Home-Bildschirm</b>.</p>
+      <div class="row"><button class="btn danger" id="logout">LOGOUT</button></div>
+    </div>
+  </section>
+</div>
+
+<div class="bottomNav hidden" id="bottomNav"><div class="inner"><button data-scroll="appScreen" class="active">START</button><button data-scroll="reviewCard">REVIEW</button><button data-scroll="knowledgeCard">LEARN</button></div></div>
+
+<script>
+const SUPA_URL="https://gbzoxohtdlujrfljdwfz.supabase.co";
+const SUPA_KEY="sb_publishable_37BENm3_dZtzAhDfu6iDqw_aXtm4Iof";
+const AUTH_KEY="panthera.mobile.auth.v1";
+const INVITE_KEY="panthera.mobile.invite.v1";
+const $=id=>document.getElementById(id);
+let session=null,membership=null,currentTaskId=null,privacyMode="off",cachedMemory=[],cachedShared=[];
+
+function writeAuth(v){if(v)localStorage.setItem(AUTH_KEY,JSON.stringify(v));else localStorage.removeItem(AUTH_KEY)}
+function readAuth(){try{return JSON.parse(localStorage.getItem(AUTH_KEY)||"null")}catch(e){return null}}
+function setStatus(id,text,mode=""){const el=$(id);el.textContent=text;el.className="status"+(mode?" "+mode:"")}
+function headers(extra={}){return{"apikey":SUPA_KEY,"Authorization":"Bearer "+session.access_token,"Content-Type":"application/json",...extra}}
+async function refresh(){if(!session?.refresh_token)return false;const r=await fetch(SUPA_URL+"/auth/v1/token?grant_type=refresh_token",{method:"POST",headers:{"apikey":SUPA_KEY,"Content-Type":"application/json"},body:JSON.stringify({refresh_token:session.refresh_token})});if(!r.ok){session=null;writeAuth(null);return false}const x=await r.json();session={...x,expires_at:Date.now()+(x.expires_in||3600)*1000,user:x.user||session.user};writeAuth(session);return true}
+async function ensure(){if(!session)return false;if((session.expires_at||0)<Date.now()+120000)return refresh();return true}
+async function api(path,options={}){if(!(await ensure()))throw new Error("Session abgelaufen.");const r=await fetch(SUPA_URL+"/rest/v1/"+path,{...options,headers:headers(options.headers||{})});const txt=await r.text();if(!r.ok)throw new Error(txt||("HTTP "+r.status));return txt?JSON.parse(txt):null}
+
+function rememberInviteFromUrl(){
+ const u=new URL(location.href),code=u.searchParams.get("invite");
+ if(code){localStorage.setItem(INVITE_KEY,code);$("invite").value=code;u.searchParams.delete("invite");history.replaceState(null,"",u.pathname+u.search+u.hash)}
+ else $("invite").value=localStorage.getItem(INVITE_KEY)||"";
+}
+async function sendMagic(){
+ const email=$("email").value.trim(),code=$("invite").value.trim();
+ if(!email||!email.includes("@"))throw new Error("Bitte gültige E-Mail eingeben.");
+ if(code)localStorage.setItem(INVITE_KEY,code);
+ const redirect=location.origin+location.pathname;
+ const r=await fetch(SUPA_URL+"/auth/v1/otp?redirect_to="+encodeURIComponent(redirect),{method:"POST",headers:{"apikey":SUPA_KEY,"Content-Type":"application/json"},body:JSON.stringify({email,create_user:true})});
+ const x=await r.json().catch(()=>({}));
+ if(!r.ok)throw new Error(x.msg||x.error_description||x.message||"Login-Link konnte nicht gesendet werden.");
+ setStatus("authStatus","Login-Link gesendet. Öffne ihn auf diesem iPhone. Falls er auf localhost führt: Link kopieren und hier einfügen.","ok");
+}
+async function acceptMagicUrl(raw){
+ let u;try{u=new URL(String(raw||"").trim())}catch(e){throw new Error("Ungültiger Link.")}
+ const h=new URLSearchParams((u.hash||"").replace(/^#/,""));
+ const access=h.get("access_token"),refreshToken=h.get("refresh_token"),expires=Number(h.get("expires_in")||3600);
+ if(access){
+  const ur=await fetch(SUPA_URL+"/auth/v1/user",{headers:{"apikey":SUPA_KEY,"Authorization":"Bearer "+access}});
+  if(!ur.ok)throw new Error("Login-Link abgelaufen. Bitte neuen senden.");
+  const user=await ur.json();
+  session={access_token:access,refresh_token:refreshToken||"",expires_at:Date.now()+expires*1000,user};
+ }else{
+  const tokenHash=u.searchParams.get("token_hash")||u.searchParams.get("token");
+  const type=(u.searchParams.get("type")||"magiclink").toLowerCase();
+  if(!tokenHash)throw new Error("Kein Login-Token gefunden.");
+  const vr=await fetch(SUPA_URL+"/auth/v1/verify",{method:"POST",headers:{"apikey":SUPA_KEY,"Content-Type":"application/json"},body:JSON.stringify({type:["magiclink","email","signup","invite","recovery","email_change"].includes(type)?type:"magiclink",token_hash:tokenHash})});
+  const x=await vr.json().catch(()=>({}));
+  if(!vr.ok||!x.access_token)throw new Error(x.msg||x.message||"Login-Link ungültig.");
+  let user=x.user;if(!user){const ur=await fetch(SUPA_URL+"/auth/v1/user",{headers:{"apikey":SUPA_KEY,"Authorization":"Bearer "+x.access_token}});user=await ur.json()}
+  session={...x,expires_at:Date.now()+Number(x.expires_in||3600)*1000,user};
+ }
+ writeAuth(session);history.replaceState(null,"",location.pathname);await bootstrap();
+}
+async function acceptHash(){
+ const h=new URLSearchParams(location.hash.replace(/^#/,"")),a=h.get("access_token");if(!a)return false;
+ const r=h.get("refresh_token"),ex=Number(h.get("expires_in")||3600);
+ const ur=await fetch(SUPA_URL+"/auth/v1/user",{headers:{"apikey":SUPA_KEY,"Authorization":"Bearer "+a}});if(!ur.ok)return false;
+ session={access_token:a,refresh_token:r||"",expires_at:Date.now()+ex*1000,user:await ur.json()};writeAuth(session);history.replaceState(null,"",location.pathname);return true;
+}
+async function loadMembership(){
+ const rows=await api("panthera_memberships?select=member_code,role,cohort&user_id=eq."+session.user.id);
+ membership=rows?.[0]||null;
+ if(!membership){
+  const code=localStorage.getItem(INVITE_KEY)||$("invite").value.trim();
+  if(!code)throw new Error("Du bist angemeldet, aber es fehlt ein PANTHERA-Einladungscode.");
+  const r=await fetch(SUPA_URL+"/rest/v1/rpc/redeem_panthera_invite",{method:"POST",headers:headers(),body:JSON.stringify({p_code:code})});
+  const txt=await r.text();if(!r.ok)throw new Error(txt||"Einladung konnte nicht eingelöst werden.");
+  membership=JSON.parse(txt);localStorage.removeItem(INVITE_KEY);
+ }
+}
+async function loadPrivacy(){
+ const rows=await api("panthera_privacy_settings?select=shared_learning_mode,consent_at&user_id=eq."+session.user.id);
+ privacyMode=rows?.[0]?.shared_learning_mode||"off";$("shareMode").checked=privacyMode==="review";
+}
+async function setPrivacy(enabled){
+ privacyMode=enabled?"review":"off";
+ await api("panthera_privacy_settings?on_conflict=user_id",{method:"POST",headers:{"Prefer":"resolution=merge-duplicates,return=minimal"},body:JSON.stringify([{user_id:session.user.id,shared_learning_mode:privacyMode,consent_version:enabled?"v1":null,consent_at:enabled?new Date().toISOString():null,updated_at:new Date().toISOString()}])});
+}
+async function loadMemory(){
+ cachedMemory=await api("panthera_user_memory?select=id,memory_type,content,created_at&active=eq.true&order=created_at.desc&limit=12")||[];
+ $("memoryList").innerHTML=cachedMemory.map(x=>'<div class="item"><b>'+escapeHtml(x.content)+'</b><div class="meta">'+escapeHtml(x.memory_type)+'</div></div>').join("")||'<div class="meta">Noch keine privaten Memory-Einträge.</div>';
+}
+async function loadShared(){
+ cachedShared=await api("panthera_shared_knowledge?select=id,category,title,generalized_learning,evidence_level,validation_count,source_candidate_id&order=created_at.desc&limit=20")||[];
+ $("sharedList").innerHTML=cachedShared.slice(0,8).map(x=>'<div class="item"><b>'+escapeHtml(x.title||x.category)+'</b><div>'+escapeHtml(x.generalized_learning)+'</div><div class="meta">'+escapeHtml(x.category)+' · '+escapeHtml(x.evidence_level)+'</div></div>').join("")||'<div class="meta">Noch keine gemeinsamen Learnings.</div>';
+ const own=await api("panthera_learning_candidates?select=id,title,generalized_learning,share_status,created_at&order=created_at.desc&limit=12")||[];
+ $("ownLearnings").innerHTML=own.map(x=>'<div class="item"><b>'+escapeHtml(x.title||"Learning")+'</b><div>'+escapeHtml(x.generalized_learning)+'</div><div class="meta">'+escapeHtml(x.share_status)+'</div>'+(x.share_status==="shared"?'<button class="btn danger" data-withdraw="'+x.id+'" style="margin-top:8px">ZURÜCKZIEHEN</button>':'')+'</div>').join("")||'<div class="meta">Noch nichts freigegeben.</div>';
+ document.querySelectorAll("[data-withdraw]").forEach(b=>b.onclick=()=>withdrawLearning(b.dataset.withdraw));
+}
+function escapeHtml(s){return String(s||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+function routeTask(text,hint){
+ const t=(text+" "+(hint||"")).toLowerCase(),mods=["PANTHERA CORE","META CONDUCTOR","REALITY ENGINE"];let type="general";
+ if(/unternehmen|company|firma|website|blueprint|audit|immobil|automotive|wealth/.test(t)){mods.push("BLUEPRINT FOUNDRY");type="company"}
+ if(/event|dinner|vip|service|bar|beverage|hospitality|gast|catering/.test(t)){mods.push("HOSPITALITY OS");type="event"}
+ if(/gespräch|call|pitch|verkauf|sales|kunde|verhandlung|abschluss/.test(t)){mods.push("SALES OS","ATHENAEUM");type=type==="general"?"sales":type}
+ if(/skill|lernen|training|besser werden|üben/.test(t)){mods.push("MASTERY COMPILER");type="skill"}
+ if(/entscheidung|option|risiko|soll ich|red team/.test(t)){mods.push("SEVEN HEADS","RISK LAYER");type="decision"}
+ if(/review|lief|passiert|lernen|fehler|ergebnis/.test(t)){mods.push("LEARNING ENGINE");if(type==="general")type="review"}
+ if(/marke|präsenz|wirkung|content|ästhetik|aura/.test(t))mods.push("MOON ARCHITECT");
+ return{type,mods:[...new Set(mods)]};
+}
+function relevantKnowledge(type){
+ const map={company:["business","operations","hospitality","sales"],event:["hospitality","operations","business"],sales:["sales","business","leadership"],skill:["leadership","general","operations"],decision:["business","finance","operations"],review:["general","operations","hospitality"]};
+ const cats=map[type]||["general","business"];
+ return cachedShared.filter(x=>cats.includes(x.category)).slice(0,6);
+}
+function buildPrompt(text,route){
+ const mem=cachedMemory.slice(0,8).map(x=>"- ["+x.memory_type+"] "+x.content).join("\n")||"- keine privaten Memory-Einträge";
+ const knowledge=relevantKnowledge(route.type).map(x=>"- "+(x.title||x.category)+": "+x.generalized_learning).join("\n")||"- keine relevanten Shared Learnings";
+ return [
+ "PANTHERA MOBILE TASK PACKET",
+ "",
+ "USER: "+(membership?.member_code||"member"),
+ "COHORT: "+(membership?.cohort||""),
+ "ROUTED MODULES: "+route.mods.join(" · "),
+ "",
+ "CORE RULES:",
+ "- Arbeite realitätsnah. Trenne Fakten, Interpretation und Hypothesen.",
+ "- Nutze nur die gerouteten Module, wenn sie echten Erkenntnisgewinn erzeugen.",
+ "- Private Memory gehört ausschließlich zu diesem Nutzer.",
+ "- Shared Knowledge darf als Teamwissen genutzt werden, aber nicht als Beweis für einen Einzelfall.",
+ "- Keine unnötige Komplexität. Stoppe Analyse, sobald Realität mehr Informationswert liefert.",
+ "- Jede relevante Antwort endet mit einem konkreten Move, Definition of Done und Aktualisierungssignal.",
+ "",
+ "PRIVATE USER CONTEXT:",
+ mem,
+ "",
+ "SHARED PANTHERA KNOWLEDGE:",
+ knowledge,
+ "",
+ "TASK:",
+ text,
+ "",
+ "OUTPUT:",
+ "1. Kernwahrheit",
+ "2. Entscheidende Analyse",
+ "3. Stärkster blinder Fleck / Gegenangriff",
+ "4. Empfehlung",
+ "5. Konkreter nächster Move",
+ "6. Reality Test / Erfolgskriterium",
+ "7. Welche Information soll nach der Ausführung zurück in den Learning Loop?"
+ ].join("\n");
+}
+async function createTask(text,route){
+ const rows=await api("panthera_task_requests",{method:"POST",headers:{"Prefer":"return=representation"},body:JSON.stringify([{user_id:session.user.id,request_text:text,routed_modules:route.mods,task_type:route.type,status:"created"}])});
+ currentTaskId=rows?.[0]?.id||null;
+}
+async function bootstrap(){
+ try{
+  await loadMembership();await loadPrivacy();await Promise.all([loadMemory(),loadShared()]);
+  $("authScreen").classList.add("hidden");$("appScreen").classList.remove("hidden");$("bottomNav").classList.remove("hidden");
+  $("memberMeta").textContent=(membership.member_code||"MEMBER")+" · "+(membership.cohort||"");
+  $("hello").textContent=membership.member_code==="TOKIO-001"?"Was willst du heute lösen, Tokio?":"Was willst du heute lösen?";
+  $("cloudBadge").textContent="SYNCED";
+ }catch(e){setStatus("authStatus",String(e.message||e),"bad");$("authScreen").classList.remove("hidden")}
+}
+async function init(){
+ rememberInviteFromUrl();
+ if(await acceptHash()){await bootstrap();return}
+ const saved=readAuth();if(saved){session=saved;if(await ensure()){await bootstrap();return}}
+}
+document.querySelectorAll("[data-task]").forEach(b=>b.onclick=()=>{const examples={company:"Analysiere dieses Unternehmen und finde die stärksten Pain Points und den besten Blueprint-Einstieg.",event:"Bereite dieses Event vollständig vor: Ziel, Gäste, Hospitality, Rollen, Risiken und Ablauf.",sales:"Bereite mich auf dieses Gespräch vor. Ziel, Interessen, Fragen, Einwände und nächster Zug.",skill:"Trainiere mit mir diese Fähigkeit mit Drill, Feldtest und Messung.",decision:"Prüfe diese Entscheidung mit Upside, Downside, Reversibilität und Red Team.",review:"Analysiere, was passiert ist, was ich falsch eingeschätzt habe und welche Regel wir aktualisieren."};$("taskText").value=examples[b.dataset.task]||"";$("taskText").focus()});
+$("sendLink").onclick=()=>sendMagic().catch(e=>setStatus("authStatus",String(e.message||e),"bad"));
+$("acceptPaste").onclick=()=>acceptMagicUrl($("magicPaste").value).catch(e=>setStatus("authStatus",String(e.message||e),"bad"));
+$("pasteClipboard").onclick=async()=>{try{$("magicPaste").value=await navigator.clipboard.readText();await acceptMagicUrl($("magicPaste").value)}catch(e){setStatus("authStatus",String(e.message||e),"bad")}};
+$("buildPacket").onclick=async()=>{try{const text=$("taskText").value.trim();if(text.length<8)throw new Error("Beschreibe die Aufgabe etwas genauer.");const route=routeTask(text);await createTask(text,route);const p=buildPrompt(text,route);$("packet").textContent=p;$("modulePills").innerHTML=route.mods.map(m=>'<span class="pill">'+escapeHtml(m)+'</span>').join("");$("packetCard").classList.remove("hidden");setStatus("taskStatus","Task gespeichert · "+route.type+" · "+route.mods.join(" → "),"ok");$("packetCard").scrollIntoView({behavior:"smooth"})}catch(e){setStatus("taskStatus",String(e.message||e),"bad")}};
+async function copyPacket(open){await navigator.clipboard.writeText($("packet").textContent);if(open)window.open("https://chatgpt.com","_blank");}
+$("copyOpen").onclick=()=>copyPacket(true).catch(e=>setStatus("taskStatus",String(e.message||e),"bad"));
+$("copyOnly").onclick=()=>copyPacket(false).catch(e=>setStatus("taskStatus",String(e.message||e),"bad"));
+$("addMemory").onclick=async()=>{try{const content=$("memoryText").value.trim();if(!content)throw new Error("Memory ist leer.");await api("panthera_user_memory",{method:"POST",headers:{"Prefer":"return=minimal"},body:JSON.stringify([{user_id:session.user.id,memory_type:$("memoryType").value,content}])});$("memoryText").value="";await loadMemory()}catch(e){alert(e.message||e)}};
+$("shareMode").onchange=async()=>{try{await setPrivacy($("shareMode").checked);setStatus("reviewStatus",$("shareMode").checked?"Shared Learning aktiviert. Trotzdem wird nur über den Freigabe-Button geteilt.":"Shared Learning deaktiviert.","ok")}catch(e){$("shareMode").checked=!$("shareMode").checked;setStatus("reviewStatus",String(e.message||e),"bad")}};
+$("saveReview").onclick=async()=>{try{const outcome=$("outcome").value.trim(),learning=$("learning").value.trim();if(!currentTaskId)throw new Error("Starte zuerst eine Aufgabe, damit das Review zugeordnet werden kann.");if(!outcome)throw new Error("Trage zuerst das reale Ergebnis ein.");await api("panthera_task_requests?id=eq."+currentTaskId,{method:"PATCH",headers:{"Prefer":"return=minimal"},body:JSON.stringify({outcome,status:"reviewed",updated_at:new Date().toISOString()})});if(learning){await api("panthera_learning_candidates",{method:"POST",headers:{"Prefer":"return=minimal"},body:JSON.stringify([{user_id:session.user.id,task_request_id:currentTaskId,category:$("learningCategory").value,title:"Learning aus Reality Loop",generalized_learning:learning,evidence_level:"field_observation",share_status:"private"}])});await loadShared()}setStatus("reviewStatus","Review gespeichert. Privates bleibt privat.","ok")}catch(e){setStatus("reviewStatus",String(e.message||e),"bad")}};
+$("shareLearning").onclick=async()=>{try{
+ if(privacyMode!=="review")throw new Error("Aktiviere zuerst Shared Learning.");
+ if(!$("noPrivateConfirm").checked)throw new Error("Bestätige zuerst, dass keine Namen oder privaten Daten enthalten sind.");
+ const learning=$("learning").value.trim();if(learning.length<12)throw new Error("Learning ist zu kurz.");
+ const rows=await api("panthera_learning_candidates",{method:"POST",headers:{"Prefer":"return=representation"},body:JSON.stringify([{user_id:session.user.id,task_request_id:currentTaskId,category:$("learningCategory").value,title:"Freigegebenes Learning",generalized_learning:learning,evidence_level:"field_observation",share_status:"private"}])});
+ const id=rows?.[0]?.id;if(!id)throw new Error("Learning konnte nicht angelegt werden.");
+ await api("rpc/publish_panthera_learning",{method:"POST",body:JSON.stringify({p_candidate:id})});
+ setStatus("reviewStatus","Als abstrahiertes Team-Learning freigegeben.","ok");$("noPrivateConfirm").checked=false;await loadShared();
+}catch(e){setStatus("reviewStatus",String(e.message||e),"bad")}};
+async function withdrawLearning(id){try{await api("rpc/withdraw_panthera_learning",{method:"POST",body:JSON.stringify({p_candidate:id})});await loadShared();setStatus("reviewStatus","Learning wurde aus dem gemeinsamen Pool zurückgezogen.","ok")}catch(e){setStatus("reviewStatus",String(e.message||e),"bad")}}
+$("logout").onclick=()=>{session=null;membership=null;writeAuth(null);location.reload()};
+document.querySelectorAll("[data-scroll]").forEach(b=>b.onclick=()=>{document.querySelectorAll(".bottomNav button").forEach(x=>x.classList.remove("active"));b.classList.add("active");$(b.dataset.scroll).scrollIntoView({behavior:"smooth"})});
+if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./panthera-service-worker.js").catch(()=>{}));
+init().catch(e=>setStatus("authStatus",String(e.message||e),"bad"));
+</script>
+</body>
+</html>
