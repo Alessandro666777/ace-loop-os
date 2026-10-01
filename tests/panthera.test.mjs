@@ -26,7 +26,6 @@ async function boot(opts={}){
       const custom=await opts.fetchHandler(u,init);
       if(custom)return custom;
     }
-    if(u.includes("/rest/v1/rpc/can_access_panthera"))return res(true);
     if(u.includes("/rest/v1/rpc/bootstrap_personal_kernel"))return res({onboarding_status:"needs_baseline"});
     if(u.includes("/rest/v1/rpc/claim_organization_invites"))return res([]);
     if(u.includes("/auth/v1/otp"))return res({});
@@ -214,24 +213,27 @@ test("68 local mode exposes no private company data",async t=>{
   assert.ok(x.d.getElementById("companyGoals").textContent.includes("Cloud-Login"));
 });
 
-test("69 invite-only login blocks unapproved new email",async t=>{
-  const x=await boot({fetchHandler:async u=>u.includes("/rest/v1/rpc/can_access_panthera")?res(false):null});
-  t.after(x.close);
-  setVal(x.w,"authEmail","newperson@example.com");
-  click(x.w,"magicBtn");
-  await new Promise(r=>setTimeout(r,15));
-  assert.equal(x.calls.some(c=>c.url.includes("/auth/v1/otp")),false);
-  assert.ok(x.d.getElementById("authStatus").textContent.includes("nicht für PANTHERA freigeschaltet"));
-});
-test("70 approved invited email can create account by magic link",async t=>{
+test("69 login request does not expose invite membership",async t=>{
   const x=await boot();
   t.after(x.close);
-  setVal(x.w,"authEmail","tokyo@example.com");
+  setVal(x.w,"authEmail","unknown@example.com");
   click(x.w,"magicBtn");
   await new Promise(r=>setTimeout(r,15));
   const otp=x.calls.find(c=>c.url.includes("/auth/v1/otp"));
   assert.ok(otp);
   assert.equal(JSON.parse(otp.init.body).create_user,true);
+  assert.equal(x.calls.some(c=>c.url.includes("can_access_panthera")),false);
+});
+test("70 authenticated uninvited user is rejected and session cleared",async t=>{
+  const auth={access_token:"a",refresh_token:"r",expires_at:Date.now()+3600000,user:{id:"user-x",email:"unknown@example.com"}};
+  const x=await boot({storage:{[AUTH_KEY]:auth},fetchHandler:async(u,init)=>{
+    if(u.includes("/rest/v1/rpc/bootstrap_personal_kernel"))return res({message:"panthera invite required"},403);
+    return null;
+  }});
+  t.after(x.close);
+  await new Promise(r=>setTimeout(r,20));
+  assert.equal(x.w.localStorage.getItem(AUTH_KEY),null);
+  assert.equal(x.d.getElementById("cloudBadge").textContent,"LOCAL");
 });
 test("71 authenticated login bootstraps kernel and claims invites",async t=>{
   const auth={access_token:"a",refresh_token:"r",expires_at:Date.now()+3600000,user:{id:"user-2",email:"tokyo@example.com"}};
