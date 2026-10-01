@@ -168,7 +168,7 @@
     <div class="eyebrow">FALLBACK · WENN DIE MAIL AUF LOCALHOST ZEIGT</div>
     <label>Kompletten Link aus der E-Mail hier einfügen<input id="magicLinkPaste" type="text" inputmode="url" autocomplete="off" placeholder="http://localhost:3000/#access_token=…"></label>
     <div class="actions"><button class="btn primary" id="pasteAndLogin">AUS ZWISCHENABLAGE ANMELDEN</button><button class="btn soft" id="useMagicLink">EINGEFÜGTEN LINK VERWENDEN</button></div>
-    <p class="muted">Der Link wird nur lokal im Browser verarbeitet. Er wird nicht als Text in deinen PANTHERA-Daten gespeichert.</p>
+    <p class="muted">Akzeptiert sowohl den ursprünglichen Supabase-Link <b>verify?token=…</b> als auch einen weitergeleiteten Link mit <b>#access_token=…</b>. Der Link wird nur lokal verarbeitet und nicht in deinen PANTHERA-Daten gespeichert.</p>
     <div id="authStatus" class="tagline">LOCAL MODE ACTIVE</div>
   </div>
 </div>
@@ -452,13 +452,39 @@ async function sendMagic(email){const redirect=location.origin+location.pathname
 async function acceptMagicUrl(raw){
  let u;
  try{u=new URL(String(raw||"").trim())}catch(e){throw new Error("Der eingefügte Link ist ungültig.")}
- const p=new URLSearchParams((u.hash||"").replace(/^#/,""));
- const access=p.get("access_token"),refresh=p.get("refresh_token"),expires=Number(p.get("expires_in")||3600),type=p.get("type");
- if(!access)throw new Error("Im Link wurde kein Login-Token gefunden.");
- const ur=await fetch(SUPA_URL+"/auth/v1/user",{headers:{"apikey":SUPA_KEY,"Authorization":"Bearer "+access}});
- if(!ur.ok)throw new Error("Der Login-Link ist abgelaufen oder bereits verwendet. Bitte einen neuen Link senden.");
- const user=await ur.json();
- cloudSession={access_token:access,refresh_token:refresh||"",expires_at:Date.now()+expires*1000,user};
+ const hash=new URLSearchParams((u.hash||"").replace(/^#/,""));
+ const access=hash.get("access_token"),refresh=hash.get("refresh_token"),expires=Number(hash.get("expires_in")||3600);
+
+ // Flow A: bereits weitergeleiteter Implicit-Link mit Session-Tokens
+ if(access){
+   const ur=await fetch(SUPA_URL+"/auth/v1/user",{headers:{"apikey":SUPA_KEY,"Authorization":"Bearer "+access}});
+   if(!ur.ok)throw new Error("Der Login-Link ist abgelaufen oder bereits verwendet. Bitte einen neuen Link senden.");
+   const user=await ur.json();
+   cloudSession={access_token:access,refresh_token:refresh||"",expires_at:Date.now()+expires*1000,user};
+ }else{
+   // Flow B: originaler Supabase ConfirmationURL: /auth/v1/verify?token=...&type=...
+   const tokenHash=u.searchParams.get("token_hash")||u.searchParams.get("token");
+   const rawType=(u.searchParams.get("type")||"magiclink").toLowerCase();
+   if(!tokenHash)throw new Error("Im Link wurde kein Login-Token gefunden.");
+   if(!u.hostname.endsWith(".supabase.co"))throw new Error("Der Link stammt nicht von Supabase.");
+   const verifyType=["magiclink","email","signup","invite","recovery","email_change"].includes(rawType)?rawType:"magiclink";
+   const vr=await fetch(SUPA_URL+"/auth/v1/verify",{
+     method:"POST",
+     headers:{"apikey":SUPA_KEY,"Content-Type":"application/json"},
+     body:JSON.stringify({type:verifyType,token_hash:tokenHash})
+   });
+   const session=await vr.json().catch(()=>({}));
+   if(!vr.ok||!session.access_token){
+     throw new Error(session.msg||session.error_description||session.message||"Der Login-Link ist abgelaufen oder bereits verwendet. Bitte einen neuen Link senden.");
+   }
+   let user=session.user||null;
+   if(!user){
+     const ur=await fetch(SUPA_URL+"/auth/v1/user",{headers:{"apikey":SUPA_KEY,"Authorization":"Bearer "+session.access_token}});
+     if(!ur.ok)throw new Error("Session wurde erstellt, konnte aber nicht geladen werden.");
+     user=await ur.json();
+   }
+   cloudSession={...session,expires_at:Date.now()+Number(session.expires_in||3600)*1000,user};
+ }
  writeAuth(cloudSession);
  $("magicLinkPaste").value="";
  await fullSync();
