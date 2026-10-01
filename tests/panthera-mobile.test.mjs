@@ -18,3 +18,5 @@ test("mobile 09 invite bootstrapping remains available",()=>{assert.match(html,/
 test("mobile 10 PWA starts on mobile app",()=>assert.equal(manifest.start_url,"./panthera.html"));
 test("mobile 11 service worker cache is v2 or newer",()=>assert.match(sw,/panthera-mobile-v(?:[2-9]|[1-9][0-9]+)/));
 test("mobile 12 model badge is GPT-5.6 Sol",()=>assert.match(html,/GPT-5\.6 SOL/));
+
+test("mobile 13 knowledge integrity status is visible",()=>{assert.match(html,/Knowledge Integrity/);assert.match(html,/panthera_knowledge_status/)});
