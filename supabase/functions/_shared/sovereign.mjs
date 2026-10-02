@@ -57,7 +57,18 @@ const STAGE_WORKERS={
   }
 };
 
-const HUMAN_GATES=new Set(["partner:AUTONOMOUS","panthera:DEPLOY","panthera:KEEP_ROLLBACK"]);
+export const HUMAN_GATES=new Set(["partner:AUTONOMOUS","panthera:DEPLOY","panthera:KEEP_ROLLBACK"]);
+
+export function requiresHumanGate(loop,stage){
+  return HUMAN_GATES.has(`${loop}:${stage}`);
+}
+
+export function canApproveHumanGate(role,loop,stage){
+  if(!requiresHumanGate(loop,stage))return true;
+  if(loop==="partner"&&stage==="AUTONOMOUS")return role==="founder"||role==="operator";
+  if(loop==="panthera"&&(stage==="DEPLOY"||stage==="KEEP_ROLLBACK"))return role==="founder";
+  return false;
+}
 const FORBIDDEN_KEYS=new Set([
   "lead_name","customer_name","client_name","prospect_name","first_name","last_name",
   "email","email_address","contact_email","phone","phone_number","mobile","telephone",
@@ -150,7 +161,7 @@ export function planSovereign({state={},mission="",explicitLoop=null,domain="",m
     version:VERSION,mode,loop,status:"PLAN_READY",current_stage:stage,
     completion_flag:Object.fromEntries(LOOPS[loop])[stage],
     workers:keys.map(k=>workerContract(loop,stage,k,mission)),
-    human_gate:HUMAN_GATES.has(`${loop}:${stage}`)?"required":"not_required",
+    human_gate:requiresHumanGate(loop,stage)?"required":"not_required",
     next_action:`Run ${stage} with bounded workers; write observed evidence before advancing.`,
     evidence_required:[`${loop}.${stage.toLowerCase()}.observed`,`${loop}.${stage.toLowerCase()}.source_pointer`],
     invariants:{
