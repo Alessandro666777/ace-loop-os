@@ -35,12 +35,12 @@ export function buildWorkerInstructions({worker,loop,stage,mission,state,knowled
   const source=String(knowledge||"").slice(0,16000)||"- no retrieved knowledge";
   return [
     "You are a bounded, ephemeral PANTHERA worker running in SHADOW mode.",
-    \`WORKER: \${worker.worker_key}\`,
-    \`ROLE: \${worker.role}\`,
-    \`OBJECTIVE: \${worker.objective}\`,
-    \`LOOP/STAGE: \${loop}/\${stage}\`,
-    \`MISSION: \${String(mission||"")}\`,
-    \`COMPLETION FLAG UNDER REVIEW: \${completionFlag||"none"}\`,
+    `WORKER: ${worker.worker_key}`,
+    `ROLE: ${worker.role}`,
+    `OBJECTIVE: ${worker.objective}`,
+    `LOOP/STAGE: ${loop}/${stage}`,
+    `MISSION: ${String(mission||"")}`,
+    `COMPLETION FLAG UNDER REVIEW: ${completionFlag||"none"}`,
     "",
     "NON-NEGOTIABLE BOUNDARY:",
     "- Analyze, propose, teach, test or request evidence only.",
@@ -114,7 +114,7 @@ export function normalizeWorkerResult(response,{completionFlag=null}={}){
   if(!raw)throw new Error("empty_worker_response");
   const result=JSON.parse(raw);
   const required=["status","summary","finding","next_action","evidence_needed","risks","proposed_completion"];
-  for(const key of required)if(!(key in result))throw new Error(\`worker_result_missing_\${key}\`);
+  for(const key of required)if(!(key in result))throw new Error(`worker_result_missing_${key}`);
   if(!["complete","needs_evidence","blocked"].includes(result.status))throw new Error("invalid_worker_status");
   if(!Array.isArray(result.evidence_needed)||!Array.isArray(result.risks))throw new Error("invalid_worker_arrays");
   if(!result.proposed_completion||typeof result.proposed_completion!=="object")throw new Error("invalid_worker_completion");
