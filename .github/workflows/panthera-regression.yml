@@ -9,6 +9,10 @@ on:
       - "site/panthera-service-worker.js"
       - "tests/panthera-mobile.test.mjs"
       - "tests/panthera.test.mjs"
+      - "tests/sovereign-runtime.test.mjs"
+      - "supabase/functions/_shared/sovereign.mjs"
+      - "supabase/functions/panthera-sovereign/index.ts"
+      - ".github/workflows/panthera-regression.yml"
       - "package.json"
 permissions:
   contents: read
