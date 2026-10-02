@@ -115,8 +115,9 @@ export function classifyLoop({explicitLoop=null,domain="",mission=""}={}){
     return key;
   }
   const text=`${domain} ${mission}`.toLowerCase();
+  const domainKey=String(domain||"").trim().toLowerCase();
   if(/partner|onboard|training|geschäftspartner|learner/.test(text))return "partner";
-  if(/panthera|runtime|system|agent|orchestration/.test(text))return "panthera";
+  if(domainKey==="panthera"||/panthera|sovereign|control plane|runtime|orchestration|agentic/.test(String(mission||"").toLowerCase()))return "panthera";
   return "company";
 }
 
