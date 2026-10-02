@@ -403,3 +403,55 @@ test("79 Readwise sync never requests full HTML content from browser",async t=>{
   assert.deepEqual(JSON.parse(c.init.body),{action:"sync"});
   assert.equal(x.calls.some(c=>c.url.includes("readwise.io/api/v3/list")),false);
 });
+
+test("81 join link opens Quick Start without email",async t=>{
+  const x=await boot({url:"https://alessandro666777.github.io/ace-loop-os/?join=1"});
+  t.after(x.close);
+  assert.equal(x.d.getElementById("quickStartModal").classList.contains("hidden"),false);
+  assert.equal(x.d.getElementById("authEmail").value,"");
+});
+test("82 Quick Start creates isolated local Tokyo kernel",async t=>{
+  const x=await boot({url:"https://alessandro666777.github.io/ace-loop-os/?join=1"});
+  t.after(x.close);
+  setVal(x.w,"quickStartName","Tokyo");
+  click(x.w,"quickStartBtn");
+  const qp=JSON.parse(x.w.localStorage.getItem("panthera-ace.quick-profile.v1"));
+  assert.equal(qp.name,"Tokyo");
+  const q=JSON.parse(x.w.localStorage.getItem(APP_KEY+":quick:"+qp.id));
+  assert.equal(q.kernelMode,"neutral");
+  assert.equal(q.profileName,"Tokyo");
+  assert.equal(q.goals.length,0);
+  assert.equal(q.skills.filter(sk=>sk.active).length,3);
+});
+test("83 Quick Start survives reload on same device",async t=>{
+  const first=await boot({url:"https://alessandro666777.github.io/ace-loop-os/?join=1"});
+  setVal(first.w,"quickStartName","Tokyo");click(first.w,"quickStartBtn");
+  setVal(first.w,"win","Tokyo Test Win");first.w.persist();
+  const storage={};
+  for(let i=0;i<first.w.localStorage.length;i++){const k=first.w.localStorage.key(i);storage[k]=first.w.localStorage.getItem(k)}
+  first.close();
+  const second=await boot({url:"https://alessandro666777.github.io/ace-loop-os/?join=1",storage});
+  t.after(second.close);
+  assert.equal(second.d.getElementById("quickStartModal").classList.contains("hidden"),true);
+  assert.equal(second.d.querySelector(".brand p").textContent.includes("TOKYO"),true);
+  assert.equal(second.d.getElementById("win").value,"Tokyo Test Win");
+});
+test("84 later cloud auth migrates Quick Start kernel instead of resetting",async t=>{
+  const first=await boot({url:"https://alessandro666777.github.io/ace-loop-os/?join=1"});
+  setVal(first.w,"quickStartName","Tokyo");click(first.w,"quickStartBtn");
+  setVal(first.w,"win","Persist me");first.w.persist();
+  const storage={};
+  for(let i=0;i<first.w.localStorage.length;i++){const k=first.w.localStorage.key(i);storage[k]=first.w.localStorage.getItem(k)}
+  first.close();
+  const auth={access_token:"a",refresh_token:"r",expires_at:Date.now()+3600000,user:{id:"tokyo-user",email:"tokyo@example.com"}};
+  storage[AUTH_KEY]=JSON.stringify(auth);
+  const second=await boot({storage,fetchHandler:async(u,init)=>{
+    if(u.includes("/rest/v1/rpc/bootstrap_personal_kernel"))return res({onboarding_status:"needs_baseline",bootstrap_mode:"neutral_v1"});
+    return null;
+  }});
+  t.after(second.close);
+  await new Promise(r=>setTimeout(r,25));
+  const cloud=JSON.parse(second.w.localStorage.getItem(APP_KEY+":tokyo-user"));
+  assert.equal(cloud.profileName,"Tokyo");
+  assert.equal(cloud.entries.some(e=>e.win==="Persist me"),true);
+});
