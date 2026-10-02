@@ -1,7 +1,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.102.0";
 import {
-  LOOPS, classifyLoop, currentStage, planSovereign, rejectLeadPII, WORKER_MODULES, VERSION
+  LOOPS, classifyLoop, currentStage, planSovereign, rejectLeadPII, requiresHumanGate, canApproveHumanGate, WORKER_MODULES, VERSION
 } from "../_shared/sovereign.mjs";
 import {
   buildWorkerRequest, normalizeWorkerResult, containsDirectContactPII
@@ -160,10 +160,13 @@ async function executeWorker(args:{
 }
 
 async function recordEvidence(args:{
-  admin:any,userId:string,loop:string,stage:string,domain:string,organizationId:string,
+  admin:any,userId:string,actorRole:string,humanApproved:boolean,
+  loop:string,stage:string,domain:string,organizationId:string,
   evidencePointer:string,evidence:any
 }){
-  const {admin,userId,loop,stage,domain,organizationId,evidencePointer,evidence}=args;
+  const {
+    admin,userId,actorRole,humanApproved,loop,stage,domain,organizationId,evidencePointer,evidence
+  }=args;
   rejectLeadPII(evidence||{});
   if(containsDirectContactPII(evidence||{}))throw new Error("lead/client PII is outside Sovereign evidence scope");
   if(!evidencePointer)throw new Error("evidence_pointer_required");
@@ -172,12 +175,19 @@ async function recordEvidence(args:{
   const match=spec.find(([name])=>name===stage);
   if(!match)throw new Error("unknown stage");
   const completionFlag=match[1];
+  if(requiresHumanGate(loop,stage)){
+    if(!humanApproved)throw new Error("human_gate_approval_required");
+    if(!canApproveHumanGate(actorRole,loop,stage))throw new Error("human_gate_role_forbidden");
+  }
 
   if(loop==="partner"||loop==="panthera"){
     const eventType="panthera.sovereign."+loop+"."+completionFlag;
     const {data,error}=await admin.from("events").insert({
       user_id:userId,event_type:eventType,source:"panthera_sovereign",
-      payload:{stage,completion_flag:completionFlag,evidence_pointer:evidencePointer,evidence:evidence||{}}
+      payload:{
+        stage,completion_flag:completionFlag,evidence_pointer:evidencePointer,evidence:evidence||{},
+        human_gate_approved:requiresHumanGate(loop,stage),approver_role:requiresHumanGate(loop,stage)?actorRole:null
+      }
     }).select("id,occurred_at,event_type").single();
     if(error)throw error;
     return {recorded:true,event:data,completion_flag:completionFlag};
@@ -255,8 +265,8 @@ Deno.serve(async(req:Request)=>{
       const evidencePointer=text(body.evidence_pointer).slice(0,1000);
       const evidence=(body.evidence&&typeof body.evidence==="object"&&!Array.isArray(body.evidence))?body.evidence:{};
       const recorded=await recordEvidence({
-        admin,userId:user.id,loop:explicitLoop,stage,domain,organizationId,
-        evidencePointer,evidence
+        admin,userId:user.id,actorRole:membership.role,humanApproved:body.human_approved===true,
+        loop:explicitLoop,stage,domain,organizationId,evidencePointer,evidence
       });
       const inferred=await inferState(admin,user.id,explicitLoop,domain,organizationId);
       return json(headers,{
@@ -413,7 +423,8 @@ Deno.serve(async(req:Request)=>{
     });
   }catch(e){
     const message=String((e as any)?.message||e);
-    const status=/PII|mission scope|unknown loop|unknown stage|state must|only supports|evidence_pointer_required|company_goal_required/.test(message)?400:500;
+    const status=/human_gate_approval_required|human_gate_role_forbidden/.test(message)?403:
+      /PII|mission scope|unknown loop|unknown stage|state must|only supports|evidence_pointer_required|company_goal_required/.test(message)?400:500;
     return json(headers,{error:"panthera_sovereign_failed",detail:message},status);
   }
 });
