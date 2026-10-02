@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
-  LOOPS,WORKERS,classifyLoop,currentStage,planSovereign,rejectLeadPII,rejectLikelyContactPII
+  LOOPS,WORKERS,classifyLoop,currentStage,planSovereign,rejectLeadPII,rejectLikelyContactPII,requiresHumanGate,canApproveHumanGate
 } from "../supabase/functions/_shared/sovereign.mjs";
 
 test("sovereign 01 exposes exactly three governed loops",()=>assert.deepEqual(Object.keys(LOOPS).sort(),["company","panthera","partner"]));
@@ -43,4 +43,15 @@ test("sovereign 15 complete partner loop closes without workers",()=>{
   const s=Object.fromEntries(LOOPS.partner.map(([,flag])=>[flag,true]));
   const p=planSovereign({explicitLoop:"partner",state:s,mission:"done"});
   assert.equal(p.status,"LOOP_COMPLETE");assert.deepEqual(p.workers,[]);
+});
+
+
+test("sovereign 16 human-gated stages require explicit authority",()=>{
+  assert.equal(requiresHumanGate("partner","AUTONOMOUS"),true);
+  assert.equal(requiresHumanGate("panthera","DEPLOY"),true);
+  assert.equal(requiresHumanGate("company","EXECUTION"),false);
+  assert.equal(canApproveHumanGate("member","partner","AUTONOMOUS"),false);
+  assert.equal(canApproveHumanGate("operator","partner","AUTONOMOUS"),true);
+  assert.equal(canApproveHumanGate("operator","panthera","DEPLOY"),false);
+  assert.equal(canApproveHumanGate("founder","panthera","DEPLOY"),true);
 });
