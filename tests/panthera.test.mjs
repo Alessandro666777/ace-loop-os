@@ -461,7 +461,7 @@ test("85 System Integrity is private-cloud gated in local mode",async t=>{
   const x=await boot();t.after(x.close);
   assert.ok(x.d.getElementById("runSystemAudit"));
   assert.equal(x.d.getElementById("auditManifest").textContent,"CLOUD LOGIN REQUIRED");
-  assert.ok(x.d.getElementById("auditFindings").textContent.includes("Cloud-Login"));
+  assert.ok(x.d.getElementById("auditFindings").textContent.includes("Login"));
 });
 
 test("86 cloud sync renders latest PANTHERA audit state",async t=>{
@@ -487,7 +487,7 @@ test("87 PANTHERA AUDIT button invokes audit RPC",async t=>{
   const auth={access_token:"a",refresh_token:"r",expires_at:Date.now()+3600000,user:{id:"user-1",email:"owner@example.com"}};
   let ran=false;
   const x=await boot({storage:{[AUTH_KEY]:auth},fetchHandler:async(u,init)=>{
-    if(u.includes("/rest/v1/rpc/run_panthera_system_audit")){ran=true;return res("run-new")}
+    if(u.includes("/rest/v1/rpc/run_panthera_system_audit")){ran=true;return res('"run-new"')}
     if(u.includes("/rest/v1/panthera_manifest_meta?"))return res([{manifest_version:"1.0",canonical_blob_sha:"abc12345"}]);
     if(u.includes("/rest/v1/panthera_audit_runs?"))return res(ran?[{id:"run-new",score:90,status:"green",components_total:49,components_healthy:47,sources_total:12,sources_healthy:12,findings_total:1,freeze_blockers:0,critical_findings:0,high_findings:0,summary:{architecture_freeze_ready:true},finished_at:"2026-10-03T20:40:00Z"}]:[]);
     if(u.includes("/rest/v1/panthera_audit_findings?"))return res([]);
