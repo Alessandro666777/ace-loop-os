@@ -202,7 +202,42 @@
     </div>
 
     <div class="card">
-      <div class="section"><span class="n">16</span><h3>KNOWLEDGE PORT</h3><span class="auto" id="knowledgePortStatus">CLOUD LOGIN REQUIRED</span></div>
+      <div class="section"><span class="n">16</span><h3>CAPTURE PORT</h3><span class="auto" id="capturePortStatus">CLOUD LOGIN REQUIRED</span></div>
+      <div class="grid3">
+        <div class="metric"><span>CAPTURED</span><b id="captureCount">0</b></div>
+        <div class="metric"><span>REVIEW</span><b id="captureReviewCount">0</b></div>
+        <div class="metric"><span>PUBLISHED</span><b id="capturePublishedCount">0</b></div>
+      </div>
+      <div class="divider"></div>
+      <div class="grid2">
+        <label>PANTHERA AI Key<input id="captureOpenAIKey" type="password" autocomplete="off" placeholder="Einmalig · verschlüsselt in Vault"></label>
+        <div class="actions" style="align-items:flex-end"><button class="btn soft" id="captureSetAI">AI REVIEW CONNECT</button></div>
+      </div>
+      <div class="divider"></div>
+      <div class="grid2">
+        <label>Pocket API Key<input id="pocketCaptureKey" type="password" autocomplete="off" placeholder="Pocket Developer API Key"></label>
+        <div class="actions" style="align-items:flex-end"><button class="btn soft" id="pocketCaptureConnect">POCKET CONNECT</button><button class="btn" id="pocketCaptureSync">SYNC POCKET</button></div>
+      </div>
+      <div class="grid2" style="margin-top:10px">
+        <label>Pocket Webhook Secret<input id="pocketWebhookSecret" type="password" autocomplete="off" placeholder="Signing Secret"></label>
+        <div class="actions" style="align-items:flex-end"><button class="btn" id="pocketWebhookSave">SAVE WEBHOOK SECRET</button></div>
+      </div>
+      <div class="tagline" id="pocketWebhookUrl">Webhook URL erscheint nach dem Speichern.</div>
+      <div class="divider"></div>
+      <div class="grid3">
+        <label>Audio / Sprachmemo<input id="captureFile" type="file" accept="audio/*,video/mp4,video/quicktime"></label>
+        <label>Typ<select id="captureType"><option value="voice_memo">VOICE MEMO</option><option value="meeting">MEETING</option><option value="sales_call">SALES CALL</option><option value="recruiting_call">RECRUITING</option><option value="presence_meeting">PRÄSENZ</option><option value="other">OTHER</option></select></label>
+        <label>Consent<select id="captureConsent"><option value="unknown">UNGEKLÄRT</option><option value="self_only">NUR ICH</option><option value="confirmed">BESTÄTIGT</option><option value="not_required">NICHT ERFORDERLICH</option><option value="blocked">BLOCKIERT</option></select></label>
+      </div>
+      <label style="margin-top:10px">Titel<input id="captureTitle" placeholder="z. B. VG Training · Meeting Tokio · Sprachmemo"></label>
+      <div class="actions"><button class="btn primary" id="captureUpload">PRIVATE UPLOAD + PROCESS</button><span class="muted" id="captureUploadStatus">Raw bleibt privat. Ohne Consent kein AI-Review.</span></div>
+      <div class="divider"></div>
+      <div id="captureItems" class="list"></div>
+      <p class="muted">CaptureSourcePort v1: Pocket, Apple Sprachmemos und weitere Recorder landen in derselben Pipeline. RAW → CONSENT → TRANSCRIPT → PANTHERA REVIEW → EVIDENCE/AUTHENTICITY → KNOWLEDGE → OBSIDIAN. Roh-Audio und Volltranskript werden nie automatisch kanonisiert.</p>
+    </div>
+
+    <div class="card">
+      <div class="section"><span class="n">17</span><h3>KNOWLEDGE PORT</h3><span class="auto" id="knowledgePortStatus">CLOUD LOGIN REQUIRED</span></div>
       <div class="grid3">
         <label>Titel<input id="knowledgeTitle" placeholder="Idee, Artikel, Beobachtung …"></label>
         <label>Quelle / URL<input id="knowledgeUrl" inputmode="url" placeholder="https://…"></label>
@@ -232,7 +267,7 @@
     </div>
 
     <div class="card">
-      <div class="section"><span class="n">17</span><h3>DATA + CLOUD</h3></div>
+      <div class="section"><span class="n">18</span><h3>DATA + CLOUD</h3></div>
       <div class="actions"><button class="btn soft" id="openCloud">CLOUD LOGIN</button><button class="btn" id="syncNow">SYNC NOW</button><button class="btn" id="export">JSON EXPORT</button><label class="btn">JSON IMPORT<input id="import" type="file" accept="application/json" hidden></label></div>
       <p class="muted">Local-first ist die sichere Betriebsbasis. Cloud wird zur geräteübergreifenden Wahrheitsschicht, sobald die Auth-Session steht.</p>
     </div>
@@ -425,7 +460,7 @@ function normalize(x){
  const b=base(),o={...b,...x};o.entries=Array.isArray(x.entries)?x.entries.map(e=>({...freshEntry(e.date),...e})):[];o.skills=Array.isArray(x.skills)&&x.skills.length?x.skills.map(normalizeSkill):b.skills;const existingGoals=Array.isArray(x.goals)?x.goals:[];const gm=new Map(existingGoals.map(g=>[g.name,g]));if(x.kernelMode!=="neutral")b.goals.forEach(g=>{if(!gm.has(g.name))gm.set(g.name,g)});o.goals=[...gm.values()];o.projects=Array.isArray(x.projects)?x.projects:[];o.events=Array.isArray(x.events)?x.events:[];o.predictions=Array.isArray(x.predictions)?x.predictions:[];o.decisions=Array.isArray(x.decisions)?x.decisions:[];o.assessments=Array.isArray(x.assessments)?x.assessments:[];o.independenceChecks=Array.isArray(x.independenceChecks)?x.independenceChecks:[];o.trainingCycles=Array.isArray(x.trainingCycles)?x.trainingCycles:[];o.evidenceItems=Array.isArray(x.evidenceItems)?x.evidenceItems:[];o.config={...b.config,...(x.config||{})};o.modules=Array.isArray(x.modules)&&x.modules.length?x.modules:b.modules;o.season={...b.season,...(x.season||{})};return o;
 }
 let ACTIVE_KEY=KEY;
-let system=migrate(),current,saveTimer=null,timerHandle=null,cloudSession=null,cloudSyncTimer=null,cloudIntegrations=[],latestIntegrationRun=null,companyContext={org:null,members:[],goals:[],kpis:[],dependencies:[],invites:[]},knowledgeSources=[],knowledgeResults=[],auditState={meta:null,run:null,findings:[]},assessmentSkillId=null;
+let system=migrate(),current,saveTimer=null,timerHandle=null,cloudSession=null,cloudSyncTimer=null,cloudIntegrations=[],latestIntegrationRun=null,companyContext={org:null,members:[],goals:[],kpis:[],dependencies:[],invites:[]},knowledgeSources=[],knowledgeResults=[],captureState={sources:[],items:[],counts:{}},auditState={meta:null,run:null,findings:[]},assessmentSkillId=null;
 function save(){localStorage.setItem(ACTIVE_KEY,JSON.stringify(system))}
 function activateUserStorage(user,boot={}){
  const scoped=KEY+":"+String(user.id);
@@ -624,6 +659,107 @@ function renderKnowledgePort(){
  if(readwise?.last_sync_at)$("readwiseSyncNote").textContent="READWISE VERIFIED · letzter vollständiger Sync "+readwise.last_sync_at.slice(0,16).replace("T"," ");
  wrap.innerHTML=knowledgeResults.length?knowledgeResults.map(k=>'<div class="row"><div><strong>'+escapeHTML(k.title||k.source_url||"Untitled")+'</strong><small>'+escapeHTML((k.provider||"manual").toUpperCase())+' · '+escapeHTML(k.category||"general")+' · '+escapeHTML((k.ingestion_status||"normalized").toUpperCase())+(k.summary?' · '+escapeHTML(k.summary.slice(0,120)):'')+(k.notes?' · '+escapeHTML(k.notes.slice(0,120)):'')+'</small></div><button class="btn" onclick="promoteKnowledge(\''+String(k.id).replace(/'/g,"")+'\')">CANDIDATE</button></div>').join(""):'<div class="muted">Noch kein privates Wissen im Knowledge Port.</div>';
 }
+async function captureBridge(action,payload={}){
+ if(!cloudSession)throw new Error("Capture Port braucht Cloud-Login.");
+ if(!(await ensureSession()))throw new Error("Session abgelaufen.");
+ const r=await fetch(SUPA_URL+"/functions/v1/capture-runtime",{
+  method:"POST",headers:authHeaders(),body:JSON.stringify({action,...payload})
+ });
+ const data=await r.json().catch(()=>({}));
+ if(!r.ok)throw new Error(data.error||data.detail||"Capture Runtime fehlgeschlagen.");
+ return data;
+}
+function renderCapturePort(){
+ if(!cloudSession){
+  $("capturePortStatus").textContent="CLOUD LOGIN REQUIRED";
+  $("captureCount").textContent="0";$("captureReviewCount").textContent="0";$("capturePublishedCount").textContent="0";
+  $("captureItems").innerHTML='<div class="muted">Cloud-Login nötig. Capture-Inhalte sind owner-private.</div>';
+  return;
+ }
+ const counts=captureState.counts||{};
+ const sources=captureState.sources||[],pocket=sources.find(x=>x.source_key==="pocket"),manual=sources.find(x=>x.source_key==="manual_upload");
+ $("capturePortStatus").textContent="MANUAL "+String(manual?.status||"—").toUpperCase()+" · POCKET "+String(pocket?.status||"—").toUpperCase().replaceAll("_"," ");
+ $("captureCount").textContent=String((captureState.items||[]).length);
+ $("captureReviewCount").textContent=String(Number(counts.review_required||0)+Number(counts.processing||0));
+ $("capturePublishedCount").textContent=String(counts.published||0);
+ const items=captureState.items||[];
+ $("captureItems").innerHTML=items.length?items.map(i=>{
+   const consent=String(i.consent_status||"unknown").toUpperCase().replaceAll("_"," ");
+   const state=String(i.pipeline_status||"captured").toUpperCase().replaceAll("_"," ");
+   const process=i.source_key==="manual_upload"?"TRANSCRIBE + REVIEW":"REVIEW";
+   return '<div class="row"><div><strong>'+escapeHTML(i.title||i.capture_type||"Capture")+'</strong><small>'+escapeHTML(String(i.source_key||"").toUpperCase())+' · '+escapeHTML(String(i.capture_type||"").toUpperCase().replaceAll("_"," "))+' · CONSENT '+escapeHTML(consent)+' · '+escapeHTML(state)+'</small></div><div class="actions"><button class="btn" onclick="captureConsent(\''+String(i.id).replace(/'/g,"")+'\',\'self_only\')">SELF</button><button class="btn" onclick="captureConsent(\''+String(i.id).replace(/'/g,"")+'\',\'confirmed\')">CONSENT</button><button class="btn danger" onclick="captureConsent(\''+String(i.id).replace(/'/g,"")+'\',\'blocked\')">BLOCK</button><button class="btn soft" onclick="captureProcess(\''+String(i.id).replace(/'/g,"")+'\',\''+escapeHTML(i.source_key)+'\')">'+process+'</button></div></div>';
+ }).join(""):'<div class="muted">Noch keine Captures. Pocket synchronisieren oder eine Sprachmemo hochladen.</div>';
+}
+async function loadCapturePort(){
+ if(!cloudSession){captureState={sources:[],items:[],counts:{}};renderCapturePort();return}
+ const [status,list]=await Promise.all([captureBridge("status"),captureBridge("list",{limit:40})]);
+ captureState={sources:status.sources||[],items:list.items||[],counts:status.counts||{}};
+ renderCapturePort();
+}
+async function connectPocketCapture(){
+ const token=$("pocketCaptureKey").value.trim();if(!token)throw new Error("Pocket API Key einfügen.");
+ $("captureUploadStatus").textContent="Pocket Key wird geprüft…";
+ try{await captureBridge("set_pocket_key",{token});$("pocketCaptureKey").value="";$("captureUploadStatus").textContent="POCKET VERIFIED";await loadCapturePort();await fullSync()}
+ catch(e){$("pocketCaptureKey").value="";throw e}
+}
+async function savePocketWebhook(){
+ const secret=$("pocketWebhookSecret").value.trim();if(!secret)throw new Error("Pocket Webhook Secret einfügen.");
+ try{
+  const r=await captureBridge("set_pocket_webhook_secret",{secret});
+  $("pocketWebhookSecret").value="";
+  $("pocketWebhookUrl").textContent="Pocket Webhook URL: "+String(r.webhook_url||"");
+ }catch(e){$("pocketWebhookSecret").value="";throw e}
+}
+async function syncPocketCapture(){
+ $("captureUploadStatus").textContent="POCKET SYNC · läuft…";
+ const r=await captureBridge("sync_pocket",{limit:50,page:1});
+ $("captureUploadStatus").textContent="POCKET SYNC · "+String((r.items||[]).length)+" verarbeitet";
+ await loadCapturePort();
+}
+async function setCaptureAI(){
+ const key=$("captureOpenAIKey").value.trim();if(!key)throw new Error("OpenAI API Key einfügen.");
+ $("captureUploadStatus").textContent="AI Provider wird geprüft…";
+ try{
+  await captureBridge("set_openai_key",{key});
+  $("captureOpenAIKey").value="";
+  $("captureUploadStatus").textContent="PANTHERA AI REVIEW VERIFIED";
+  await fullSync();
+ }catch(e){$("captureOpenAIKey").value="";throw e}
+}
+async function uploadCaptureFile(){
+ if(!cloudSession)throw new Error("Cloud-Login nötig.");
+ const file=$("captureFile").files?.[0];if(!file)throw new Error("Audio-/Videodatei auswählen.");
+ const consent=$("captureConsent").value,type=$("captureType").value,title=$("captureTitle").value.trim()||file.name;
+ const safeName=file.name.replace(/[^A-Za-z0-9._,'!&$@=;:+?() -]/g,"_").slice(-180);
+ const path=cloudSession.user.id+"/"+new Date().toISOString().replace(/[:.]/g,"-")+"_"+uid()+"_"+safeName;
+ $("captureUploadStatus").textContent="PRIVATE UPLOAD · "+Math.round(file.size/1024/1024*10)/10+" MB";
+ if(!(await ensureSession()))throw new Error("Session abgelaufen.");
+ const encoded=path.split("/").map(encodeURIComponent).join("/");
+ const up=await fetch(SUPA_URL+"/storage/v1/object/panthera-capture-raw/"+encoded,{method:"POST",headers:{
+   "apikey":SUPA_KEY,"Authorization":"Bearer "+cloudSession.access_token,"Content-Type":file.type||"application/octet-stream","x-upsert":"false"
+ },body:file});
+ if(!up.ok)throw new Error(await up.text());
+ const reg=await captureBridge("register_manual_upload",{storage_path:path,capture_type:type,title,consent_status:consent,consent_basis:consent==="self_only"?"User confirmed self-only recording":consent==="confirmed"?"User confirmed recording consent":consent==="not_required"?"User marked consent not required":consent==="blocked"?"User blocked processing":"Consent not confirmed",mime_type:file.type||"application/octet-stream",file_size_bytes:file.size,original_file_name:file.name,occurred_at:new Date().toISOString()});
+ $("captureFile").value="";$("captureTitle").value="";
+ if(["self_only","confirmed","not_required"].includes(consent)){
+   $("captureUploadStatus").textContent="UPLOAD OK · Transkription + PANTHERA Review…";
+   try{await captureBridge("transcribe_manual",{capture_item_id:reg.capture_item.id});$("captureUploadStatus").textContent="VERARBEITUNG ABGESCHLOSSEN / GATE AUSGEWERTET"}
+   catch(e){$("captureUploadStatus").textContent="SICHER GESPEICHERT · "+String(e.message||e)}
+ }else $("captureUploadStatus").textContent=consent==="blocked"?"QUARANTINED":"SICHER GESPEICHERT · CONSENT ERFORDERLICH";
+ await loadCapturePort();
+}
+window.captureConsent=async(id,status)=>{try{
+ await captureBridge("set_consent",{capture_item_id:id,consent_status:status,consent_basis:status==="self_only"?"User confirmed self-only":status==="confirmed"?"User confirmed participant consent":status==="blocked"?"User blocked processing":"User update"});
+ await loadCapturePort();
+ }catch(e){alert(String(e.message||e))}};
+window.captureProcess=async(id,source)=>{try{
+ $("captureUploadStatus").textContent="PANTHERA PROCESSING…";
+ const action=source==="manual_upload"?"transcribe_manual":"review";
+ await captureBridge(action,{capture_item_id:id});
+ $("captureUploadStatus").textContent="PROCESSING COMPLETE / GATE APPLIED";
+ await loadCapturePort();
+ }catch(e){$("captureUploadStatus").textContent="STOPPED SAFELY · "+String(e.message||e);alert(String(e.message||e))}};
+
 async function readwiseBridge(action,token=null){
  if(!cloudSession)throw new Error("Cloud-Login nötig.");
  if(!(await ensureSession()))throw new Error("Session abgelaufen.");
@@ -715,7 +851,7 @@ window.promoteKnowledge=async id=>{try{
  alert("Als privater Learning Candidate gespeichert. Noch NICHT im Shared Canon.");
  }catch(e){alert(String(e.message||e))}};
 
-function renderAll(){renderToday();renderGrowth();renderReview();renderCompany();renderCommand();renderKnowledgePort();save()}
+function renderAll(){renderToday();renderGrowth();renderReview();renderCompany();renderCommand();renderKnowledgePort();renderCapturePort();save()}
 function load(date){current=getEntry(date);renderAll();$("autosave").textContent="READY"}
 function show(id){document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("active",s.id===id));document.querySelectorAll(".nav button").forEach(b=>b.classList.toggle("active",b.dataset.screen===id));if(id==="growth")renderGrowth();if(id==="review")renderReview();if(id==="company")renderCompany();if(id==="command")renderCommand()}
 document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>show(b.dataset.screen));
@@ -731,6 +867,11 @@ $("startMove").onclick=()=>{if(!current.nextMove.trim()){$("nextMove").focus();r
 $("closeReview").onclick=()=>{const s=skillByName(current.skillFocus);if(current.skillEvidence.trim()&&s){const type=current.pressureEvidence?"pressure":"capability";const ev={id:uid(),skillId:s.id,skillName:s.name,date:current.date,type,quality:Number(current.evidenceQuality||3),independent:Number(current.assistanceLevel||0)===0,evidence:current.skillEvidence,createdAt:new Date().toISOString()};system.evidenceItems.push(ev);s.evidenceCount+=1;s.lastUsedAt=new Date().toISOString();s.confidence=Math.min(.99,s.confidence+.03*(ev.quality/3));if(ev.independent&&ev.quality>=4)s.confidence=Math.min(.99,s.confidence+.04);system.independenceChecks.push({id:uid(),skillId:s.id,date:current.date,assistanceLevel:Number(current.assistanceLevel||0),createdAt:new Date().toISOString()});event("skill.evidence",{skill:s.name,type,quality:ev.quality,independent:ev.independent})}current.reviewClosed=true;event("review.closed",{date:current.date,score:score(current),failure:current.failureType});persist();if(cloudSession)queueFullSync()};
 $("addPrediction").onclick=()=>{const st=$("predictionStatement").value.trim(),pr=Number($("predictionProbability").value),due=$("predictionDue").value;if(!st||!pr){alert("Vorhersage und Wahrscheinlichkeit eintragen.");return}const p={id:uid(),statement:st,probability:pr,dueDate:due||null,outcome:null,createdAt:new Date().toISOString(),resolvedAt:null};system.predictions.push(p);event("prediction.created",{id:p.id,probability:pr});$("predictionStatement").value="";save();renderAll();if(cloudSession)cloudPushPrediction(p).catch(cloudError)};
 $("runSystemAudit").onclick=()=>runPantheraAudit().catch(e=>{$("auditStatusText").textContent="AUDIT ERROR · "+String(e.message||e);alert(String(e.message||e))});
+$("captureSetAI").onclick=()=>setCaptureAI().catch(e=>alert(String(e.message||e)));
+$("pocketCaptureConnect").onclick=()=>connectPocketCapture().catch(e=>alert(String(e.message||e)));
+$("pocketCaptureSync").onclick=()=>syncPocketCapture().catch(e=>alert(String(e.message||e)));
+$("pocketWebhookSave").onclick=()=>savePocketWebhook().catch(e=>alert(String(e.message||e)));
+$("captureUpload").onclick=()=>uploadCaptureFile().catch(e=>{$("captureUploadStatus").textContent="UPLOAD ERROR · "+String(e.message||e);alert(String(e.message||e))});
 $("captureKnowledge").onclick=()=>captureKnowledge().catch(e=>alert(String(e.message||e)));
 $("searchKnowledge").onclick=()=>searchKnowledgePort().catch(e=>alert(String(e.message||e)));
 $("connectReadwise").onclick=()=>connectReadwise().catch(e=>alert(String(e.message||e)));
@@ -830,6 +971,7 @@ async function fullSync(){
  const map=new Map(system.entries.map(e=>[e.date,e]));(re||[]).forEach(r=>{const e={...freshEntry(r.entry_date),id:r.id,date:r.entry_date,sleep:r.sleep_hours,energy:r.energy,state:r.state||"",win:r.win||"",nextMove:r.next_move||"",goalFocus:r.goal_focus_name||"",skillFocus:r.skill_focus||"",uncomfortable:r.uncomfortable||"",ifThen:r.if_then||"",locked:r.locked,proofs:r.proofs||freshEntry(r.entry_date).proofs,biggest:r.biggest||"",deviation:r.deviation||"",failureType:r.failure_type||"",correction:r.correction||"",skillEvidence:r.skill_evidence||"",updatedAt:r.updated_at,createdAt:r.created_at};const l=map.get(e.date);if(!l||new Date(e.updatedAt)>=new Date(l.updatedAt||0))map.set(e.date,e)});system.entries=[...map.values()];
  if(rs?.length)system.skills=rs.map(normalizeSkill);if(rp?.length)system.projects=rp.map(p=>p.name);if(rpred?.length)system.predictions=rpred.map(p=>({id:p.id,statement:p.statement,probability:Math.round(Number(p.probability)*100),dueDate:p.due_date,outcome:p.outcome,createdAt:p.created_at,resolvedAt:p.resolved_at}));if(rdec?.length)system.decisions=rdec.map(d=>({id:d.id,title:d.title,goal:d.goal||"",problemClass:d.problem_class||"strategy",stakes:d.stakes,reversibility:d.reversibility,status:d.status,blindSpots:d.blind_spots||{},expected:d.expected_outcome||"",complexityBudget:d.metadata?.complexity_budget||1,route:d.metadata?.route||["Reality"],counterLenses:d.metadata?.counter_lenses||[],createdAt:d.created_at}));if(rgoals?.length)system.goals=rgoals.map(g=>({id:g.id,domain:g.domain,name:g.name,status:g.status,focusTier:g.focus_tier,priority:g.priority,target:g.target_value==null?null:Number(g.target_value),current:g.current_value==null?null:Number(g.current_value),unit:g.unit,deadline:g.deadline,source:g.source||"cloud"}));cloudIntegrations=Array.isArray(rints)?rints:[];latestIntegrationRun=Array.isArray(rirun)&&rirun.length?rirun[0]:null;
  await loadKnowledgePort();
+ await loadCapturePort();
  await loadSystemAudit();
   companyContext={org:null,members:[],goals:[],kpis:[],dependencies:[]};
  if(Array.isArray(rorgs)&&rorgs.length){
