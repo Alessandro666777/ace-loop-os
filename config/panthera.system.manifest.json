@@ -22,7 +22,7 @@
     },
     {
       "domain": "operational_crm",
-      "primary": "monday",
+      "primary": "external_crm_jascha",
       "fallback": "supabase_prod"
     },
     {
@@ -90,12 +90,17 @@
     "n8n": {
       "class": "automation_truth"
     },
-    "monday": {
-      "class": "operational_truth"
-    },
     "chatgpt_memory": {
       "class": "private_context",
       "canonical": false
+    },
+    "external_crm_jascha": {
+      "class": "operational_truth",
+      "required": true,
+      "status": "connection_required",
+      "authority": "EXTERNAL_SYSTEM_OF_RECORD",
+      "owner_decision": "D-COORD-47",
+      "note": "Jascha CRM is the operational CRM truth. PANTHERA must integrate through an adapter and must not create a parallel CRM."
     }
   },
   "internal_modules": {
@@ -191,10 +196,13 @@
     },
     "CRM": {
       "expected": [
-        "superseded"
+        "connection_required",
+        "verified"
       ],
-      "scored": false,
-      "replacement": "monday.com"
+      "criticality": 5,
+      "freeze_required": true,
+      "system_of_record": "External CRM (Jascha)",
+      "owner_decision": "D-COORD-47"
     },
     "Direct AI Provider": {
       "expected": [
@@ -237,10 +245,11 @@
     },
     "monday.com": {
       "expected": [
-        "verified"
+        "superseded"
       ],
-      "criticality": 5,
-      "freeze_required": true
+      "scored": false,
+      "replacement": "External CRM (Jascha)",
+      "owner_decision": "D-COORD-47"
     },
     "Multi-User Auth": {
       "expected": [
@@ -351,6 +360,16 @@
       ],
       "criticality": 5,
       "freeze_required": true
+    },
+    "External CRM (Jascha)": {
+      "expected": [
+        "connection_required",
+        "verified"
+      ],
+      "criticality": 5,
+      "freeze_required": true,
+      "authority": "EXTERNAL_SYSTEM_OF_RECORD",
+      "owner_decision": "D-COORD-47"
     }
   },
   "remembered_non_active_components": {
