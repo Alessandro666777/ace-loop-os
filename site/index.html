@@ -563,7 +563,7 @@ function renderSystemAudit(){
   $("auditFindings").innerHTML='<div class="muted">Nach dem Login prüft PANTHERA Manifest, Runtime, Registry, Evidenz und Drift.</div>';
   return;
  }
- $("auditManifest").textContent=meta?("MANIFEST "+meta.manifest_version+" · "+String(meta.canonical_blob_sha||"").slice(0,8)): "MANIFEST NOT LOADED";
+ $("auditManifest").textContent=meta?("MANIFEST "+meta.manifest_version+" · "+String(meta.canonical_blob_sha||"").slice(0,8)+(meta.audit_dirty?" · DIRTY":"")): "MANIFEST NOT LOADED";
  if(!run){
   $("auditScore").textContent="—";$("auditBlockers").textContent="—";$("auditFindingCount").textContent="—";$("auditCoverage").textContent="—";
   $("auditStatusText").textContent="Noch kein Audit-Run. Command: panthera audit";
@@ -576,13 +576,13 @@ function renderSystemAudit(){
  $("auditBlockers").textContent=String(run.freeze_blockers||0);
  $("auditFindingCount").textContent=String(run.findings_total||0);
  $("auditCoverage").textContent=coverage+"%";
- $("auditStatusText").textContent=String(run.status||"unknown").toUpperCase()+" · "+(run.summary?.architecture_freeze_ready?"FREEZE READY":"FREEZE NOT READY")+" · "+(run.finished_at?run.finished_at.slice(0,16).replace("T"," "):"");
+ $("auditStatusText").textContent=String(run.status||"unknown").toUpperCase()+" · "+(run.summary?.architecture_freeze_ready?"FREEZE READY":"FREEZE NOT READY")+(meta?.audit_dirty?" · AUDIT STALE":"")+(run.summary?.knowledge_modules_total!=null?" · KNOWLEDGE "+run.summary.knowledge_modules_mapped+"/"+run.summary.knowledge_modules_total:"")+" · "+(run.finished_at?run.finished_at.slice(0,16).replace("T"," "):"");
  $("auditFindings").innerHTML=findings.length?findings.slice(0,8).map(f=>'<div class="row"><div><strong>'+escapeHTML((f.component_key||f.source_key||f.finding_type).replaceAll("_"," "))+'</strong><small>'+escapeHTML(f.message)+(f.remediation?' · '+escapeHTML(f.remediation):'')+'</small></div><span class="pill">'+escapeHTML(String(f.severity).toUpperCase())+'</span></div>').join(""):'<div class="success">Keine Findings. Manifest und Runtime sind im definierten Korridor.</div>';
 }
 async function loadSystemAudit(){
  if(!cloudSession){auditState={meta:null,run:null,findings:[]};renderSystemAudit();return}
  const [rm,rr]=await Promise.all([
-   api("panthera_manifest_meta?select=manifest_version,canonical_repo,canonical_path,canonical_blob_sha,architecture_freeze_until&limit=1"),
+   api("panthera_manifest_meta?select=manifest_version,canonical_repo,canonical_path,canonical_blob_sha,architecture_freeze_until,audit_dirty,last_audit_at&limit=1"),
    api("panthera_audit_runs?select=id,score,status,components_total,components_healthy,sources_total,sources_healthy,findings_total,freeze_blockers,critical_findings,high_findings,summary,started_at,finished_at&order=started_at.desc&limit=1")
  ]);
  const meta=Array.isArray(rm)&&rm.length?rm[0]:null,run=Array.isArray(rr)&&rr.length?rr[0]:null;
@@ -594,7 +594,7 @@ async function loadSystemAudit(){
 async function runPantheraAudit(){
  if(!cloudSession)throw new Error("PANTHERA AUDIT braucht Cloud-Login.");
  $("auditStatusText").textContent="AUDIT RUNNING · Manifest gegen Runtime…";
- await api("rpc/run_panthera_system_audit","",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});
+ await api("rpc/run_panthera_full_audit","",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});
  await loadSystemAudit();
 }
 
