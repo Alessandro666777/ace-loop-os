@@ -189,7 +189,20 @@
     </div>
 
     <div class="card">
-      <div class="section"><span class="n">15</span><h3>KNOWLEDGE PORT</h3><span class="auto" id="knowledgePortStatus">CLOUD LOGIN REQUIRED</span></div>
+      <div class="section"><span class="n">15</span><h3>SYSTEM INTEGRITY</h3><span class="auto" id="auditManifest">CLOUD LOGIN REQUIRED</span></div>
+      <div class="grid4">
+        <div class="metric"><span>INTEGRITY</span><b id="auditScore">—</b></div>
+        <div class="metric"><span>FREEZE BLOCKERS</span><b id="auditBlockers">—</b></div>
+        <div class="metric"><span>FINDINGS</span><b id="auditFindingCount">—</b></div>
+        <div class="metric"><span>COVERAGE</span><b id="auditCoverage">—</b></div>
+      </div>
+      <div class="actions"><button class="btn primary" id="runSystemAudit">PANTHERA AUDIT</button><span class="muted" id="auditStatusText">Command: panthera audit</span></div>
+      <div id="auditFindings" class="list" style="margin-top:10px"></div>
+      <p class="muted">Manifest → Runtime → Registry → Evidence → Drift. GitHub definiert den erwarteten technischen Kanon; Supabase misst den realen Zustand. Historische Quellen dürfen den aktiven Kanon nicht überschreiben.</p>
+    </div>
+
+    <div class="card">
+      <div class="section"><span class="n">16</span><h3>KNOWLEDGE PORT</h3><span class="auto" id="knowledgePortStatus">CLOUD LOGIN REQUIRED</span></div>
       <div class="grid3">
         <label>Titel<input id="knowledgeTitle" placeholder="Idee, Artikel, Beobachtung …"></label>
         <label>Quelle / URL<input id="knowledgeUrl" inputmode="url" placeholder="https://…"></label>
@@ -219,7 +232,7 @@
     </div>
 
     <div class="card">
-      <div class="section"><span class="n">16</span><h3>DATA + CLOUD</h3></div>
+      <div class="section"><span class="n">17</span><h3>DATA + CLOUD</h3></div>
       <div class="actions"><button class="btn soft" id="openCloud">CLOUD LOGIN</button><button class="btn" id="syncNow">SYNC NOW</button><button class="btn" id="export">JSON EXPORT</button><label class="btn">JSON IMPORT<input id="import" type="file" accept="application/json" hidden></label></div>
       <p class="muted">Local-first ist die sichere Betriebsbasis. Cloud wird zur geräteübergreifenden Wahrheitsschicht, sobald die Auth-Session steht.</p>
     </div>
@@ -412,7 +425,7 @@ function normalize(x){
  const b=base(),o={...b,...x};o.entries=Array.isArray(x.entries)?x.entries.map(e=>({...freshEntry(e.date),...e})):[];o.skills=Array.isArray(x.skills)&&x.skills.length?x.skills.map(normalizeSkill):b.skills;const existingGoals=Array.isArray(x.goals)?x.goals:[];const gm=new Map(existingGoals.map(g=>[g.name,g]));if(x.kernelMode!=="neutral")b.goals.forEach(g=>{if(!gm.has(g.name))gm.set(g.name,g)});o.goals=[...gm.values()];o.projects=Array.isArray(x.projects)?x.projects:[];o.events=Array.isArray(x.events)?x.events:[];o.predictions=Array.isArray(x.predictions)?x.predictions:[];o.decisions=Array.isArray(x.decisions)?x.decisions:[];o.assessments=Array.isArray(x.assessments)?x.assessments:[];o.independenceChecks=Array.isArray(x.independenceChecks)?x.independenceChecks:[];o.trainingCycles=Array.isArray(x.trainingCycles)?x.trainingCycles:[];o.evidenceItems=Array.isArray(x.evidenceItems)?x.evidenceItems:[];o.config={...b.config,...(x.config||{})};o.modules=Array.isArray(x.modules)&&x.modules.length?x.modules:b.modules;o.season={...b.season,...(x.season||{})};return o;
 }
 let ACTIVE_KEY=KEY;
-let system=migrate(),current,saveTimer=null,timerHandle=null,cloudSession=null,cloudSyncTimer=null,cloudIntegrations=[],latestIntegrationRun=null,companyContext={org:null,members:[],goals:[],kpis:[],dependencies:[],invites:[]},knowledgeSources=[],knowledgeResults=[],assessmentSkillId=null;
+let system=migrate(),current,saveTimer=null,timerHandle=null,cloudSession=null,cloudSyncTimer=null,cloudIntegrations=[],latestIntegrationRun=null,companyContext={org:null,members:[],goals:[],kpis:[],dependencies:[],invites:[]},knowledgeSources=[],knowledgeResults=[],auditState={meta:null,run:null,findings:[]},assessmentSkillId=null;
 function save(){localStorage.setItem(ACTIVE_KEY,JSON.stringify(system))}
 function activateUserStorage(user,boot={}){
  const scoped=KEY+":"+String(user.id);
@@ -540,6 +553,51 @@ function renderCompany(){
  $("companyMembers").innerHTML=c.members.length?c.members.map(m=>'<div class="row"><div><strong>'+escapeHTML(m.metadata?.display_name||m.metadata?.email||"Member")+'</strong><small>'+escapeHTML(m.role)+' · '+escapeHTML(m.status)+' · capabilities '+(m.share_capabilities?'shared':'private')+' · goals '+(m.share_goals?'shared':'private')+' · daily '+(m.share_daily_execution?'shared':'private')+'</small></div><span class="pill">'+escapeHTML(m.role.toUpperCase())+'</span></div>').join(""):'<div class="muted">Noch keine weiteren Mitglieder.</div>';
  $("companyInvites").innerHTML=c.invites?.length?c.invites.map(i=>'<div class="row"><div><strong>'+escapeHTML(i.email)+'</strong><small>'+escapeHTML(i.role)+' · '+escapeHTML(i.status)+(i.expires_at?' · bis '+escapeHTML(i.expires_at.slice(0,10)):'')+'</small></div><span class="pill">'+escapeHTML(i.status.toUpperCase())+'</span></div>').join(""):'<div class="muted">Keine offenen Einladungen.</div>';
 }
+function auditSeverityRank(s){return({critical:0,high:1,medium:2,low:3,info:4})[s]??5}
+function renderSystemAudit(){
+ const meta=auditState.meta,run=auditState.run,findings=[...(auditState.findings||[])].sort((a,b)=>auditSeverityRank(a.severity)-auditSeverityRank(b.severity));
+ if(!cloudSession){
+  $("auditManifest").textContent="CLOUD LOGIN REQUIRED";
+  $("auditScore").textContent="—";$("auditBlockers").textContent="—";$("auditFindingCount").textContent="—";$("auditCoverage").textContent="—";
+  $("auditStatusText").textContent="Cloud-Login nötig für panthera audit.";
+  $("auditFindings").innerHTML='<div class="muted">Nach dem Login prüft PANTHERA Manifest, Runtime, Registry, Evidenz und Drift.</div>';
+  return;
+ }
+ $("auditManifest").textContent=meta?("MANIFEST "+meta.manifest_version+" · "+String(meta.canonical_blob_sha||"").slice(0,8)): "MANIFEST NOT LOADED";
+ if(!run){
+  $("auditScore").textContent="—";$("auditBlockers").textContent="—";$("auditFindingCount").textContent="—";$("auditCoverage").textContent="—";
+  $("auditStatusText").textContent="Noch kein Audit-Run. Command: panthera audit";
+  $("auditFindings").innerHTML='<div class="muted">Starte PANTHERA AUDIT, um den realen Systemzustand gegen das Manifest zu prüfen.</div>';
+  return;
+ }
+ const total=Number(run.components_total||0)+Number(run.sources_total||0),healthy=Number(run.components_healthy||0)+Number(run.sources_healthy||0);
+ const coverage=total?Math.round(healthy/total*100):0;
+ $("auditScore").textContent=Number(run.score).toFixed(1)+"%";
+ $("auditBlockers").textContent=String(run.freeze_blockers||0);
+ $("auditFindingCount").textContent=String(run.findings_total||0);
+ $("auditCoverage").textContent=coverage+"%";
+ $("auditStatusText").textContent=String(run.status||"unknown").toUpperCase()+" · "+(run.summary?.architecture_freeze_ready?"FREEZE READY":"FREEZE NOT READY")+" · "+(run.finished_at?run.finished_at.slice(0,16).replace("T"," "):"");
+ $("auditFindings").innerHTML=findings.length?findings.slice(0,8).map(f=>'<div class="row"><div><strong>'+escapeHTML((f.component_key||f.source_key||f.finding_type).replaceAll("_"," "))+'</strong><small>'+escapeHTML(f.message)+(f.remediation?' · '+escapeHTML(f.remediation):'')+'</small></div><span class="pill">'+escapeHTML(String(f.severity).toUpperCase())+'</span></div>').join(""):'<div class="success">Keine Findings. Manifest und Runtime sind im definierten Korridor.</div>';
+}
+async function loadSystemAudit(){
+ if(!cloudSession){auditState={meta:null,run:null,findings:[]};renderSystemAudit();return}
+ const [rm,rr]=await Promise.all([
+   api("panthera_manifest_meta?select=manifest_version,canonical_repo,canonical_path,canonical_blob_sha,architecture_freeze_until&limit=1"),
+   api("panthera_audit_runs?select=id,score,status,components_total,components_healthy,sources_total,sources_healthy,findings_total,freeze_blockers,critical_findings,high_findings,summary,started_at,finished_at&order=started_at.desc&limit=1")
+ ]);
+ const meta=Array.isArray(rm)&&rm.length?rm[0]:null,run=Array.isArray(rr)&&rr.length?rr[0]:null;
+ let findings=[];
+ if(run?.id)findings=await api("panthera_audit_findings?select=severity,finding_type,component_key,source_key,message,remediation,evidence_ref,created_at&run_id=eq."+encodeURIComponent(run.id)+"&order=created_at.asc")||[];
+ auditState={meta,run,findings:Array.isArray(findings)?findings:[]};
+ renderSystemAudit();
+}
+async function runPantheraAudit(){
+ if(!cloudSession)throw new Error("PANTHERA AUDIT braucht Cloud-Login.");
+ $("auditStatusText").textContent="AUDIT RUNNING · Manifest gegen Runtime…";
+ await api("rpc/run_panthera_system_audit","",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});
+ await loadSystemAudit();
+}
+
 function renderCommand(){
  $("projectsText").value=system.projects.join("\n");$("skillsText").value=system.skills.map(s=>s.name+"|"+s.knowledge+"|"+s.capability+"|"+s.pressure+"|"+s.class).join("\n");$("freezeChip").textContent="FREEZE · "+system.config.freezeUntil;
  const ag=activeGoals(),fg=frontlineGoals();$("frontlineCount").textContent=fg.length;$("activeGoalCount").textContent=ag.length;$("allGoalCount").textContent=system.goals.length;$("goalCounts").textContent=ag.length+" ACTIVE · "+system.goals.filter(g=>g.status==="incubating").length+" INCUBATING · "+system.goals.filter(g=>g.status==="option").length+" OPTION";
@@ -549,6 +607,7 @@ function renderCommand(){
  $("integrationVerified").textContent=verified;$("integrationDry").textContent=dry;$("integrationRequired").textContent=required;
  $("integrationSuite").textContent=latestIntegrationRun?(latestIntegrationRun.suite+" · "+latestIntegrationRun.cases_passed+"/"+latestIntegrationRun.cases_total+" "+latestIntegrationRun.status.toUpperCase()):(cloudSession?"NO TEST RUN":"CLOUD LOGIN REQUIRED");
  $("integrationStatus").innerHTML=cloudIntegrations.length?cloudIntegrations.map(i=>'<div class="row"><div><strong>'+escapeHTML(i.provider)+'</strong><small>'+escapeHTML(i.metadata?.mode||"—")+(i.last_sync_at?' · '+escapeHTML(i.last_sync_at.slice(0,16).replace("T"," ")):"")+'</small></div><span class="pill">'+escapeHTML(i.status.toUpperCase().replaceAll("_"," "))+'</span></div>').join(""):'<div class="muted">'+(cloudSession?'Noch kein Integrationsregister geladen.':'Nach Cloud-Login erscheint hier der verifizierte Systemstatus.')+'</div>';
+ renderSystemAudit();
  renderRoute();$("decisions").innerHTML=[...system.decisions].sort((a,b)=>b.createdAt.localeCompare(a.createdAt)).slice(0,8).map(d=>'<div class="row"><div><strong>'+escapeHTML(d.title)+'</strong><small>'+d.problemClass+' · '+d.stakes.toUpperCase()+' · Complexity '+d.complexityBudget+' · '+d.route.join(" → ")+'</small></div><span class="pill">'+d.status.toUpperCase()+'</span></div>').join("")||'<div class="muted">Noch keine dokumentierten Entscheidungen.</div>'
 }
 window.updateGoalProgress=id=>{const g=system.goals.find(x=>x.id===id);if(!g)return;const raw=prompt("Aktueller Stand für "+g.name+(g.unit?" ("+g.unit+")":"")+":",g.current==null?"":String(g.current));if(raw===null)return;const v=Number(String(raw).replace(",", "."));if(!Number.isFinite(v)){alert("Bitte Zahl eingeben.");return}g.current=v;g.updatedAt=new Date().toISOString();event("goal.progress.updated",{goal:g.name,value:v,target:g.target,unit:g.unit});save();renderAll();if(cloudSession)cloudPushGoal(g).catch(cloudError)};
@@ -671,6 +730,7 @@ $("timerReset").onclick=()=>{clearInterval(timerHandle);$("timer").textContent="
 $("startMove").onclick=()=>{if(!current.nextMove.trim()){$("nextMove").focus();return}event("execution.next_move",{date:current.date,move:current.nextMove});runTimer(600);document.querySelector("#timer").scrollIntoView({behavior:"smooth",block:"center"})};
 $("closeReview").onclick=()=>{const s=skillByName(current.skillFocus);if(current.skillEvidence.trim()&&s){const type=current.pressureEvidence?"pressure":"capability";const ev={id:uid(),skillId:s.id,skillName:s.name,date:current.date,type,quality:Number(current.evidenceQuality||3),independent:Number(current.assistanceLevel||0)===0,evidence:current.skillEvidence,createdAt:new Date().toISOString()};system.evidenceItems.push(ev);s.evidenceCount+=1;s.lastUsedAt=new Date().toISOString();s.confidence=Math.min(.99,s.confidence+.03*(ev.quality/3));if(ev.independent&&ev.quality>=4)s.confidence=Math.min(.99,s.confidence+.04);system.independenceChecks.push({id:uid(),skillId:s.id,date:current.date,assistanceLevel:Number(current.assistanceLevel||0),createdAt:new Date().toISOString()});event("skill.evidence",{skill:s.name,type,quality:ev.quality,independent:ev.independent})}current.reviewClosed=true;event("review.closed",{date:current.date,score:score(current),failure:current.failureType});persist();if(cloudSession)queueFullSync()};
 $("addPrediction").onclick=()=>{const st=$("predictionStatement").value.trim(),pr=Number($("predictionProbability").value),due=$("predictionDue").value;if(!st||!pr){alert("Vorhersage und Wahrscheinlichkeit eintragen.");return}const p={id:uid(),statement:st,probability:pr,dueDate:due||null,outcome:null,createdAt:new Date().toISOString(),resolvedAt:null};system.predictions.push(p);event("prediction.created",{id:p.id,probability:pr});$("predictionStatement").value="";save();renderAll();if(cloudSession)cloudPushPrediction(p).catch(cloudError)};
+$("runSystemAudit").onclick=()=>runPantheraAudit().catch(e=>{$("auditStatusText").textContent="AUDIT ERROR · "+String(e.message||e);alert(String(e.message||e))});
 $("captureKnowledge").onclick=()=>captureKnowledge().catch(e=>alert(String(e.message||e)));
 $("searchKnowledge").onclick=()=>searchKnowledgePort().catch(e=>alert(String(e.message||e)));
 $("connectReadwise").onclick=()=>connectReadwise().catch(e=>alert(String(e.message||e)));
@@ -770,6 +830,7 @@ async function fullSync(){
  const map=new Map(system.entries.map(e=>[e.date,e]));(re||[]).forEach(r=>{const e={...freshEntry(r.entry_date),id:r.id,date:r.entry_date,sleep:r.sleep_hours,energy:r.energy,state:r.state||"",win:r.win||"",nextMove:r.next_move||"",goalFocus:r.goal_focus_name||"",skillFocus:r.skill_focus||"",uncomfortable:r.uncomfortable||"",ifThen:r.if_then||"",locked:r.locked,proofs:r.proofs||freshEntry(r.entry_date).proofs,biggest:r.biggest||"",deviation:r.deviation||"",failureType:r.failure_type||"",correction:r.correction||"",skillEvidence:r.skill_evidence||"",updatedAt:r.updated_at,createdAt:r.created_at};const l=map.get(e.date);if(!l||new Date(e.updatedAt)>=new Date(l.updatedAt||0))map.set(e.date,e)});system.entries=[...map.values()];
  if(rs?.length)system.skills=rs.map(normalizeSkill);if(rp?.length)system.projects=rp.map(p=>p.name);if(rpred?.length)system.predictions=rpred.map(p=>({id:p.id,statement:p.statement,probability:Math.round(Number(p.probability)*100),dueDate:p.due_date,outcome:p.outcome,createdAt:p.created_at,resolvedAt:p.resolved_at}));if(rdec?.length)system.decisions=rdec.map(d=>({id:d.id,title:d.title,goal:d.goal||"",problemClass:d.problem_class||"strategy",stakes:d.stakes,reversibility:d.reversibility,status:d.status,blindSpots:d.blind_spots||{},expected:d.expected_outcome||"",complexityBudget:d.metadata?.complexity_budget||1,route:d.metadata?.route||["Reality"],counterLenses:d.metadata?.counter_lenses||[],createdAt:d.created_at}));if(rgoals?.length)system.goals=rgoals.map(g=>({id:g.id,domain:g.domain,name:g.name,status:g.status,focusTier:g.focus_tier,priority:g.priority,target:g.target_value==null?null:Number(g.target_value),current:g.current_value==null?null:Number(g.current_value),unit:g.unit,deadline:g.deadline,source:g.source||"cloud"}));cloudIntegrations=Array.isArray(rints)?rints:[];latestIntegrationRun=Array.isArray(rirun)&&rirun.length?rirun[0]:null;
  await loadKnowledgePort();
+ await loadSystemAudit();
   companyContext={org:null,members:[],goals:[],kpis:[],dependencies:[]};
  if(Array.isArray(rorgs)&&rorgs.length){
    const org=rorgs[0],oid=encodeURIComponent(org.id);
