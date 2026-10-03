@@ -100,15 +100,12 @@
     "capture_raw_storage": {
       "class": "capture_quarantine",
       "required": true,
-      "state": "verified",
-      "canonical": false,
-      "private": true
+      "canonical": false
     },
     "pocket_capture": {
       "class": "capture_input",
       "required": false,
-      "state": "connection_required",
-      "contract": "CaptureSourcePort v1"
+      "replaceable": true
     }
   },
   "internal_modules": {
@@ -376,8 +373,7 @@
       "expected": [
         "verified"
       ],
-      "criticality": 3,
-      "freeze_required": false
+      "criticality": 3
     },
     "Pocket Capture Adapter": {
       "expected": [
@@ -459,7 +455,11 @@
     "No architecture freeze while critical or high freeze-blockers remain",
     "Any active indexed knowledge module must map to a manifest component.",
     "Consent must pass before captured conversation content is transcribed or sent to AI review.",
-    "Raw capture material is private source evidence and is never canonical by default."
+    "Raw capture material is private source evidence and is never canonical by default.",
+    "Raw captures never become canonical knowledge directly.",
+    "Consent must pass before any transcript is sent to an external AI reviewer.",
+    "Capture authenticity means source provenance/integrity, not factual truth of participant statements.",
+    "Raw audio and full transcripts are excluded from canonical Obsidian publications."
   ],
   "audit": {
     "command": "panthera audit",
@@ -480,7 +480,9 @@
       "dependency_component_missing",
       "review_due",
       "knowledge_module_unmapped",
-      "alias_target_missing"
+      "alias_target_missing",
+      "capture_adapter_unverified",
+      "capture_publish_gate_violation"
     ]
   },
   "knowledge_module_aliases": {
@@ -533,5 +535,24 @@
     ],
     "obsidian_sink": "PANTHERA_CANONICAL/10_FIELD_INTELLIGENCE",
     "local_bridge": "pull-only; write-once; ACK after vault write and brain refresh"
+  },
+  "capture_pipeline": {
+    "contract": "CaptureSourcePort v1",
+    "flow": [
+      "CAPTURE",
+      "CONSENT",
+      "TRANSCRIPT",
+      "PANTHERA_REVIEW",
+      "AUTHENTICITY_EVIDENCE",
+      "KNOWLEDGE_CANDIDATE",
+      "PUBLISH"
+    ],
+    "adapters": {
+      "manual_upload": "Apple Voice Memos / audio / video",
+      "pocket": "Pocket AI recordings + signed webhooks",
+      "fireflies": "Optional meeting transcript source"
+    },
+    "canon_sink": "777 / PANTHERA_CANONICAL/10_FIELD_INTELLIGENCE",
+    "raw_storage": "Supabase private bucket panthera-capture-raw"
   }
 }
