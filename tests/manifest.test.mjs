@@ -58,3 +58,17 @@ test("manifest 08 self-audit has explicit drift detection",()=>{
     assert.ok(manifest.audit.drift_checks.includes(check));
   }
 });
+
+
+test("manifest 09 CaptureSourcePort is provider-neutral and gated",()=>{
+  assert.equal(manifest.capture_source_port.version,"1.0");
+  assert.ok(manifest.capture_source_port.adapters.includes("pocket"));
+  assert.ok(manifest.capture_source_port.adapters.includes("manual_upload"));
+  assert.deepEqual(manifest.capture_source_port.pipeline,["capture","consent","transcript","panthera_review","authenticity_evidence","knowledge_candidate","publish"]);
+});
+
+test("manifest 10 Pocket is optional, CaptureSourcePort is not",()=>{
+  assert.equal(manifest.sources.pocket_capture.required,false);
+  assert.equal(manifest.integrations["Universal Capture Port"].freeze_required,true);
+  assert.equal(manifest.integrations["Pocket Capture Adapter"].freeze_required,false);
+});
