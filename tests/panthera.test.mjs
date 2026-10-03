@@ -575,3 +575,50 @@ test("91 Capture consent is explicit server action",async t=>{
   assert.equal(consentBody.capture_item_id,"capture-1");
   assert.equal(consentBody.consent_status,"confirmed");
 });
+
+
+test("88 Capture Port is cloud-gated and exposes universal inputs",async t=>{
+  const x=await boot();t.after(x.close);
+  assert.ok(x.d.getElementById("captureFile"));
+  assert.ok(x.d.getElementById("pocketCaptureKey"));
+  assert.ok(x.d.getElementById("captureOpenAIKey"));
+  assert.equal(x.d.getElementById("capturePortStatus").textContent,"CLOUD LOGIN REQUIRED");
+});
+
+test("89 Pocket key goes only to capture runtime and is cleared from UI",async t=>{
+  const auth={access_token:"a",refresh_token:"r",expires_at:Date.now()+3600000,user:{id:"user-1",email:"owner@example.com"}};
+  const raw="pk_test_12345678901234567890";
+  const x=await boot({storage:{[AUTH_KEY]:auth},fetchHandler:async(u,init)=>{
+    if(u.includes("/functions/v1/capture-runtime")){
+      const b=JSON.parse(init.body||"{}");
+      if(b.action==="set_pocket_key")return res({ok:true,connected:true});
+      if(b.action==="status")return res({ok:true,sources:[],counts:{}});
+      if(b.action==="list")return res({ok:true,items:[]});
+    }
+    return null;
+  }});
+  t.after(x.close);
+  setVal(x.w,"pocketCaptureKey",raw);
+  click(x.w,"pocketCaptureConnect");
+  await new Promise(r=>setTimeout(r,50));
+  const c=x.calls.find(c=>c.url.includes("/functions/v1/capture-runtime")&&JSON.parse(c.init.body||"{}").action==="set_pocket_key");
+  assert.ok(c);
+  assert.equal(JSON.parse(c.init.body).token,raw);
+  assert.equal(x.d.getElementById("pocketCaptureKey").value,"");
+  assert.equal(x.w.localStorage.getItem("pocketCaptureKey"),null);
+});
+
+test("90 Capture consent controls are present before processing",async t=>{
+  const x=await boot();t.after(x.close);
+  const options=[...x.d.getElementById("captureConsent").options].map(o=>o.value);
+  assert.deepEqual(options,["unknown","self_only","confirmed","not_required","blocked"]);
+  assert.ok(x.d.getElementById("captureUploadStatus").textContent.includes("Ohne Consent"));
+});
+
+test("91 Capture runtime paths never expose raw canon controls",async t=>{
+  const x=await boot();t.after(x.close);
+  const text=x.d.querySelector("#command")?.textContent||"";
+  assert.ok(text.includes("Roh-Audio"));
+  assert.ok(text.includes("Volltranskript"));
+  assert.equal(text.includes("RAW → CANON"),false);
+});
