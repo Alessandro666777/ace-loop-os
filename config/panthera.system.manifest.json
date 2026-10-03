@@ -96,6 +96,19 @@
     "chatgpt_memory": {
       "class": "private_context",
       "canonical": false
+    },
+    "capture_raw_storage": {
+      "class": "capture_quarantine",
+      "required": true,
+      "state": "verified",
+      "canonical": false,
+      "private": true
+    },
+    "pocket_capture": {
+      "class": "capture_input",
+      "required": false,
+      "state": "connection_required",
+      "contract": "CaptureSourcePort v1"
     }
   },
   "internal_modules": {
@@ -200,8 +213,8 @@
       "expected": [
         "verified"
       ],
-      "criticality": 2,
-      "freeze_required": false
+      "criticality": 5,
+      "freeze_required": true
     },
     "GitHub 777": {
       "expected": [
@@ -351,6 +364,34 @@
       ],
       "criticality": 5,
       "freeze_required": true
+    },
+    "Universal Capture Port": {
+      "expected": [
+        "verified"
+      ],
+      "criticality": 5,
+      "freeze_required": true
+    },
+    "Manual Capture Adapter": {
+      "expected": [
+        "verified"
+      ],
+      "criticality": 3,
+      "freeze_required": false
+    },
+    "Pocket Capture Adapter": {
+      "expected": [
+        "verified"
+      ],
+      "criticality": 3,
+      "freeze_required": false
+    },
+    "Obsidian Capture Bridge": {
+      "expected": [
+        "verified"
+      ],
+      "criticality": 4,
+      "freeze_required": true
     }
   },
   "remembered_non_active_components": {
@@ -416,7 +457,9 @@
     "Providers are adapters, never the PANTHERA core",
     "Legacy sources cannot silently override current canon",
     "No architecture freeze while critical or high freeze-blockers remain",
-    "Any active indexed knowledge module must map to a manifest component."
+    "Any active indexed knowledge module must map to a manifest component.",
+    "Consent must pass before captured conversation content is transcribed or sent to AI review.",
+    "Raw capture material is private source evidence and is never canonical by default."
   ],
   "audit": {
     "command": "panthera audit",
@@ -463,5 +506,32 @@
     "PANTHERA INFRASTRUCTURE": "ace_supabase_runtime",
     "PANTHERA KNOWLEDGE": "knowledge_port",
     "OBSIDIAN CONFIG": "obsidian_777"
+  },
+  "capture_source_port": {
+    "version": "1.0",
+    "pipeline": [
+      "capture",
+      "consent",
+      "transcript",
+      "panthera_review",
+      "authenticity_evidence",
+      "knowledge_candidate",
+      "publish"
+    ],
+    "adapters": [
+      "manual_upload",
+      "pocket",
+      "fireflies_optional"
+    ],
+    "invariants": [
+      "Raw recordings and full transcripts remain private source material.",
+      "Consent must pass before transcription or AI review for captured conversations.",
+      "Authenticity describes source integrity, not truth of participant statements.",
+      "No capture reaches canonical knowledge without PANTHERA review and canonicalization gate.",
+      "Obsidian receives distilled approved knowledge only; never raw audio or full transcript.",
+      "Providers are replaceable adapters."
+    ],
+    "obsidian_sink": "PANTHERA_CANONICAL/10_FIELD_INTELLIGENCE",
+    "local_bridge": "pull-only; write-once; ACK after vault write and brain refresh"
   }
 }
