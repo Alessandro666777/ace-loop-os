@@ -21,7 +21,8 @@ test("manifest 03 registers every current integration provider contract",()=>{
     "GitHub 777","Gmail","Google Calendar","Google Drive","Knowledge Port","monday.com",
     "Multi-User Auth","n8n","Obsidian 777","Operator App","OXIDIA","P-GATE","PANTHERA",
     "PANTHERA Sovereign Runtime","PANTHERA-MACHINE","Quintera","Readwise ChatGPT Connector",
-    "Readwise Reader","Revenue Engine","Security Hardening","Self Audit","System Manifest"
+    "Readwise Reader","Revenue Engine","Security Hardening","Self Audit","System Manifest",
+    "Universal Capture Port","Manual Capture Adapter","Pocket Capture Adapter","Obsidian Capture Bridge"
   ];
   for(const key of required)assert.ok(manifest.integrations[key],key+" missing from manifest");
 });
