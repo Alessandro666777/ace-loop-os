@@ -1,0 +1,440 @@
+{
+  "name": "PANTHERA SYSTEM MANIFEST",
+  "manifest_version": "1.0",
+  "architecture_version": "3.0",
+  "architecture_freeze_until": "2026-10-31",
+  "principle": "Nothing important may exist without identity, authority, state, evidence, privacy scope and replacement semantics.",
+  "truth_precedence": [
+    {
+      "domain": "technical_canon",
+      "primary": "github_ace_loop_os",
+      "fallback": "github_777"
+    },
+    {
+      "domain": "knowledge_canon",
+      "primary": "github_777",
+      "fallback": "supabase_prod"
+    },
+    {
+      "domain": "runtime_state",
+      "primary": "supabase_prod",
+      "fallback": "github_ace_loop_os"
+    },
+    {
+      "domain": "operational_crm",
+      "primary": "monday",
+      "fallback": "supabase_prod"
+    },
+    {
+      "domain": "automation_state",
+      "primary": "n8n",
+      "fallback": "supabase_prod"
+    },
+    {
+      "domain": "private_knowledge",
+      "primary": "supabase_prod",
+      "fallback": "readwise"
+    },
+    {
+      "domain": "planning_history",
+      "primary": "drive_master_2026_09_14",
+      "fallback": "github_ace_loop_os"
+    },
+    {
+      "domain": "assistant_context",
+      "primary": "chatgpt_memory",
+      "fallback": "github_777"
+    },
+    {
+      "domain": "archive_reference",
+      "primary": "panthera_machine",
+      "fallback": "github_ace_loop_os"
+    }
+  ],
+  "sources": {
+    "github_ace_loop_os": {
+      "class": "technical_canon",
+      "required": true
+    },
+    "github_777": {
+      "class": "knowledge_canon",
+      "required": true
+    },
+    "supabase_prod": {
+      "class": "runtime_truth",
+      "required": true
+    },
+    "drive_master_2026_09_14": {
+      "class": "planning_snapshot",
+      "state": "stale_snapshot",
+      "superseded_by": "github_ace_loop_os"
+    },
+    "panthera_machine": {
+      "class": "archive_reference",
+      "replacement": "github_ace_loop_os"
+    },
+    "readwise": {
+      "class": "knowledge_input",
+      "contract": "KnowledgeSourcePort v1",
+      "private_by_default": true
+    },
+    "google_drive": {
+      "class": "reference_input"
+    },
+    "gmail": {
+      "class": "reference_input"
+    },
+    "google_calendar": {
+      "class": "reference_input"
+    },
+    "n8n": {
+      "class": "automation_truth"
+    },
+    "monday": {
+      "class": "operational_truth"
+    },
+    "chatgpt_memory": {
+      "class": "private_context",
+      "canonical": false
+    }
+  },
+  "internal_modules": {
+    "constitution": {
+      "expected": [
+        "active"
+      ],
+      "criticality": 5,
+      "freeze_required": true
+    },
+    "meta_conductor": {
+      "expected": [
+        "active"
+      ],
+      "criticality": 5,
+      "freeze_required": true
+    },
+    "reality": {
+      "expected": [
+        "active"
+      ],
+      "criticality": 5,
+      "freeze_required": true
+    },
+    "learning": {
+      "expected": [
+        "active"
+      ],
+      "criticality": 5,
+      "freeze_required": true
+    },
+    "mastery": {
+      "expected": [
+        "active"
+      ],
+      "criticality": 4,
+      "freeze_required": true
+    },
+    "ace": {
+      "expected": [
+        "active"
+      ],
+      "criticality": 5,
+      "freeze_required": true
+    },
+    "athenaeum": {
+      "expected": [
+        "conditional"
+      ],
+      "criticality": 3
+    },
+    "moon": {
+      "expected": [
+        "conditional"
+      ],
+      "criticality": 3
+    },
+    "seven_heads": {
+      "expected": [
+        "conditional"
+      ],
+      "criticality": 3
+    }
+  },
+  "integrations": {
+    "ACE/Supabase": {
+      "expected": [
+        "verified"
+      ],
+      "criticality": 5,
+      "freeze_required": true
+    },
+    "AUREA Sales OS": {
+      "expected": [
+        "verified"
+      ],
+      "criticality": 5,
+      "freeze_required": true
+    },
+    "Backup Recovery": {
+      "expected": [
+        "verified"
+      ],
+      "criticality": 5,
+      "freeze_required": true
+    },
+    "Company OS": {
+      "expected": [
+        "verified"
+      ],
+      "criticality": 4,
+      "freeze_required": true
+    },
+    "CRM": {
+      "expected": [
+        "superseded"
+      ],
+      "scored": false,
+      "replacement": "monday.com"
+    },
+    "Direct AI Provider": {
+      "expected": [
+        "verified"
+      ],
+      "criticality": 2,
+      "freeze_required": false
+    },
+    "GitHub 777": {
+      "expected": [
+        "verified"
+      ],
+      "criticality": 4,
+      "freeze_required": true
+    },
+    "Gmail": {
+      "expected": [
+        "verified"
+      ],
+      "scored": false
+    },
+    "Google Calendar": {
+      "expected": [
+        "verified"
+      ],
+      "scored": false
+    },
+    "Google Drive": {
+      "expected": [
+        "verified"
+      ],
+      "criticality": 2
+    },
+    "Knowledge Port": {
+      "expected": [
+        "verified"
+      ],
+      "criticality": 4,
+      "freeze_required": true
+    },
+    "monday.com": {
+      "expected": [
+        "verified"
+      ],
+      "criticality": 5,
+      "freeze_required": true
+    },
+    "Multi-User Auth": {
+      "expected": [
+        "verified"
+      ],
+      "criticality": 5,
+      "freeze_required": true
+    },
+    "n8n": {
+      "expected": [
+        "verified"
+      ],
+      "criticality": 5,
+      "freeze_required": true
+    },
+    "Obsidian 777": {
+      "expected": [
+        "verified"
+      ],
+      "criticality": 4,
+      "freeze_required": true
+    },
+    "Operator App": {
+      "expected": [
+        "verified"
+      ],
+      "criticality": 3
+    },
+    "OXIDIA": {
+      "expected": [
+        "verified"
+      ],
+      "scored": false,
+      "review_by": "2026-10-31"
+    },
+    "P-GATE": {
+      "expected": [
+        "verified"
+      ],
+      "criticality": 5,
+      "freeze_required": true
+    },
+    "PANTHERA": {
+      "expected": [
+        "ready",
+        "verified"
+      ],
+      "scored": false
+    },
+    "PANTHERA Sovereign Runtime": {
+      "expected": [
+        "verified"
+      ],
+      "scored": false,
+      "review_by": "2026-10-31"
+    },
+    "PANTHERA-MACHINE": {
+      "expected": [
+        "verified"
+      ],
+      "scored": false,
+      "replacement": "ACE Loop OS"
+    },
+    "Quintera": {
+      "expected": [
+        "verified"
+      ],
+      "scored": false,
+      "review_by": "2026-10-31"
+    },
+    "Readwise ChatGPT Connector": {
+      "expected": [
+        "verified"
+      ],
+      "scored": false,
+      "replacement": "Readwise Reader"
+    },
+    "Readwise Reader": {
+      "expected": [
+        "verified"
+      ],
+      "criticality": 2
+    },
+    "Revenue Engine": {
+      "expected": [
+        "verified"
+      ],
+      "criticality": 4,
+      "freeze_required": true
+    },
+    "Security Hardening": {
+      "expected": [
+        "verified"
+      ],
+      "criticality": 5,
+      "freeze_required": true
+    },
+    "Self Audit": {
+      "expected": [
+        "verified"
+      ],
+      "criticality": 5,
+      "freeze_required": true
+    },
+    "System Manifest": {
+      "expected": [
+        "verified"
+      ],
+      "criticality": 5,
+      "freeze_required": true
+    }
+  },
+  "remembered_non_active_components": {
+    "readwise_autonomous_sync": {
+      "state": "planned",
+      "review_by": "2026-10-31"
+    },
+    "mr_seven": {
+      "state": "historical_candidate",
+      "review_by": "2026-10-31"
+    },
+    "actor": {
+      "state": "historical_candidate",
+      "review_by": "2026-10-31"
+    },
+    "blueprint_foundry": {
+      "state": "needs_proof",
+      "review_by": "2026-10-31"
+    },
+    "failure_registry_220": {
+      "state": "needs_proof",
+      "review_by": "2026-10-31"
+    },
+    "executive_hospitality_os": {
+      "state": "needs_proof",
+      "review_by": "2026-10-31"
+    },
+    "superagent_forge": {
+      "state": "needs_proof",
+      "review_by": "2026-10-31"
+    },
+    "panthera_world": {
+      "state": "planned",
+      "review_by": "2026-10-31"
+    },
+    "panthera_os_2": {
+      "state": "legacy",
+      "replacement": "PANTHERA 3.0"
+    },
+    "growth_os": {
+      "state": "historical_candidate",
+      "boundary_review": "P-GATE",
+      "review_by": "2026-10-31"
+    },
+    "cohort_zero": {
+      "state": "historical_candidate",
+      "role": "field proving program",
+      "review_by": "2026-11-01"
+    },
+    "mj_mentor": {
+      "state": "historical_candidate",
+      "boundary_review": "Moon Architect",
+      "review_by": "2026-10-31"
+    }
+  },
+  "invariants": [
+    "Reality > Narrative",
+    "Evidence > Authority",
+    "Capability requires proof",
+    "Complexity must earn its existence",
+    "Private raw knowledge never becomes shared canon automatically",
+    "Operational systems have one truth owner",
+    "Providers are adapters, never the PANTHERA core",
+    "Legacy sources cannot silently override current canon",
+    "No architecture freeze while critical or high freeze-blockers remain"
+  ],
+  "audit": {
+    "command": "panthera audit",
+    "engine": "public.run_panthera_system_audit()",
+    "status": {
+      "green": "no critical/high findings, no freeze blockers, score >= 85",
+      "yellow": "high findings, freeze blockers or score < 85",
+      "red": "any critical finding"
+    },
+    "drift_checks": [
+      "missing_component",
+      "state_gap",
+      "missing_evidence",
+      "stale_verification",
+      "unregistered_integration",
+      "unregistered_module",
+      "authority_source_missing",
+      "dependency_component_missing",
+      "review_due"
+    ]
+  }
+}
