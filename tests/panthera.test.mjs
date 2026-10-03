@@ -455,3 +455,49 @@ test("84 later cloud auth migrates Quick Start kernel instead of resetting",asyn
   assert.equal(cloud.profileName,"Tokyo");
   assert.equal(cloud.entries.some(e=>e.win==="Persist me"),true);
 });
+
+
+test("85 System Integrity is private-cloud gated in local mode",async t=>{
+  const x=await boot();t.after(x.close);
+  assert.ok(x.d.getElementById("runSystemAudit"));
+  assert.equal(x.d.getElementById("auditManifest").textContent,"CLOUD LOGIN REQUIRED");
+  assert.ok(x.d.getElementById("auditFindings").textContent.includes("Cloud-Login"));
+});
+
+test("86 cloud sync renders latest PANTHERA audit state",async t=>{
+  const auth={access_token:"a",refresh_token:"r",expires_at:Date.now()+3600000,user:{id:"user-1",email:"owner@example.com"}};
+  const meta=[{manifest_version:"1.0",canonical_repo:"Alessandro666777/ace-loop-os",canonical_path:"config/panthera.system.manifest.json",canonical_blob_sha:"2e58adfd75ef8befc748e336d0a9abc92b47f8b9",architecture_freeze_until:"2026-10-31"}];
+  const run=[{id:"run-1",score:84.7,status:"yellow",components_total:49,components_healthy:41,sources_total:12,sources_healthy:12,findings_total:9,freeze_blockers:3,critical_findings:0,high_findings:3,summary:{architecture_freeze_ready:false},started_at:"2026-10-03T20:33:23Z",finished_at:"2026-10-03T20:33:23Z"}];
+  const findings=[{severity:"high",finding_type:"state_gap",component_key:"n8n_runtime",source_key:null,message:"n8n Runtime is present but not at its target verification state.",remediation:"Live runtime still unverified.",evidence_ref:"workflow_exports:4/4",created_at:"2026-10-03T20:33:23Z"}];
+  const x=await boot({storage:{[AUTH_KEY]:auth},fetchHandler:async(u)=>{
+    if(u.includes("/rest/v1/panthera_manifest_meta?"))return res(meta);
+    if(u.includes("/rest/v1/panthera_audit_runs?"))return res(run);
+    if(u.includes("/rest/v1/panthera_audit_findings?"))return res(findings);
+    return null;
+  }});
+  t.after(x.close);
+  await new Promise(r=>setTimeout(r,60));
+  assert.equal(x.d.getElementById("auditScore").textContent,"84.7%");
+  assert.equal(x.d.getElementById("auditBlockers").textContent,"3");
+  assert.ok(x.d.getElementById("auditManifest").textContent.includes("MANIFEST 1.0"));
+  assert.ok(x.d.getElementById("auditFindings").textContent.includes("n8n Runtime"));
+});
+
+test("87 PANTHERA AUDIT button invokes audit RPC",async t=>{
+  const auth={access_token:"a",refresh_token:"r",expires_at:Date.now()+3600000,user:{id:"user-1",email:"owner@example.com"}};
+  let ran=false;
+  const x=await boot({storage:{[AUTH_KEY]:auth},fetchHandler:async(u,init)=>{
+    if(u.includes("/rest/v1/rpc/run_panthera_system_audit")){ran=true;return res("run-new")}
+    if(u.includes("/rest/v1/panthera_manifest_meta?"))return res([{manifest_version:"1.0",canonical_blob_sha:"abc12345"}]);
+    if(u.includes("/rest/v1/panthera_audit_runs?"))return res(ran?[{id:"run-new",score:90,status:"green",components_total:49,components_healthy:47,sources_total:12,sources_healthy:12,findings_total:1,freeze_blockers:0,critical_findings:0,high_findings:0,summary:{architecture_freeze_ready:true},finished_at:"2026-10-03T20:40:00Z"}]:[]);
+    if(u.includes("/rest/v1/panthera_audit_findings?"))return res([]);
+    return null;
+  }});
+  t.after(x.close);
+  await new Promise(r=>setTimeout(r,50));
+  click(x.w,"runSystemAudit");
+  await new Promise(r=>setTimeout(r,60));
+  assert.equal(ran,true);
+  assert.ok(x.calls.some(c=>c.url.includes("/rest/v1/rpc/run_panthera_system_audit")));
+  assert.equal(x.d.getElementById("auditScore").textContent,"90.0%");
+});
