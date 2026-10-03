@@ -415,11 +415,12 @@
     "Operational systems have one truth owner",
     "Providers are adapters, never the PANTHERA core",
     "Legacy sources cannot silently override current canon",
-    "No architecture freeze while critical or high freeze-blockers remain"
+    "No architecture freeze while critical or high freeze-blockers remain",
+    "Any active indexed knowledge module must map to a manifest component."
   ],
   "audit": {
     "command": "panthera audit",
-    "engine": "public.run_panthera_system_audit()",
+    "engine": "public.run_panthera_full_audit()",
     "status": {
       "green": "no critical/high findings, no freeze blockers, score >= 85",
       "yellow": "high findings, freeze blockers or score < 85",
@@ -434,7 +435,33 @@
       "unregistered_module",
       "authority_source_missing",
       "dependency_component_missing",
-      "review_due"
+      "review_due",
+      "knowledge_module_unmapped",
+      "alias_target_missing"
     ]
+  },
+  "knowledge_module_aliases": {
+    "ATHENAEUM": "athenaeum",
+    "BLUEPRINT FOUNDRY": "blueprint_foundry",
+    "HOSPITALITY OS": "executive_hospitality_os",
+    "MASTERY COMPILER": "mastery_compiler",
+    "META CONDUCTOR": "meta_conductor",
+    "MOON ARCHITECT": "moon_architect",
+    "PANTHERA CORE": "system_manifest",
+    "SYSTEM REGISTRY": "system_manifest",
+    "SYSTEM ARCHITECTURE": "system_manifest",
+    "EXECUTION OS": "ace_loop_os",
+    "PANTHERA RUNTIME / KNOWLEDGE PORT": "knowledge_port",
+    "COMMAND / GOVERNANCE": "constitution",
+    "INTEGRATION LAB": "self_audit",
+    "PANTHERA MASTER LIST": "system_manifest",
+    "P-GATE": "p_gate",
+    "GOVERNANCE / ADR": "constitution",
+    "REVENUE ENGINE": "revenue_engine",
+    "SALES OS": "aurea_sales_os",
+    "GROWTH OS": "growth_os",
+    "PANTHERA INFRASTRUCTURE": "ace_supabase_runtime",
+    "PANTHERA KNOWLEDGE": "knowledge_port",
+    "OBSIDIAN CONFIG": "obsidian_777"
   }
 }
