@@ -501,3 +501,77 @@ test("87 PANTHERA AUDIT button invokes audit RPC",async t=>{
   assert.ok(x.calls.some(c=>c.url.includes("/rest/v1/rpc/run_panthera_full_audit")));
   assert.equal(x.d.getElementById("auditScore").textContent,"90.0%");
 });
+
+
+test("88 Capture Port is cloud-gated in local mode",async t=>{
+  const x=await boot();t.after(x.close);
+  assert.ok(x.d.getElementById("capturePortStatus"));
+  assert.ok(x.d.getElementById("captureUpload"));
+  assert.equal(x.d.getElementById("capturePortStatus").textContent,"CLOUD LOGIN REQUIRED");
+  assert.ok(x.d.getElementById("captureItems").textContent.includes("Cloud-Login"));
+});
+
+test("89 Pocket Capture connect sends key only to capture runtime and clears field",async t=>{
+  const auth={access_token:"a",refresh_token:"r",expires_at:Date.now()+3600000,user:{id:"user-1",email:"owner@example.com"}};
+  const key="pk_test_capture_12345678901234567890";
+  const x=await boot({storage:{[AUTH_KEY]:auth},fetchHandler:async(u,init)=>{
+    if(u.includes("/functions/v1/capture-runtime")){
+      const b=JSON.parse(init.body||"{}");
+      if(b.action==="set_pocket_key")return res({ok:true,connected:true});
+      if(b.action==="status")return res({ok:true,sources:[],counts:{}});
+      if(b.action==="list")return res({ok:true,items:[]});
+    }
+    return null;
+  }});
+  t.after(x.close);
+  setVal(x.w,"pocketCaptureKey",key);
+  click(x.w,"pocketCaptureConnect");
+  await new Promise(r=>setTimeout(r,60));
+  const call=x.calls.find(c=>c.url.includes("/functions/v1/capture-runtime")&&JSON.parse(c.init.body||"{}").action==="set_pocket_key");
+  assert.ok(call);
+  assert.equal(JSON.parse(call.init.body).token,key);
+  assert.equal(x.d.getElementById("pocketCaptureKey").value,"");
+  for(let i=0;i<x.w.localStorage.length;i++)assert.ok(!String(x.w.localStorage.getItem(x.w.localStorage.key(i))).includes(key));
+});
+
+test("90 PANTHERA AI setup uses capture runtime and does not persist key",async t=>{
+  const auth={access_token:"a",refresh_token:"r",expires_at:Date.now()+3600000,user:{id:"user-1",email:"owner@example.com"}};
+  const key="sk-proj-test_capture_12345678901234567890";
+  const x=await boot({storage:{[AUTH_KEY]:auth},fetchHandler:async(u,init)=>{
+    if(u.includes("/functions/v1/capture-runtime")){
+      const b=JSON.parse(init.body||"{}");
+      if(b.action==="set_openai_key")return res({ok:true,configured:true});
+      if(b.action==="status")return res({ok:true,sources:[],counts:{}});
+      if(b.action==="list")return res({ok:true,items:[]});
+    }
+    return null;
+  }});
+  t.after(x.close);
+  setVal(x.w,"captureOpenAIKey",key);
+  click(x.w,"captureSetAI");
+  await new Promise(r=>setTimeout(r,60));
+  const call=x.calls.find(c=>c.url.includes("/functions/v1/capture-runtime")&&JSON.parse(c.init.body||"{}").action==="set_openai_key");
+  assert.ok(call);
+  assert.equal(x.d.getElementById("captureOpenAIKey").value,"");
+  for(let i=0;i<x.w.localStorage.length;i++)assert.ok(!String(x.w.localStorage.getItem(x.w.localStorage.key(i))).includes(key));
+});
+
+test("91 Capture consent is explicit server action",async t=>{
+  const auth={access_token:"a",refresh_token:"r",expires_at:Date.now()+3600000,user:{id:"user-1",email:"owner@example.com"}};
+  let consentBody=null;
+  const item={id:"capture-1",source_key:"pocket",capture_type:"meeting",title:"Meeting",consent_status:"unknown",pipeline_status:"review_required",authenticity_status:"source_verified"};
+  const x=await boot({storage:{[AUTH_KEY]:auth},fetchHandler:async(u,init)=>{
+    if(u.includes("/functions/v1/capture-runtime")){
+      const b=JSON.parse(init.body||"{}");
+      if(b.action==="status")return res({ok:true,sources:[],counts:{review_required:1}});
+      if(b.action==="list")return res({ok:true,items:[item]});
+      if(b.action==="set_consent"){consentBody=b;return res({ok:true,capture_item_id:"capture-1",consent_status:"confirmed"});}
+    }
+    return null;
+  }});
+  t.after(x.close);
+  await new Promise(r=>setTimeout(r,60));
+  await x.w.captureConsent("capture-1","confirmed");
+  assert.equal(consentBody.capture_item_id,"capture-1");
+  assert.equal(consentBody.consent_status,"confirmed");
+});
