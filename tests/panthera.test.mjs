@@ -622,3 +622,5 @@ test("91 Capture runtime paths never expose raw canon controls",async t=>{
   assert.ok(text.includes("Volltranskript"));
   assert.equal(text.includes("RAW → CANON"),false);
 });
+
+// CaptureSourcePort v1 final regression gate.
