@@ -56,15 +56,15 @@ function detectType(title:string,tags:string[]){
 function summaryText(rec:any){
   const s=rec?.summarizations;
   if(typeof s==="string")return s;
-  if(Array.isArray(s)){
-    for(const x of [...s].reverse()){
-      const c=x?.summary?.markdown||x?.summary||x?.markdown||x?.content||x?.text;
-      if(typeof c==="string"&&c.trim())return c;
-    }
+  const candidates:any[]=[];
+  if(Array.isArray(s))candidates.push(...s);
+  else if(s&&typeof s==="object"){
+    candidates.push(s);
+    candidates.push(...Object.values(s));
   }
-  if(s&&typeof s==="object"){
-    const c=s?.summary?.markdown||s?.summary||s?.markdown||s?.content||s?.text;
-    if(typeof c==="string")return c;
+  for(const x of candidates.reverse()){
+    const c=x?.v2?.summary?.markdown||x?.summary?.markdown||x?.summary||x?.markdown||x?.content||x?.text;
+    if(typeof c==="string"&&c.trim())return c;
   }
   return "";
 }
@@ -287,11 +287,18 @@ Deno.serve(async(req:Request)=>{
       if(!safeEq(expected,String(sig).toLowerCase()))return j({error:"webhook_signature_invalid"},401,headers);
       const payload=JSON.parse(rawBody||"{}");
       const event=String(payload.event||"");
-      const rec=payload.recording||payload.data?.recording||payload.data||{};
+      let rec=payload.recording||payload.data?.recording||payload.data||{};
       if(!rec?.id)return j({ok:true,ignored:true,event},200,headers);
       if(!rec.transcript&&payload.transcript)rec.transcript=payload.transcript;
       if(!rec.summarizations&&payload.summarizations)rec.summarizations=payload.summarizations;
-      const item=await upsertPocket(admin,userId,rec,{signed_webhook:true,event,transcript:payload.transcript});
+      try{
+        const token=await pocketSecret(admin,userId);
+        if(token){
+          const detail=await pocket(token,"/public/recordings/"+encodeURIComponent(rec.id)+"?include_transcript=true&include_summarizations=true");
+          if(detail?.data)rec={...rec,...detail.data,transcript:detail.data.transcript||rec.transcript,summarizations:detail.data.summarizations||rec.summarizations};
+        }
+      }catch(e){console.warn("Pocket webhook enrichment degraded",String((e as any)?.message||e))}
+      const item=await upsertPocket(admin,userId,rec,{signed_webhook:true,event,api_verified:!!(await pocketSecret(admin,userId).catch(()=>null)),transcript:rec.transcript||payload.transcript});
       let review=null;
       if(["summary.completed","summary.updated","summary.regenerated","transcription.completed","transcript.edited","speakers.labeled"].includes(event)){
         try{review=await reviewCapture(admin,userId,item.id)}catch(e){
