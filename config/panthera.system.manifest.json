@@ -463,7 +463,7 @@
   ],
   "audit": {
     "command": "panthera audit",
-    "engine": "public.run_panthera_full_audit()",
+    "engine": "public.run_panthera_operational_audit()",
     "status": {
       "green": "no critical/high findings, no freeze blockers, score >= 85",
       "yellow": "high findings, freeze blockers or score < 85",
@@ -482,7 +482,8 @@
       "knowledge_module_unmapped",
       "alias_target_missing",
       "capture_adapter_unverified",
-      "capture_publish_gate_violation"
+      "capture_publish_gate_violation",
+      "runtime_heartbeat_stale"
     ]
   },
   "knowledge_module_aliases": {
@@ -534,7 +535,7 @@
       "Providers are replaceable adapters."
     ],
     "obsidian_sink": "PANTHERA_CANONICAL/10_FIELD_INTELLIGENCE",
-    "local_bridge": "pull-only; write-once; ACK after vault write and brain refresh"
+    "local_bridge": "pull-only; write-once; ACK after vault write and brain refresh; 60s watcher heartbeat; 5m audit liveness gate"
   },
   "capture_pipeline": {
     "contract": "CaptureSourcePort v1",
