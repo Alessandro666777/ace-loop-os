@@ -98,8 +98,12 @@ The real 777 vault uses a pull-only bridge:
 Canonical sink:
 PANTHERA_CANONICAL/10_FIELD_INTELLIGENCE/
 
-Current background limitation:
-macOS privacy controls block an unattended launchd Python process from reading Desktop/777. Manual pull is verified. Continuous local polling must remain disabled until the Mac process is explicitly authorized; no unsafe bypass is permitted.
+Runtime watcher:
+- a pull-only watcher polls every 60 seconds while the logged-in Mac session is active
+- every authenticated pull writes a separate runtime heartbeat in Supabase
+- panthera audit treats a heartbeat older than 5 minutes as a HIGH freeze blocker
+- a dedicated Login Item command exists for restart after login; macOS still requires the user to approve that Login Item / Automation permission
+- no launchd/TCC bypass is used
 
 ## Runtime components
 
@@ -127,3 +131,20 @@ A provider is valid only if removing it does not require changes to:
 - KnowledgeSourcePort
 - canonicalization rules
 - Obsidian publication contract
+
+## Activation gates
+
+The architecture is complete without any single capture provider, but two account-owned credentials are required for the fully automatic Pocket path:
+
+1. PANTHERA Direct AI Provider
+   - required for direct audio transcription and PANTHERA review
+   - configured through the PANTHERA Capture Port field
+   - server validates the key and stores it in Supabase Vault
+   - the browser clears the field and never persists it in LocalStorage
+
+2. Pocket AI
+   - Pocket API key for recording sync/upload
+   - Pocket webhook signing secret for event-driven ingestion
+   - both are entered directly into PANTHERA and stored server-side in Vault
+
+The Pocket ChatGPT plugin is optional and is not required by the autonomous runtime.
