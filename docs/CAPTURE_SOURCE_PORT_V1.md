@@ -148,3 +148,11 @@ The architecture is complete without any single capture provider, but two accoun
    - both are entered directly into PANTHERA and stored server-side in Vault
 
 The Pocket ChatGPT plugin is optional and is not required by the autonomous runtime.
+
+## Pocket webhook setup order
+
+1. Sign in to PANTHERA and open COMMAND → CAPTURE PORT.
+2. Copy the Pocket Webhook URL shown immediately in the Capture Port.
+3. Create the personal webhook in Pocket using that URL.
+4. Pocket reveals the signing secret once; paste that secret into PANTHERA → Pocket Webhook Secret → SAVE WEBHOOK SECRET.
+5. The signing secret is stored server-side in Supabase Vault and is not persisted in browser storage.
