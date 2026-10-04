@@ -24,6 +24,15 @@ Deno.serve(async(req:Request)=>{
       .eq("key_hash",hash).eq("label","obsidian_capture_pull_v1").eq("active",true).maybeSingle();
     if(keyErr)throw keyErr;if(!key)return j({error:"bridge_auth_invalid"},401);
     await admin.from("integration_keys").update({last_used_at:new Date().toISOString()}).eq("id",key.id);
+    const heartbeatAt=new Date().toISOString();
+    await admin.from("panthera_runtime_heartbeats").upsert({
+      user_id:key.user_id,
+      runtime_key:"obsidian_capture_bridge",
+      heartbeat_at:heartbeatAt,
+      instance_id:"mac-local-pull",
+      metadata:{bridge:"obsidian_capture_pull_v1",mode:"pull_only",raw_content:false},
+      updated_at:heartbeatAt
+    },{onConflict:"user_id,runtime_key"});
 
     const body=await req.json().catch(()=>({}));
     const action=String(body.action||"pull");
