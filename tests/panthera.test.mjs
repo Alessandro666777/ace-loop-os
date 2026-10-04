@@ -644,3 +644,5 @@ test("92 authenticated Capture Port shows Pocket webhook URL before secret setup
   assert.ok(text.includes("/functions/v1/capture-runtime?user_id=user-1"));
   assert.ok(text.startsWith("Pocket Webhook URL:"));
 });
+
+// Final Pocket webhook ordering + PWA cache verification gate.
