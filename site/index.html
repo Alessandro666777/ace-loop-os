@@ -222,7 +222,7 @@
         <label>Pocket Webhook Secret<input id="pocketWebhookSecret" type="password" autocomplete="off" placeholder="Signing Secret"></label>
         <div class="actions" style="align-items:flex-end"><button class="btn" id="pocketWebhookSave">SAVE WEBHOOK SECRET</button></div>
       </div>
-      <div class="tagline" id="pocketWebhookUrl">Webhook URL erscheint nach dem Speichern.</div>
+      <div class="tagline" id="pocketWebhookUrl">Nach Cloud-Login erscheint hier sofort deine Pocket Webhook URL. Diese URL zuerst in Pocket anlegen; danach das dort erzeugte Signing Secret hier speichern.</div>
       <div class="divider"></div>
       <div class="grid3">
         <label>Audio / Sprachmemo<input id="captureFile" type="file" accept="audio/*,video/mp4,video/quicktime"></label>
@@ -679,6 +679,7 @@ function renderCapturePort(){
  const counts=captureState.counts||{};
  const sources=captureState.sources||[],pocket=sources.find(x=>x.source_key==="pocket"),manual=sources.find(x=>x.source_key==="manual_upload");
  $("capturePortStatus").textContent="MANUAL "+String(manual?.status||"—").toUpperCase()+" · POCKET "+String(pocket?.status||"—").toUpperCase().replaceAll("_"," ");
+ $("pocketWebhookUrl").textContent="Pocket Webhook URL: "+SUPA_URL+"/functions/v1/capture-runtime?user_id="+cloudSession.user.id;
  $("captureCount").textContent=String((captureState.items||[]).length);
  $("captureReviewCount").textContent=String(Number(counts.review_required||0)+Number(counts.processing||0));
  $("capturePublishedCount").textContent=String(counts.published||0);
