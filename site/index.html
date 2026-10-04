@@ -629,7 +629,7 @@ async function loadSystemAudit(){
 async function runPantheraAudit(){
  if(!cloudSession)throw new Error("PANTHERA AUDIT braucht Cloud-Login.");
  $("auditStatusText").textContent="AUDIT RUNNING · Manifest gegen Runtime…";
- await api("rpc/run_panthera_full_audit","",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});
+ await api("rpc/run_panthera_operational_audit","",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});
  await loadSystemAudit();
 }
 
