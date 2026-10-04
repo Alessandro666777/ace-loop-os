@@ -4,13 +4,13 @@ on:
   push:
     branches: [main]
     paths:
+      - "site/index.html"
       - "site/panthera.html"
       - "site/panthera-manifest.webmanifest"
       - "site/panthera-service-worker.js"
-      - "tests/panthera-mobile.test.mjs"
-      - "tests/panthera.test.mjs"
-      - "tests/sovereign-runtime.test.mjs"
-      - "tests/sovereign-worker-runtime.test.mjs"
+      - "tests/*.test.mjs"
+      - "supabase/functions/capture-runtime/index.ts"
+      - "supabase/functions/capture-obsidian-pull/index.ts"
       - "supabase/functions/_shared/sovereign.mjs"
       - "supabase/functions/_shared/worker-runtime.mjs"
       - "supabase/functions/panthera-sovereign/index.ts"
