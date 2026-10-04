@@ -624,3 +624,5 @@ test("91 Capture runtime paths never expose raw canon controls",async t=>{
 });
 
 // CaptureSourcePort v1 final regression gate.
+
+// Final CaptureSourcePort completion verification.
