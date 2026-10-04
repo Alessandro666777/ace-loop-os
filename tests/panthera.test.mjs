@@ -626,3 +626,21 @@ test("91 Capture runtime paths never expose raw canon controls",async t=>{
 // CaptureSourcePort v1 final regression gate.
 
 // Final CaptureSourcePort completion verification.
+
+
+test("92 authenticated Capture Port shows Pocket webhook URL before secret setup",async t=>{
+  const auth={access_token:"a",refresh_token:"r",expires_at:Date.now()+3600000,user:{id:"user-1",email:"owner@example.com"}};
+  const x=await boot({storage:{[AUTH_KEY]:auth},fetchHandler:async(u,init)=>{
+    if(u.includes("/functions/v1/capture-runtime")){
+      const b=JSON.parse(init.body||"{}");
+      if(b.action==="status")return res({ok:true,sources:[],counts:{}});
+      if(b.action==="list")return res({ok:true,items:[]});
+    }
+    return null;
+  }});
+  t.after(x.close);
+  await new Promise(r=>setTimeout(r,60));
+  const text=x.d.getElementById("pocketWebhookUrl").textContent;
+  assert.ok(text.includes("/functions/v1/capture-runtime?user_id=user-1"));
+  assert.ok(text.startsWith("Pocket Webhook URL:"));
+});
